@@ -10,7 +10,7 @@ idf_component_register(
         "fonts/ui_font_HeadingDegree.c"
         "fonts/ui_font_SmallerEmblemaOne.c"
     INCLUDE_DIRS
-        "include"
+        "."
     REQUIRES
         lvgl
 )

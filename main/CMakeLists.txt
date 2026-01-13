@@ -1,2 +1,7 @@
-idf_component_register(SRCS "real_time_stats_example_main.c"
+idf_component_register(SRCS "main.cpp"
                     INCLUDE_DIRS ".")
+
+set_source_files_properties(
+    ${LV_DEMOS_SOURCES}
+    PROPERTIES COMPILE_OPTIONS
+    -DLV_LVGL_H_INCLUDE_SIMPLE)

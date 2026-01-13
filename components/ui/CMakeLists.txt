@@ -1,0 +1,16 @@
+idf_component_register(
+    SRCS
+        "ui.c"
+        "ui_helpers.c"
+        "components/ui_comp_hook.c"
+        "screens/ui_Inclinometer.c"
+        "screens/ui_Temperature.c"
+        "images/ui_img_scale_revamp_png.c"
+        "fonts/ui_font_Nabla_Big.c"
+        "fonts/ui_font_HeadingDegree.c"
+        "fonts/ui_font_SmallerEmblemaOne.c"
+    INCLUDE_DIRS
+        "include"
+    REQUIRES
+        lvgl
+)

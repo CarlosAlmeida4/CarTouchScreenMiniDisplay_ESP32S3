@@ -1,0 +1,14 @@
+idf_component_register(
+    SRCS
+        "display.cpp"
+    INCLUDE_DIRS
+        "."
+    REQUIRES
+        lvgl
+        ui
+        driver
+        esp_lcd_sh8601
+        freertos
+        log
+        SensorLib
+)

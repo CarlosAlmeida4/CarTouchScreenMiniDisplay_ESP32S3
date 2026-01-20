@@ -1,0 +1,11 @@
+idf_component_register(
+    SRCS
+        "qmi8658cInterface.cpp"
+    INCLUDE_DIRS
+        "."
+    REQUIRES
+        log
+        SensorLib
+        driver
+        freertos
+)

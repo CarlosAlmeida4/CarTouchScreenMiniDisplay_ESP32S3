@@ -19,6 +19,7 @@
 #include "lv_demos.h"
 #include "esp_lcd_sh8601.h"
 #include "display.hpp"
+#include "qmi8658cInterface.hpp"
 
 // TODO: implement a shared pointer strategy for the I2C communication
 
@@ -26,4 +27,6 @@ extern "C" void app_main(void)
 {
     Display display;
     display.init();
+    qmi8658cInterface qmi8658;
+    qmi8658.init();
 }

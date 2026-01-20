@@ -20,6 +20,8 @@
 #include "esp_lcd_sh8601.h"
 #include "display.hpp"
 
+// TODO: implement a shared pointer strategy for the I2C communication
+
 extern "C" void app_main(void)
 {
     Display display;

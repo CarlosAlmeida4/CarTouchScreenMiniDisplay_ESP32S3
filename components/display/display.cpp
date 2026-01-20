@@ -47,20 +47,6 @@ int16_t x[5], y[5];
 Display::~Display() {
 }
 
-esp_err_t Display::i2c_init(void)
-{
-    i2c_config_t i2c_conf;
-    memset(&i2c_conf, 0, sizeof(i2c_conf));
-    i2c_conf.mode = I2C_MODE_MASTER;
-    i2c_conf.sda_io_num = Pins.pinMasterSDA;
-    i2c_conf.scl_io_num = Pins.pinMasterSCL;
-    i2c_conf.sda_pullup_en = GPIO_PULLUP_ENABLE;
-    i2c_conf.scl_pullup_en = GPIO_PULLUP_ENABLE;
-    i2c_conf.master.clk_speed = I2C_MASTER_FREQ_HZ;
-    i2c_param_config(I2C_MASTER_NUM, &i2c_conf);
-    return i2c_driver_install(I2C_MASTER_NUM, i2c_conf.mode, I2C_MASTER_RX_BUF_DISABLE, I2C_MASTER_TX_BUF_DISABLE, 0);
-}
-
 void Display::setup_sensor() {
     uint8_t touchAddress = 0x5A;
     touch.setPins(Pins.TouchRST, Pins.TouchINT);
@@ -123,8 +109,6 @@ void Display::init() {
     ESP_ERROR_CHECK(esp_lcd_panel_init(panel_handle));
     // user can flush pre-defined pattern to the screen before we turn on the screen or backlight
     ESP_ERROR_CHECK(esp_lcd_panel_disp_on_off(panel_handle, true));
-    // Initialize I2C for touch controller
-    ESP_ERROR_CHECK(i2c_init());
 
     setup_sensor();
 

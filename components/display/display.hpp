@@ -87,7 +87,6 @@ private:
         .TouchRST = GPIO_NUM_40
     }; 
 
-    esp_err_t i2c_init(void);
     void setup_sensor();
     static void lvglTouchCallBack(lv_indev_drv_t *drv, lv_indev_data_t *data);
     static void lvglFlushCallback(lv_disp_drv_t *drv, const lv_area_t *area, lv_color_t *color_map);

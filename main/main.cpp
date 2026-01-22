@@ -26,7 +26,7 @@
 extern "C" void app_main(void)
 {
     Display display;
-    display.init();
     qmi8658cInterface qmi8658;
     qmi8658.init();
+    display.init();
 }

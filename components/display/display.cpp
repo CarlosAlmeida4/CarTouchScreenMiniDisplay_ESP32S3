@@ -208,7 +208,7 @@ void Display::lvglTouchCallBack(lv_indev_drv_t *drv, lv_indev_data_t *data)
             data->point.x = x[0];
             data->point.y = y[0];
             data->state = LV_INDEV_STATE_PRESSED;
-            ESP_LOGI(DISPLAY_TAG, "Touch[%d]: X=%d Y=%d", i, x[i], y[i]);
+            //ESP_LOGI(DISPLAY_TAG, "Touch[%d]: X=%d Y=%d", i, x[i], y[i]);
         }
     }
     else

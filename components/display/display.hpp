@@ -70,7 +70,7 @@ private:
     static constexpr uint8_t I2C_MASTER_RX_BUF_DISABLE = 0; /*!< I2C master doesn't need buffer */
     static constexpr unsigned int I2C_MASTER_TIMEOUT_MS = 1000;
     static constexpr int LVGL_BUF_HEIGHT = LCD_V_RES/4; // in pixels
-    static constexpr uint8_t LVGL_TICK_PERIOD_MS = 1; // in milliseconds
+    static constexpr uint8_t LVGL_TICK_PERIOD_MS = 10; // in milliseconds
     static constexpr uint32_t LVGL_TASK_STACK_SIZE = 1024 * 4; // in bytes
     static constexpr uint8_t LVGL_TASK_PRIORITY = 2;
 

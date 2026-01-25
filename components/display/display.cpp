@@ -228,9 +228,9 @@ void Display::updateUI()
         std::string rollStr  = turnFloat2Char(RP.roll);
         std::string pitchStr = turnFloat2Char(RP.pitch);
 
-        ESP_LOGI(DISPLAY_TAG,
+        /*ESP_LOGI(DISPLAY_TAG,
              "Roll: %.2f deg, Pitch: %.2f deg",
-             RP.roll, RP.pitch);
+             RP.roll, RP.pitch);*/
         _ui_label_set_property(uic_RollText,_UI_LABEL_PROPERTY_TEXT,rollStr.c_str());
         _ui_label_set_property(uic_PitchText,_UI_LABEL_PROPERTY_TEXT,pitchStr.c_str());
         lv_slider_set_value(uic_RollA,(int32_t)(100-normalize(-RP.roll)), LV_ANIM_ON);

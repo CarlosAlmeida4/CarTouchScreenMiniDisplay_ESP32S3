@@ -163,7 +163,7 @@ uint8_t TouchDrvCST92xx::getPoint(int16_t *x_array, int16_t *y_array, uint8_t ge
     }
 
     if (point_info[0].evt == 0x00) {
-        log_d("Release finger ....");
+        //log_d("Release finger ....");
         return 0;
     }
 

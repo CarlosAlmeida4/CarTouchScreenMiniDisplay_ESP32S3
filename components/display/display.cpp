@@ -6,11 +6,25 @@
 #define LCD_BIT_PER_PIXEL (16)
 #endif
 
+#include <atomic>
+
+static std::atomic<bool> ui_ready{false};
+
 // ---- static member definitions ----
 lv_disp_drv_t Display::disp_drv{};
 lv_disp_draw_buf_t Display::disp_buf{};
 SemaphoreHandle_t Display::lvgl_mux = nullptr;
 TouchDrvCST92xx Display::touch{};
+
+inline float normalize(float input)
+{
+    return ((10/9)*input + 50);
+}
+
+inline std::string turnFloat2Char(float input)
+{
+    return std::to_string(input);
+}
 
 static const sh8601_lcd_init_cmd_t lcd_init_cmds[] = {
     {0xFE, (uint8_t[]){0x00}, 1, 0},
@@ -161,11 +175,75 @@ void Display::init() {
     assert(lvgl_mux);
 
     ui_init();
-
-    xTaskCreate(displayTask, "LVGL", LVGL_TASK_STACK_SIZE, NULL, LVGL_TASK_PRIORITY, NULL);
+    lv_scr_load(ui_Inclinometer);   // VERY IMPORTANT
+    ui_ready.store(true, std::memory_order_release);
+    
+    xTaskCreate(task_entry, "LVGL", LVGL_TASK_STACK_SIZE, this, LVGL_TASK_PRIORITY, NULL);
+    xTaskCreate(UI_entry, "LVGL", LVGL_TASK_STACK_SIZE, this, LVGL_TASK_PRIORITY, NULL);
 }
 
-void Display::displayTask(void *arg) 
+void Display::task_entry(void *arg)
+{
+    auto* self = static_cast<Display*>(arg);
+    self->displayTask();
+}
+
+void Display::UI_entry(void *arg)
+{
+    auto* self = static_cast<Display*>(arg);
+    self->updateUI();
+}
+static inline bool lv_obj_ready(lv_obj_t * obj)
+{
+    return obj &&
+           lv_obj_is_valid(obj) &&
+           lv_obj_get_disp(obj) != NULL;
+}
+
+bool checkInclinometerFieldsVdl()
+{
+    return lv_obj_ready(uic_RollText)  &&
+           lv_obj_ready(uic_PitchText) &&
+           lv_obj_ready(uic_RollA)     &&
+           lv_obj_ready(uic_RollB)     &&
+           lv_obj_ready(uic_Pitch);
+}
+
+
+void Display::updateUI()
+{
+    RollPitch RP{0,0};
+
+    if (!ui_ready.load(std::memory_order_acquire)) {
+        return;
+    }
+
+    // Receive data WITHOUT LVGL lock
+
+    if (!xQueueReceive(Queue_, &RP, 0)) {
+        return;
+    }
+
+    // Now touch LVGL
+    if (!checkInclinometerFieldsVdl()) {
+        return;
+    }
+
+        std::string rollStr  = turnFloat2Char(RP.roll);
+        std::string pitchStr = turnFloat2Char(RP.pitch);
+
+        ESP_LOGI(DISPLAY_TAG,
+             "Roll: %.2f deg, Pitch: %.2f deg",
+             RP.roll, RP.pitch);
+        _ui_label_set_property(uic_RollText,_UI_LABEL_PROPERTY_TEXT,rollStr.c_str());
+        _ui_label_set_property(uic_PitchText,_UI_LABEL_PROPERTY_TEXT,pitchStr.c_str());
+        lv_slider_set_value(uic_RollA,(int32_t)(100-normalize(-RP.roll)), LV_ANIM_ON);
+        lv_slider_set_value(uic_RollB,(int32_t)(100-normalize(RP.roll)), LV_ANIM_ON);
+        lv_slider_set_value(uic_Pitch,(int32_t)normalize(RP.pitch), LV_ANIM_ON);
+
+}
+
+void Display::displayTask() 
 {
     ESP_LOGI(DISPLAY_TAG, "Starting LVGL task");
     uint32_t task_delay_ms = LVGL_TASK_MAX_DELAY_MS;
@@ -173,7 +251,7 @@ void Display::displayTask(void *arg)
     {
         // Lock the mutex due to the LVGL APIs are not thread-safe
         if (lvgl_lock(-1))
-        {
+        {   
             task_delay_ms = lv_timer_handler();
             // Release the mutex
             lvgl_unlock();

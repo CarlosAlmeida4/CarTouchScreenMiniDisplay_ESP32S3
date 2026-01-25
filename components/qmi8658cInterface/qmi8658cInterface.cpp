@@ -2,12 +2,6 @@
 
 #include "qmi8658cInterface.hpp"
 
-#if CONFIG_LV_COLOR_DEPTH == 32
-#define LCD_BIT_PER_PIXEL (24)
-#elif CONFIG_LV_COLOR_DEPTH == 16
-#define LCD_BIT_PER_PIXEL (16)
-#endif
-
 SensorQMI8658 qmi8658cInterface::qmi{};
 RollPitch qmi8658cInterface::RP{};
 
@@ -18,8 +12,6 @@ IMUdata gyr;
 qmi8658cInterface::~qmi8658cInterface() {
 
 }
-
-
 
 void qmi8658cInterface::setup_sensor()
 {
@@ -55,25 +47,17 @@ void qmi8658cInterface::setup_sensor()
     ESP_LOGI(QMI8658C_TAG, "Ready to read data...");
 }
 
-void qmi8658cInterface::read_sensor_data(void* arg) {
+void qmi8658cInterface::read_sensor_data() {
+    
+    assert(Queue_ != nullptr);
+    
     while (1) {
         if (qmi.getDataReady()) {
-            RollPitch RP = getPitchAndRoll();
-            //ESP_LOGI(QMI8658C_TAG, "Roll: %f, Pitch: %f", RP.roll, RP.pitch);
-            
-            /*if (qmi.getAccelerometer(acc.x, acc.y, acc.z)) {
-                ESP_LOGI(QMI8658C_TAG, "ACCEL: %f, %f, %f", acc.x, acc.y, acc.z);
-            } else {
-                ESP_LOGE(QMI8658C_TAG, "Failed to read accelerometer data");
-            }*/
-
-            /*if (qmi.getGyroscope(gyr.x, gyr.y, gyr.z)) {
-                ESP_LOGI(QMI8658C_TAG, "GYRO: %f, %f, %f", gyr.x, gyr.y, gyr.z);
-            } else {
-                ESP_LOGE(QMI8658C_TAG, "Failed to read gyroscope data");
-            }*/
-
-            //ESP_LOGI(QMI8658C_TAG, "Timestamp: %u, Temperature: %.2f *C", (unsigned int)qmi.getTimestamp(), qmi.getTemperature_C()); // Casting to unsigned int
+            RollPitch rp{};
+            if (getPitchAndRoll(rp)) 
+            {
+                xQueueOverwrite(Queue_, &rp);
+            }
         } else {
             ESP_LOGW(QMI8658C_TAG, "Data not ready yet");
         }
@@ -81,9 +65,9 @@ void qmi8658cInterface::read_sensor_data(void* arg) {
     }
 }
 
-RollPitch  qmi8658cInterface::getPitchAndRoll()
+/*RollPitch  OldgetPitchAndRoll()
 {
-    RollPitch RP;
+    RollPitch RP = {};
     IMUdata acc;
     struct Angle
     {
@@ -94,15 +78,29 @@ RollPitch  qmi8658cInterface::getPitchAndRoll()
 
     if(qmi.getAccelerometer(acc.x,acc.y,acc.z))
     {
-        float mask = (float)acc.x / sqrt(((float)acc.y * (float)acc.y + (float)acc.z * (float)acc.z));
-        angle.x = atan(mask) * 57.29578f; // 180/π=57.29578
-        mask = (float)acc.y / sqrt(((float)acc.x * (float)acc.x + (float)acc.z * (float)acc.z));
-        angle.y = atan(mask) * 57.29578f; // 180/π=57.29578
-        mask = (float)acc.z / sqrt(((float)acc.x * (float)acc.x + (float)acc.y * (float)acc.y)); 
-        angle.z = atan(mask) * 57.29578f; // 180/π=57.29578
+        //float mask = (float)acc.x / sqrt(((float)acc.y * (float)acc.y + (float)acc.z * (float)acc.z));
+        //angle.x = atan(mask) * 57.29578f; // 180/π=57.29578
+        //mask = (float)acc.y / sqrt(((float)acc.x * (float)acc.x + (float)acc.z * (float)acc.z));
+        //angle.y = atan(mask) * 57.29578f; // 180/π=57.29578
+        //mask = (float)acc.z / sqrt(((float)acc.x * (float)acc.x + (float)acc.y * (float)acc.y)); 
+        //angle.z = atan(mask) * 57.29578f; // 180/π=57.29578
         //angle z is not correctly calculated
-        RP.roll = angle.y;
-        RP.pitch = atan2(acc.z,acc.x) * 57.29578f;
+        //RP.roll = angle.y;
+        //RP.pitch = atan2(acc.z,acc.x) * 57.29578f;
+
+        if(fabs(acc.y)<1e-6f && fabs(acc.z)< 1e-6f)
+        {
+            ESP_LOGW(QMI8658C_TAG, "Invalid accel data (near zero)");
+        }
+        else
+        {
+            constexpr float RAD_TO_DEG = 57.2957795f;
+            RP.roll  = atan2(acc.y, acc.z) * RAD_TO_DEG;
+            RP.pitch = atan2(-acc.x, sqrt(acc.y * acc.y + acc.z * acc.z)) * RAD_TO_DEG;
+            ESP_LOGI(QMI8658C_TAG,
+             "Roll: %.2f deg, Pitch: %.2f deg",
+             RP.roll, RP.pitch);
+        }
     }
     else 
     {
@@ -113,10 +111,45 @@ RollPitch  qmi8658cInterface::getPitchAndRoll()
     
     return RP;
 
+}*/
+
+bool qmi8658cInterface::getPitchAndRoll(RollPitch& out)
+{
+    IMUdata acc{};
+
+    if (!qmi.getAccelerometer(acc.x, acc.y, acc.z)) {
+        ESP_LOGE(QMI8658C_TAG, "Failed to read accelerometer data");
+        return false;
+    }
+
+    // Protect against invalid data
+    const float eps = 1e-6f;
+    if (fabs(acc.y) < eps && fabs(acc.z) < eps) {
+        ESP_LOGW(QMI8658C_TAG, "Invalid accel data (near zero)");
+        return false;
+    }
+
+    constexpr float RAD_TO_DEG = 57.2957795f; // 180/π=57.29578
+    
+    float mask = (float)acc.y / sqrt(((float)acc.x * (float)acc.x + (float)acc.z * (float)acc.z));
+     
+    out.roll  = atan(mask) * RAD_TO_DEG;
+    out.pitch = atan2(acc.z,acc.x) * RAD_TO_DEG;
+    
+    ESP_LOGI(QMI8658C_TAG,
+             "Roll: %.2f deg, Pitch: %.2f deg",
+             out.roll, out.pitch);
+
+    return true;
 }
 
+void qmi8658cInterface::task_entry(void* arg)
+{
+    auto* self = static_cast<qmi8658cInterface*>(arg);
+    self->read_sensor_data();
+}
 
 void qmi8658cInterface::init() {
     setup_sensor();
-    xTaskCreate(read_sensor_data, "sensor_read_task", 4096, NULL, 10, NULL);
+    xTaskCreate(task_entry, "sensor_read_task", 4096, this, 10, NULL);
 }

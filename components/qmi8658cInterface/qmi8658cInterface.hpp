@@ -14,6 +14,7 @@
 #include "freertos/queue.h"
 #include "SensorLib.h"
 #include "SensorQMI8658.hpp"
+#include "rollsandpitch.hpp"
 
 
 struct qmi8652Pins 
@@ -22,26 +23,23 @@ struct qmi8652Pins
     gpio_num_t pinMasterSCL;
 };
 
-struct RollPitch {
-        float roll = 0.0f;
-        float pitch = 0.0f;
-};
 
 
 class qmi8658cInterface {
 public:
 
-    qmi8658cInterface() = default;
+    explicit qmi8658cInterface(QueueHandle_t q): Queue_(q) {}
+
     qmi8658cInterface(const qmi8658cInterface&) = delete;
     qmi8658cInterface& operator=(const qmi8658cInterface&) = delete;
     ~qmi8658cInterface();
     
     void init();
-    static RollPitch getPitchAndRoll();
+    static bool getPitchAndRoll(RollPitch& out);
 
 
 private:
-      
+    QueueHandle_t  Queue_;  
     static constexpr auto *QMI8658C_TAG = "QMI8658C";
     static constexpr int QMI8658_ADDRESS = 0x6B;
     static constexpr int I2C_MASTER_FREQ_HZ = 100000;
@@ -60,7 +58,8 @@ private:
     };
     
     void setup_sensor();
-    static void read_sensor_data(void* arg);
+    static void task_entry(void* arg);
+    void read_sensor_data();
 
 };
 

@@ -19,6 +19,8 @@
 #include "SensorLib.h"
 #include "TouchDrvCST92xx.h"
 #include "esp_lcd_sh8601.h"
+#include "rollsandpitch.hpp"
+#include <bits/stdc++.h>
 
 struct DisplayPins {
     gpio_num_t pinNumLcdCs;
@@ -37,17 +39,20 @@ struct DisplayPins {
 
 class Display {
 public:
-    Display() = default;
+    explicit Display(QueueHandle_t q): Queue_(q) {}
+
     Display(const Display&) = delete;
     Display& operator=(const Display&) = delete;
     ~Display();
     
     void init();
-    static void displayTask(void *arg);
+    
     static bool notifyLvglFlushReady(esp_lcd_panel_io_handle_t panel_io, esp_lcd_panel_io_event_data_t *edata, void *user_ctx);
     
 private:
     
+    QueueHandle_t Queue_;
+
     static TouchDrvCST92xx touch;
 
     static lv_disp_draw_buf_t disp_buf;
@@ -94,6 +99,10 @@ private:
     static void lvglIncreaseTick(void *arg);
     static void lvgl_unlock(void);
     static bool lvgl_lock(int timeout_ms);
+    static void task_entry(void *arg);
+    static void UI_entry(void *arg);
+    void updateUI();
+    void displayTask();
 };
 
 #endif // DISPLAY_HPP

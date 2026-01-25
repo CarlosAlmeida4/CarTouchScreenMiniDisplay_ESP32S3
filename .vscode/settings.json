@@ -16,5 +16,5 @@
     "--query-driver=**",
     "--compile-commands-dir=d:\\Sandbox\\CarTouchScreenMiniDisplay_ESP32S3\\build"
   ],
-  "idf.flashType": "UART"
+  "idf.flashType": "JTAG"
 }

@@ -1,7 +1,7 @@
 idf_component_register(SRCS "main.cpp"
                     INCLUDE_DIRS "."
                     REQUIRES
-                    display SensorLib qmi8658cInterface
+                    display SensorLib qmi8658cInterface System
 )
 
 set_source_files_properties(

@@ -1,6 +1,6 @@
 idf_component_register(
     SRCS
-        "qmi8658cInterface.cpp"
+        "System.cpp"
     INCLUDE_DIRS
         "."
     REQUIRES
@@ -8,5 +8,6 @@ idf_component_register(
         SensorLib
         driver
         freertos
-        rollsandpitch
+        qmi8658cInterface
+        display
 )

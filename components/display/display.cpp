@@ -23,7 +23,8 @@ inline float normalize(float input)
 
 inline std::string turnFloat2Char(float input)
 {
-    return std::to_string(input);
+    return std::format("{:.1f}", input);
+    
 }
 
 static const sh8601_lcd_init_cmd_t lcd_init_cmds[] = {

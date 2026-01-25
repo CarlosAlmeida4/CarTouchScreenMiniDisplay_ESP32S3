@@ -100,7 +100,7 @@ private:
     static void lvgl_unlock(void);
     static bool lvgl_lock(int timeout_ms);
     static void task_entry(void *arg);
-    static void UI_entry(void *arg);
+
     void updateUI();
     void displayTask();
 };

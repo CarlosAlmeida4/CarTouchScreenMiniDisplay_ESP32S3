@@ -179,7 +179,6 @@ void Display::init() {
     ui_ready.store(true, std::memory_order_release);
     
     xTaskCreate(task_entry, "LVGL", LVGL_TASK_STACK_SIZE, this, LVGL_TASK_PRIORITY, NULL);
-    xTaskCreate(UI_entry, "LVGL", LVGL_TASK_STACK_SIZE, this, LVGL_TASK_PRIORITY, NULL);
 }
 
 void Display::task_entry(void *arg)
@@ -188,11 +187,7 @@ void Display::task_entry(void *arg)
     self->displayTask();
 }
 
-void Display::UI_entry(void *arg)
-{
-    auto* self = static_cast<Display*>(arg);
-    self->updateUI();
-}
+
 static inline bool lv_obj_ready(lv_obj_t * obj)
 {
     return obj &&
@@ -253,6 +248,7 @@ void Display::displayTask()
         if (lvgl_lock(-1))
         {   
             task_delay_ms = lv_timer_handler();
+            updateUI();
             // Release the mutex
             lvgl_unlock();
         }

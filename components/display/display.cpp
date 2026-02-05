@@ -135,14 +135,17 @@ void Display::init() {
 
     ESP_LOGI(DISPLAY_TAG, "Initialize LVGL library");
     lv_init();
+
+    ESP_LOGI("HEAP", "Free DMA heap: %d",
+    heap_caps_get_free_size(MALLOC_CAP_DMA));
     // alloc draw buffers used by LVGL
     // it's recommended to choose the size of the draw buffer(s) to be at least 1/10 screen sized
     lv_color_t *buf1 = static_cast<lv_color_t *>(heap_caps_malloc(LCD_H_RES * LVGL_BUF_HEIGHT * sizeof(lv_color_t), MALLOC_CAP_DMA));
     assert(buf1);
-    lv_color_t *buf2 = static_cast<lv_color_t *>(heap_caps_malloc(LCD_H_RES * LVGL_BUF_HEIGHT * sizeof(lv_color_t), MALLOC_CAP_DMA));
-    assert(buf2);
+    //lv_color_t *buf2 = static_cast<lv_color_t *>(heap_caps_malloc(LCD_H_RES * LVGL_BUF_HEIGHT * sizeof(lv_color_t), MALLOC_CAP_DMA));
+    //assert(buf2);
     // initialize LVGL draw buffers
-    lv_disp_draw_buf_init(&disp_buf, buf1, buf2, LCD_H_RES * LVGL_BUF_HEIGHT);
+    lv_disp_draw_buf_init(&disp_buf, buf1, NULL, LCD_H_RES * LVGL_BUF_HEIGHT);
 
     ESP_LOGI(DISPLAY_TAG, "Register display driver to LVGL");
     lv_disp_drv_init(&disp_drv);

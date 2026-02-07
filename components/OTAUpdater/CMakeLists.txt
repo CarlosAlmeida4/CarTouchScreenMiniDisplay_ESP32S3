@@ -1,0 +1,19 @@
+idf_component_register(
+    SRCS
+        "OTAUpdater.cpp"
+    INCLUDE_DIRS
+        "."
+    REQUIRES
+        log
+        driver
+        freertos
+        esp_http_client 
+        app_update 
+        esp_https_ota   
+        esp_netif 
+        mbedtls 
+        nvs_flash 
+        esp_wifi 
+        esp_psram     
+
+)

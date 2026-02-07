@@ -4,19 +4,18 @@
 
 #include <stdio.h>
 #include <cstring>
-#include "driver/gpio.h"
-#include "driver/i2c.h"
-#include "driver/spi_master.h"
-#include "esp_timer.h"
-#include "esp_err.h"
-#include "esp_log.h"
-#include "sdkconfig.h"
+
+#include "freertos/FreeRTOS.h"
 #include "freertos/queue.h"
+#include "freertos/task.h"
+
+#include "sdkconfig.h"
 #include "SensorLib.h"
-#include "SensorQMI8658.hpp"
 #include "display.hpp"
 #include "qmi8658cInterface.hpp"
-#include "rollsandpitch.hpp"
+#include "OTAUpdater.hpp"
+
+
 
 class System {
 public:
@@ -33,13 +32,20 @@ public:
     {
         display.init();
         qmiItf.init();
+        OTAUpd.initWifi();
+
     }
 
+    void ota()
+    {
+
+    }
 private:
       
     QueueHandle_t RollPitchQueue;
     Display display;
     qmi8658cInterface qmiItf;
+    OTAUpdater OTAUpd;
 
 };
 

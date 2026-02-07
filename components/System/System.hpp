@@ -32,7 +32,7 @@ public:
     {
         display.init();
         qmiItf.init();
-        OTAUpd.initWifi();
+        //OTAUpd.initWifi();
 
     }
 

@@ -13,13 +13,15 @@ extern "C" {
 #include "lvgl.h"
 
 #include "ui_helpers.h"
+#include "components/ui_comp.h"
+#include "components/ui_comp_hook.h"
 #include "ui_events.h"
 
 
 ///////////////////// SCREENS ////////////////////
 
 #include "screens/ui_Inclinometer.h"
-#include "screens/ui_Temperature.h"
+#include "screens/ui_Options.h"
 
 ///////////////////// VARIABLES ////////////////////
 

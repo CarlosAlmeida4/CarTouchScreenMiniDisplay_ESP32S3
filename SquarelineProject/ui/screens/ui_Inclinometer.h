@@ -13,23 +13,24 @@ extern "C" {
 // SCREEN: ui_Inclinometer
 extern void ui_Inclinometer_screen_init(void);
 extern void ui_Inclinometer_screen_destroy(void);
-extern void ui_Inclinometer_screen_relocalize(void);
 extern void ui_event_Inclinometer(lv_event_t * e);
 extern lv_obj_t * ui_Inclinometer;
+extern lv_obj_t * ui_RollA;
+extern lv_obj_t * ui_RollB;
 extern lv_obj_t * ui_LateralScale;
 extern lv_obj_t * ui_Pitch;
 extern lv_obj_t * ui_PitchText;
 extern lv_obj_t * ui_RollText;
 extern lv_obj_t * ui_PitchName;
 extern lv_obj_t * ui_RollName;
-extern lv_obj_t * ui_RollA;
-extern lv_obj_t * ui_RollB;
+extern lv_obj_t * ui_Label2;
+extern lv_obj_t * ui_TemperatureName;
 // CUSTOM VARIABLES
+extern lv_obj_t * uic_RollA;
+extern lv_obj_t * uic_RollB;
 extern lv_obj_t * uic_Pitch;
 extern lv_obj_t * uic_PitchText;
 extern lv_obj_t * uic_RollText;
-extern lv_obj_t * uic_RollA;
-extern lv_obj_t * uic_RollB;
 
 #ifdef __cplusplus
 } /*extern "C"*/

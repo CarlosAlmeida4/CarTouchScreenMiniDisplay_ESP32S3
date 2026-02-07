@@ -5,20 +5,22 @@
 
 #include "../ui.h"
 
-lv_obj_t * uic_RollB;
-lv_obj_t * uic_RollA;
 lv_obj_t * uic_RollText;
 lv_obj_t * uic_PitchText;
 lv_obj_t * uic_Pitch;
+lv_obj_t * uic_RollB;
+lv_obj_t * uic_RollA;
 lv_obj_t * ui_Inclinometer = NULL;
+lv_obj_t * ui_RollA = NULL;
+lv_obj_t * ui_RollB = NULL;
 lv_obj_t * ui_LateralScale = NULL;
 lv_obj_t * ui_Pitch = NULL;
 lv_obj_t * ui_PitchText = NULL;
 lv_obj_t * ui_RollText = NULL;
 lv_obj_t * ui_PitchName = NULL;
 lv_obj_t * ui_RollName = NULL;
-lv_obj_t * ui_RollA = NULL;
-lv_obj_t * ui_RollB = NULL;
+lv_obj_t * ui_Label2 = NULL;
+lv_obj_t * ui_TemperatureName = NULL;
 // event funtions
 void ui_event_Inclinometer(lv_event_t * e)
 {
@@ -26,7 +28,7 @@ void ui_event_Inclinometer(lv_event_t * e)
 
     if(event_code == LV_EVENT_GESTURE &&  lv_indev_get_gesture_dir(lv_indev_get_act()) == LV_DIR_RIGHT) {
         lv_indev_wait_release(lv_indev_get_act());
-        _ui_screen_change(&ui_Temperature, LV_SCR_LOAD_ANIM_FADE_ON, 50, 0, &ui_Temperature_screen_init);
+        _ui_screen_change(&ui_Options, LV_SCR_LOAD_ANIM_FADE_ON, 50, 0, &ui_Options_screen_init);
     }
 }
 
@@ -35,6 +37,60 @@ void ui_event_Inclinometer(lv_event_t * e)
 void ui_Inclinometer_screen_init(void)
 {
     ui_Inclinometer = lv_obj_create(NULL);
+
+    ui_RollA = lv_slider_create(ui_Inclinometer);
+    lv_slider_set_range(ui_RollA, 25, 100);
+    lv_slider_set_value(ui_RollA, 50, LV_ANIM_OFF);
+    if(lv_slider_get_mode(ui_RollA) == LV_SLIDER_MODE_RANGE) lv_slider_set_left_value(ui_RollA, 0, LV_ANIM_OFF);
+    lv_obj_set_width(ui_RollA, 171);
+    lv_obj_set_height(ui_RollA, 226);
+    lv_obj_set_x(ui_RollA, -163);
+    lv_obj_set_y(ui_RollA, -39);
+    lv_obj_set_align(ui_RollA, LV_ALIGN_CENTER);
+    lv_obj_clear_flag(ui_RollA, LV_OBJ_FLAG_CLICKABLE);      /// Flags
+    lv_obj_set_style_radius(ui_RollA, 4, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_color(ui_RollA, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_opa(ui_RollA, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+
+    lv_obj_set_style_radius(ui_RollA, 0, LV_PART_INDICATOR | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_grad_color(ui_RollA, lv_color_hex(0x868686), LV_PART_INDICATOR | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_main_stop(ui_RollA, 0, LV_PART_INDICATOR | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_grad_stop(ui_RollA, 50, LV_PART_INDICATOR | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_grad_dir(ui_RollA, LV_GRAD_DIR_VER, LV_PART_INDICATOR | LV_STATE_DEFAULT);
+    lv_obj_set_style_border_color(ui_RollA, lv_color_hex(0x000000), LV_PART_INDICATOR | LV_STATE_DEFAULT);
+    lv_obj_set_style_border_opa(ui_RollA, 255, LV_PART_INDICATOR | LV_STATE_DEFAULT);
+    lv_obj_set_style_outline_color(ui_RollA, lv_color_hex(0x000000), LV_PART_INDICATOR | LV_STATE_DEFAULT);
+    lv_obj_set_style_outline_opa(ui_RollA, 255, LV_PART_INDICATOR | LV_STATE_DEFAULT);
+
+    lv_obj_set_style_blend_mode(ui_RollA, LV_BLEND_MODE_NORMAL, LV_PART_KNOB | LV_STATE_DEFAULT);
+    lv_obj_set_style_opa(ui_RollA, 0, LV_PART_KNOB | LV_STATE_DEFAULT);
+
+    ui_RollB = lv_slider_create(ui_Inclinometer);
+    lv_slider_set_range(ui_RollB, 25, 100);
+    lv_slider_set_value(ui_RollB, 50, LV_ANIM_OFF);
+    if(lv_slider_get_mode(ui_RollB) == LV_SLIDER_MODE_RANGE) lv_slider_set_left_value(ui_RollB, 0, LV_ANIM_OFF);
+    lv_obj_set_width(ui_RollB, 151);
+    lv_obj_set_height(ui_RollB, 226);
+    lv_obj_set_x(ui_RollB, 157);
+    lv_obj_set_y(ui_RollB, -39);
+    lv_obj_set_align(ui_RollB, LV_ALIGN_CENTER);
+    lv_obj_clear_flag(ui_RollB, LV_OBJ_FLAG_CLICKABLE);      /// Flags
+    lv_obj_set_style_radius(ui_RollB, 4, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_color(ui_RollB, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_opa(ui_RollB, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+
+    lv_obj_set_style_radius(ui_RollB, 0, LV_PART_INDICATOR | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_grad_color(ui_RollB, lv_color_hex(0x868686), LV_PART_INDICATOR | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_main_stop(ui_RollB, 0, LV_PART_INDICATOR | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_grad_stop(ui_RollB, 50, LV_PART_INDICATOR | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_grad_dir(ui_RollB, LV_GRAD_DIR_VER, LV_PART_INDICATOR | LV_STATE_DEFAULT);
+    lv_obj_set_style_border_color(ui_RollB, lv_color_hex(0x000000), LV_PART_INDICATOR | LV_STATE_DEFAULT);
+    lv_obj_set_style_border_opa(ui_RollB, 255, LV_PART_INDICATOR | LV_STATE_DEFAULT);
+    lv_obj_set_style_outline_color(ui_RollB, lv_color_hex(0x000000), LV_PART_INDICATOR | LV_STATE_DEFAULT);
+    lv_obj_set_style_outline_opa(ui_RollB, 255, LV_PART_INDICATOR | LV_STATE_DEFAULT);
+
+    lv_obj_set_style_blend_mode(ui_RollB, LV_BLEND_MODE_NORMAL, LV_PART_KNOB | LV_STATE_DEFAULT);
+    lv_obj_set_style_opa(ui_RollB, 0, LV_PART_KNOB | LV_STATE_DEFAULT);
 
     ui_LateralScale = lv_img_create(ui_Inclinometer);
     lv_img_set_src(ui_LateralScale, &ui_img_scale_revamp_png);
@@ -110,66 +166,30 @@ void ui_Inclinometer_screen_init(void)
     lv_label_set_text(ui_RollName, "Roll");
     lv_obj_set_style_text_font(ui_RollName, &ui_font_SmallerEmblemaOne, LV_PART_MAIN | LV_STATE_DEFAULT);
 
-    ui_RollA = lv_slider_create(ui_Inclinometer);
-    lv_slider_set_range(ui_RollA, 25, 100);
-    lv_slider_set_value(ui_RollA, 50, LV_ANIM_OFF);
-    if(lv_slider_get_mode(ui_RollA) == LV_SLIDER_MODE_RANGE) lv_slider_set_left_value(ui_RollA, 0, LV_ANIM_OFF);
-    lv_obj_set_width(ui_RollA, 73);
-    lv_obj_set_height(ui_RollA, 226);
-    lv_obj_set_x(ui_RollA, -117);
-    lv_obj_set_y(ui_RollA, -39);
-    lv_obj_set_align(ui_RollA, LV_ALIGN_CENTER);
-    lv_obj_clear_flag(ui_RollA, LV_OBJ_FLAG_CLICKABLE);      /// Flags
-    lv_obj_set_style_radius(ui_RollA, 4, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_bg_color(ui_RollA, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_bg_opa(ui_RollA, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+    ui_Label2 = lv_label_create(ui_Inclinometer);
+    lv_obj_set_width(ui_Label2, LV_SIZE_CONTENT);   /// 1
+    lv_obj_set_height(ui_Label2, LV_SIZE_CONTENT);    /// 1
+    lv_obj_set_x(ui_Label2, -48);
+    lv_obj_set_y(ui_Label2, -188);
+    lv_obj_set_align(ui_Label2, LV_ALIGN_CENTER);
+    lv_label_set_text(ui_Label2, "25");
+    lv_obj_set_style_text_font(ui_Label2, &ui_font_HeadingDegree, LV_PART_MAIN | LV_STATE_DEFAULT);
 
-    lv_obj_set_style_radius(ui_RollA, 0, LV_PART_INDICATOR | LV_STATE_DEFAULT);
-    lv_obj_set_style_bg_grad_color(ui_RollA, lv_color_hex(0x868686), LV_PART_INDICATOR | LV_STATE_DEFAULT);
-    lv_obj_set_style_bg_main_stop(ui_RollA, 0, LV_PART_INDICATOR | LV_STATE_DEFAULT);
-    lv_obj_set_style_bg_grad_stop(ui_RollA, 50, LV_PART_INDICATOR | LV_STATE_DEFAULT);
-    lv_obj_set_style_bg_grad_dir(ui_RollA, LV_GRAD_DIR_VER, LV_PART_INDICATOR | LV_STATE_DEFAULT);
-    lv_obj_set_style_border_color(ui_RollA, lv_color_hex(0x000000), LV_PART_INDICATOR | LV_STATE_DEFAULT);
-    lv_obj_set_style_border_opa(ui_RollA, 255, LV_PART_INDICATOR | LV_STATE_DEFAULT);
-    lv_obj_set_style_outline_color(ui_RollA, lv_color_hex(0x000000), LV_PART_INDICATOR | LV_STATE_DEFAULT);
-    lv_obj_set_style_outline_opa(ui_RollA, 255, LV_PART_INDICATOR | LV_STATE_DEFAULT);
-
-    lv_obj_set_style_blend_mode(ui_RollA, LV_BLEND_MODE_NORMAL, LV_PART_KNOB | LV_STATE_DEFAULT);
-    lv_obj_set_style_opa(ui_RollA, 0, LV_PART_KNOB | LV_STATE_DEFAULT);
-
-    ui_RollB = lv_slider_create(ui_Inclinometer);
-    lv_slider_set_range(ui_RollB, 25, 100);
-    lv_slider_set_value(ui_RollB, 50, LV_ANIM_OFF);
-    if(lv_slider_get_mode(ui_RollB) == LV_SLIDER_MODE_RANGE) lv_slider_set_left_value(ui_RollB, 0, LV_ANIM_OFF);
-    lv_obj_set_width(ui_RollB, 73);
-    lv_obj_set_height(ui_RollB, 226);
-    lv_obj_set_x(ui_RollB, 120);
-    lv_obj_set_y(ui_RollB, -39);
-    lv_obj_set_align(ui_RollB, LV_ALIGN_CENTER);
-    lv_obj_clear_flag(ui_RollB, LV_OBJ_FLAG_CLICKABLE);      /// Flags
-    lv_obj_set_style_radius(ui_RollB, 4, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_bg_color(ui_RollB, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_bg_opa(ui_RollB, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
-
-    lv_obj_set_style_radius(ui_RollB, 0, LV_PART_INDICATOR | LV_STATE_DEFAULT);
-    lv_obj_set_style_bg_grad_color(ui_RollB, lv_color_hex(0x868686), LV_PART_INDICATOR | LV_STATE_DEFAULT);
-    lv_obj_set_style_bg_main_stop(ui_RollB, 0, LV_PART_INDICATOR | LV_STATE_DEFAULT);
-    lv_obj_set_style_bg_grad_stop(ui_RollB, 50, LV_PART_INDICATOR | LV_STATE_DEFAULT);
-    lv_obj_set_style_bg_grad_dir(ui_RollB, LV_GRAD_DIR_VER, LV_PART_INDICATOR | LV_STATE_DEFAULT);
-    lv_obj_set_style_border_color(ui_RollB, lv_color_hex(0x000000), LV_PART_INDICATOR | LV_STATE_DEFAULT);
-    lv_obj_set_style_border_opa(ui_RollB, 255, LV_PART_INDICATOR | LV_STATE_DEFAULT);
-    lv_obj_set_style_outline_color(ui_RollB, lv_color_hex(0x000000), LV_PART_INDICATOR | LV_STATE_DEFAULT);
-    lv_obj_set_style_outline_opa(ui_RollB, 255, LV_PART_INDICATOR | LV_STATE_DEFAULT);
-
-    lv_obj_set_style_blend_mode(ui_RollB, LV_BLEND_MODE_NORMAL, LV_PART_KNOB | LV_STATE_DEFAULT);
-    lv_obj_set_style_opa(ui_RollB, 0, LV_PART_KNOB | LV_STATE_DEFAULT);
+    ui_TemperatureName = lv_label_create(ui_Inclinometer);
+    lv_obj_set_width(ui_TemperatureName, LV_SIZE_CONTENT);   /// 1
+    lv_obj_set_height(ui_TemperatureName, LV_SIZE_CONTENT);    /// 1
+    lv_obj_set_x(ui_TemperatureName, 37);
+    lv_obj_set_y(ui_TemperatureName, -190);
+    lv_obj_set_align(ui_TemperatureName, LV_ALIGN_CENTER);
+    lv_label_set_text(ui_TemperatureName, "Celsius");
+    lv_obj_set_style_text_font(ui_TemperatureName, &ui_font_SmallerEmblemaOne, LV_PART_MAIN | LV_STATE_DEFAULT);
 
     lv_obj_add_event_cb(ui_Inclinometer, ui_event_Inclinometer, LV_EVENT_ALL, NULL);
+    uic_RollA = ui_RollA;
+    uic_RollB = ui_RollB;
     uic_Pitch = ui_Pitch;
     uic_PitchText = ui_PitchText;
     uic_RollText = ui_RollText;
-    uic_RollA = ui_RollA;
-    uic_RollB = ui_RollB;
 
 }
 
@@ -179,6 +199,10 @@ void ui_Inclinometer_screen_destroy(void)
 
     // NULL screen variables
     ui_Inclinometer = NULL;
+    uic_RollA = NULL;
+    ui_RollA = NULL;
+    uic_RollB = NULL;
+    ui_RollB = NULL;
     ui_LateralScale = NULL;
     uic_Pitch = NULL;
     ui_Pitch = NULL;
@@ -188,15 +212,7 @@ void ui_Inclinometer_screen_destroy(void)
     ui_RollText = NULL;
     ui_PitchName = NULL;
     ui_RollName = NULL;
-    uic_RollA = NULL;
-    ui_RollA = NULL;
-    uic_RollB = NULL;
-    ui_RollB = NULL;
-
-}
-
-void ui_Inclinometer_screen_relocalize(void)
-{
-    // label widgets on screen
+    ui_Label2 = NULL;
+    ui_TemperatureName = NULL;
 
 }

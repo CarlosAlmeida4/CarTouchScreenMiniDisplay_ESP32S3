@@ -1,5 +1,7 @@
-SET(SOURCES screens/ui_Inclinometer.c
-    screens/ui_Temperature.c
+SET(SOURCES components/ui_comp_softwarupdate.c
+    components/ui_comp.c
+    screens/ui_Inclinometer.c
+    screens/ui_Options.c
     ui.c
     components/ui_comp_hook.c
     ui_helpers.c

@@ -10,4 +10,5 @@ idf_component_register(
         freertos
         qmi8658cInterface
         display
+        OTAUpdater
 )

@@ -13,6 +13,7 @@
 #include "SensorLib.h"
 #include "display.hpp"
 #include "qmi8658cInterface.hpp"
+#include "OTAUpdater.hpp"
 
 
 
@@ -31,6 +32,8 @@ public:
     {
         display.init();
         qmiItf.init();
+        OTAUpd.initWifi();
+
     }
 
     void ota()
@@ -42,6 +45,7 @@ private:
     QueueHandle_t RollPitchQueue;
     Display display;
     qmi8658cInterface qmiItf;
+    OTAUpdater OTAUpd;
 
 };
 

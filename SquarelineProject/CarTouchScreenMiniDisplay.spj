@@ -2394,7 +2394,6 @@
               },
               {
                 "compnid": 40,
-                "flags": 1048576,
                 "strtype": "OBJECT/Transform",
                 "InheritedType": 1
               },
@@ -2403,18 +2402,18 @@
                 "flags": 131089,
                 "strtype": "OBJECT/Position",
                 "intarray": [
-                  3,
-                  -144
+                  4,
+                  -11
                 ],
                 "InheritedType": 7
               },
               {
                 "compnid": 60,
-                "flags": 17,
+                "flags": 65553,
                 "strtype": "OBJECT/Size",
                 "intarray": [
-                  100,
-                  50
+                  400,
+                  132
                 ],
                 "InheritedType": 7
               },
@@ -2431,7 +2430,6 @@
               },
               {
                 "compnid": 90,
-                "flags": 1048576,
                 "strtype": "OBJECT/Flags",
                 "InheritedType": 1
               },
@@ -2863,6 +2861,7 @@
               },
               {
                 "nid": 40,
+                "flags": 1048576,
                 "strtype": "OBJECT/Transform",
                 "InheritedType": 1
               },
@@ -2871,8 +2870,8 @@
                 "flags": 17,
                 "strtype": "OBJECT/Position",
                 "intarray": [
-                  2,
-                  -9
+                  4,
+                  -12
                 ],
                 "InheritedType": 7
               },
@@ -2902,6 +2901,12 @@
                 "flags": 1048576,
                 "strtype": "OBJECT/Flags",
                 "InheritedType": 1
+              },
+              {
+                "nid": 100,
+                "strtype": "LABEL/Hidden",
+                "strval": "False",
+                "InheritedType": 2
               },
               {
                 "nid": 110,
@@ -2959,7 +2964,7 @@
               {
                 "nid": 1030,
                 "strtype": "LABEL/Text",
-                "strval": "Idle",
+                "strval": "Update Software",
                 "InheritedType": 10
               },
               {
@@ -3033,6 +3038,12 @@
             "flags": 1048576,
             "strtype": "OBJECT/Flags",
             "InheritedType": 1
+          },
+          {
+            "nid": 100,
+            "strtype": "SCREEN/Hidden",
+            "strval": "False",
+            "InheritedType": 2
           },
           {
             "nid": 225,
@@ -3223,7 +3234,7 @@
     "custom_variable_prefix": "uic",
     "separate_screen_save": false,
     "hierarchy_state_save": false,
-    "backup_cnt": 43,
+    "backup_cnt": 44,
     "autosave_cnt": 0,
     "group_color_cnt": 0,
     "imagebytearrayprefix": "",

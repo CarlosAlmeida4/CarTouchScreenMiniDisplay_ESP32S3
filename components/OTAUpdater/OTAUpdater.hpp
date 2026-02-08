@@ -10,6 +10,7 @@
 #include "esp_https_ota.h"
 #include "esp_log.h"
 #include "esp_system.h"
+#include <bits/stdc++.h>
 
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
@@ -36,7 +37,9 @@ public:
      * @brief Start OTA update process
      * Creates a task that handles the OTA download and update
      */
-    void startUpdate();
+    void triggerUpdate();
+
+    void setSWUpdateFeedback(std::function<void(const std::string&)> callback);
     
 
 private:
@@ -60,6 +63,8 @@ private:
                         esp_event_base_t event_base,
                         int32_t event_id,
                         void* event_data);
+
+    std::function<void(const std::string&)> m_SWUpdateFeedbackCallback;
 };
 
 

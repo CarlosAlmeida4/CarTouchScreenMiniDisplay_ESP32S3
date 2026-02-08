@@ -142,7 +142,7 @@ void OTAUpdater::OTAUpdaterTask()
         .http_config = &config,
     };
 
-    m_SWUpdateFeedbackCallback("Looking for updates");
+    m_SWUpdateFeedbackCallback("updating");
     esp_err_t ret = esp_https_ota(&otaConfig);
 
     if (ret == ESP_OK) {

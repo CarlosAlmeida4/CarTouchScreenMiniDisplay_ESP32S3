@@ -239,15 +239,17 @@ void Display::updateUI()
 
     std::string rollStr  = turnFloat2Char(RP.roll);
     std::string pitchStr = turnFloat2Char(RP.pitch);
+    std::string TemperatureString = turnFloat2Char(RP.temperature);
 
     _ui_label_set_property(uic_IPString,_UI_LABEL_PROPERTY_TEXT,ip_str);
     _ui_label_set_property(uic_RollText,_UI_LABEL_PROPERTY_TEXT,rollStr.c_str());
     _ui_label_set_property(uic_PitchText,_UI_LABEL_PROPERTY_TEXT,pitchStr.c_str());
+    _ui_label_set_property(uic_TemperatureReading,_UI_LABEL_PROPERTY_TEXT,TemperatureString.c_str());
+
     lv_slider_set_value(uic_RollA,(int32_t)(100-normalize(-RP.roll)), LV_ANIM_ON);
     lv_slider_set_value(uic_RollB,(int32_t)(100-normalize(RP.roll)), LV_ANIM_ON);
     lv_slider_set_value(uic_Pitch,(int32_t)normalize(RP.pitch), LV_ANIM_ON);
 
-    
 }
 
 void Display::displayTask() 

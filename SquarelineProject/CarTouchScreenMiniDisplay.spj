@@ -1844,7 +1844,15 @@
               {
                 "nid": 10,
                 "strtype": "OBJECT/Name",
-                "strval": "Label2",
+                "strval": "TemperatureReading",
+                "childs": [
+                  {
+                    "nid": 15,
+                    "strtype": "_codename/Codename",
+                    "strval": "TemperatureReading",
+                    "InheritedType": 10
+                  }
+                ],
                 "InheritedType": 10
               },
               {
@@ -3071,6 +3079,12 @@
                 "InheritedType": 1
               },
               {
+                "nid": 100,
+                "strtype": "LABEL/Hidden",
+                "strval": "False",
+                "InheritedType": 2
+              },
+              {
                 "nid": 110,
                 "strtype": "OBJECT/Clickable",
                 "strval": "False",
@@ -3237,6 +3251,12 @@
                 "flags": 1048576,
                 "strtype": "OBJECT/Flags",
                 "InheritedType": 1
+              },
+              {
+                "nid": 100,
+                "strtype": "LABEL/Hidden",
+                "strval": "False",
+                "InheritedType": 2
               },
               {
                 "nid": 110,
@@ -3536,7 +3556,7 @@
   },
   "animations": [],
   "selected_theme": "Default",
-  "selected_screen": "GUID2802063-362681S398538",
+  "selected_screen": "GUID13094076-844163S96479",
   "info": {
     "name": "CarTouchScreenMiniDisplay.spj",
     "depth": 2,
@@ -3564,7 +3584,7 @@
     "custom_variable_prefix": "uic",
     "separate_screen_save": false,
     "hierarchy_state_save": false,
-    "backup_cnt": 45,
+    "backup_cnt": 46,
     "autosave_cnt": 0,
     "group_color_cnt": 0,
     "imagebytearrayprefix": "",

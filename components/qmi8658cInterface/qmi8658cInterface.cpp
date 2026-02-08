@@ -87,7 +87,7 @@ bool qmi8658cInterface::getPitchAndRoll(RollPitch& out)
      
     out.roll  = atan(mask) * RAD_TO_DEG;
     out.pitch = atan2(acc.z,acc.x) * RAD_TO_DEG;
-    
+    out.temperature = qmi.getTemperature_C();
     /*ESP_LOGI(QMI8658C_TAG,
              "Roll: %.2f deg, Pitch: %.2f deg",
              out.roll, out.pitch);*/

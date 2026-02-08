@@ -5,6 +5,7 @@
 
 #include "../ui.h"
 
+lv_obj_t * uic_TemperatureReading;
 lv_obj_t * uic_RollText;
 lv_obj_t * uic_PitchText;
 lv_obj_t * uic_Pitch;
@@ -19,7 +20,7 @@ lv_obj_t * ui_PitchText = NULL;
 lv_obj_t * ui_RollText = NULL;
 lv_obj_t * ui_PitchName = NULL;
 lv_obj_t * ui_RollName = NULL;
-lv_obj_t * ui_Label2 = NULL;
+lv_obj_t * ui_TemperatureReading = NULL;
 lv_obj_t * ui_TemperatureName = NULL;
 // event funtions
 void ui_event_Inclinometer(lv_event_t * e)
@@ -166,14 +167,14 @@ void ui_Inclinometer_screen_init(void)
     lv_label_set_text(ui_RollName, "Roll");
     lv_obj_set_style_text_font(ui_RollName, &ui_font_SmallerEmblemaOne, LV_PART_MAIN | LV_STATE_DEFAULT);
 
-    ui_Label2 = lv_label_create(ui_Inclinometer);
-    lv_obj_set_width(ui_Label2, LV_SIZE_CONTENT);   /// 1
-    lv_obj_set_height(ui_Label2, LV_SIZE_CONTENT);    /// 1
-    lv_obj_set_x(ui_Label2, -48);
-    lv_obj_set_y(ui_Label2, -188);
-    lv_obj_set_align(ui_Label2, LV_ALIGN_CENTER);
-    lv_label_set_text(ui_Label2, "25");
-    lv_obj_set_style_text_font(ui_Label2, &ui_font_HeadingDegree, LV_PART_MAIN | LV_STATE_DEFAULT);
+    ui_TemperatureReading = lv_label_create(ui_Inclinometer);
+    lv_obj_set_width(ui_TemperatureReading, LV_SIZE_CONTENT);   /// 1
+    lv_obj_set_height(ui_TemperatureReading, LV_SIZE_CONTENT);    /// 1
+    lv_obj_set_x(ui_TemperatureReading, -48);
+    lv_obj_set_y(ui_TemperatureReading, -188);
+    lv_obj_set_align(ui_TemperatureReading, LV_ALIGN_CENTER);
+    lv_label_set_text(ui_TemperatureReading, "25");
+    lv_obj_set_style_text_font(ui_TemperatureReading, &ui_font_HeadingDegree, LV_PART_MAIN | LV_STATE_DEFAULT);
 
     ui_TemperatureName = lv_label_create(ui_Inclinometer);
     lv_obj_set_width(ui_TemperatureName, LV_SIZE_CONTENT);   /// 1
@@ -190,6 +191,7 @@ void ui_Inclinometer_screen_init(void)
     uic_Pitch = ui_Pitch;
     uic_PitchText = ui_PitchText;
     uic_RollText = ui_RollText;
+    uic_TemperatureReading = ui_TemperatureReading;
 
 }
 
@@ -212,7 +214,8 @@ void ui_Inclinometer_screen_destroy(void)
     ui_RollText = NULL;
     ui_PitchName = NULL;
     ui_RollName = NULL;
-    ui_Label2 = NULL;
+    uic_TemperatureReading = NULL;
+    ui_TemperatureReading = NULL;
     ui_TemperatureName = NULL;
 
 }

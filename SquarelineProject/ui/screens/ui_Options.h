@@ -18,8 +18,11 @@ extern lv_obj_t * ui_Options;
 extern void ui_event_SoftwarUpdate_SoftwarUpdate(lv_event_t * e);
 extern lv_obj_t * ui_SoftwarUpdate;
 extern lv_obj_t * ui_SoftwareUpdateFeedback;
+extern lv_obj_t * ui_IPLabel;
+extern lv_obj_t * ui_IPString;
 // CUSTOM VARIABLES
 extern lv_obj_t * uic_SoftwareUpdateFeedback;
+extern lv_obj_t * uic_IPString;
 
 #ifdef __cplusplus
 } /*extern "C"*/

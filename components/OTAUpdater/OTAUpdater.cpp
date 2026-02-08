@@ -114,16 +114,19 @@ void OTAUpdater::OTAUpdaterTask()
 {
     ESP_LOGI(TAG, "Starting OTA...");
     
-    switch (otaStatus)
+    if(OTAUpdater::READY == otaStatus)
     {
-    case OTAUpdater::INIT:
+    
         m_SWUpdateFeedbackCallback("Started");
-        break;
-    case OTAUpdater::UPDATE_FAILED:
+    }
+    else if(OTAUpdater::UPDATE_FAILED == otaStatus)
+    {
         m_SWUpdateFeedbackCallback("Retrying");
-        break;
-    default:
-        break;
+    }
+    else if(OTAUpdater::INIT == otaStatus)
+    {
+        m_SWUpdateFeedbackCallback("No Connection");
+        return;
     }
 
     otaStatus = OTAUpdater::UPDATING;

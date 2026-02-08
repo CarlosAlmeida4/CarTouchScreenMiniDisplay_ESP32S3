@@ -14,6 +14,8 @@
 #include "esp_lcd_panel_ops.h"
 #include "esp_err.h"
 #include "esp_log.h"
+#include "esp_netif.h"
+
 #include "sdkconfig.h"
 #include "freertos/queue.h"
 #include "SensorLib.h"

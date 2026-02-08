@@ -227,18 +227,27 @@ void Display::updateUI()
         return;
     }
 
-        std::string rollStr  = turnFloat2Char(RP.roll);
-        std::string pitchStr = turnFloat2Char(RP.pitch);
+    char ip_str[16];
 
-        /*ESP_LOGI(DISPLAY_TAG,
-             "Roll: %.2f deg, Pitch: %.2f deg",
-             RP.roll, RP.pitch);*/
-        _ui_label_set_property(uic_RollText,_UI_LABEL_PROPERTY_TEXT,rollStr.c_str());
-        _ui_label_set_property(uic_PitchText,_UI_LABEL_PROPERTY_TEXT,pitchStr.c_str());
-        lv_slider_set_value(uic_RollA,(int32_t)(100-normalize(-RP.roll)), LV_ANIM_ON);
-        lv_slider_set_value(uic_RollB,(int32_t)(100-normalize(RP.roll)), LV_ANIM_ON);
-        lv_slider_set_value(uic_Pitch,(int32_t)normalize(RP.pitch), LV_ANIM_ON);
+    esp_netif_ip_info_t ip_info;
+    esp_netif_t *netif = esp_netif_get_handle_from_ifkey("WIFI_STA_DEF");
 
+    esp_netif_get_ip_info(netif, &ip_info);
+
+    sprintf(ip_str, IPSTR, IP2STR(&ip_info.ip));
+
+
+    std::string rollStr  = turnFloat2Char(RP.roll);
+    std::string pitchStr = turnFloat2Char(RP.pitch);
+
+    _ui_label_set_property(uic_IPString,_UI_LABEL_PROPERTY_TEXT,ip_str);
+    _ui_label_set_property(uic_RollText,_UI_LABEL_PROPERTY_TEXT,rollStr.c_str());
+    _ui_label_set_property(uic_PitchText,_UI_LABEL_PROPERTY_TEXT,pitchStr.c_str());
+    lv_slider_set_value(uic_RollA,(int32_t)(100-normalize(-RP.roll)), LV_ANIM_ON);
+    lv_slider_set_value(uic_RollB,(int32_t)(100-normalize(RP.roll)), LV_ANIM_ON);
+    lv_slider_set_value(uic_Pitch,(int32_t)normalize(RP.pitch), LV_ANIM_ON);
+
+    
 }
 
 void Display::displayTask() 

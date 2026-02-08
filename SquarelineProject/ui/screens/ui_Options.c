@@ -5,10 +5,13 @@
 
 #include "../ui.h"
 
+lv_obj_t * uic_IPString;
 lv_obj_t * uic_SoftwareUpdateFeedback;
 lv_obj_t * ui_Options = NULL;
 lv_obj_t * ui_SoftwarUpdate = NULL;
 lv_obj_t * ui_SoftwareUpdateFeedback = NULL;
+lv_obj_t * ui_IPLabel = NULL;
+lv_obj_t * ui_IPString = NULL;
 // event funtions
 void ui_event_Options(lv_event_t * e)
 {
@@ -37,21 +40,42 @@ void ui_Options_screen_init(void)
     lv_obj_clear_flag(ui_Options, LV_OBJ_FLAG_SCROLLABLE);      /// Flags
 
     ui_SoftwarUpdate = ui_SoftwarUpdate_create(ui_Options);
-    lv_obj_set_x(ui_SoftwarUpdate, 3);
-    lv_obj_set_y(ui_SoftwarUpdate, -144);
+    lv_obj_set_width(ui_SoftwarUpdate, 466);
+    lv_obj_set_height(ui_SoftwarUpdate, 186);
+    lv_obj_set_x(ui_SoftwarUpdate, 1);
+    lv_obj_set_y(ui_SoftwarUpdate, 139);
 
     ui_SoftwareUpdateFeedback = lv_label_create(ui_Options);
     lv_obj_set_width(ui_SoftwareUpdateFeedback, LV_SIZE_CONTENT);   /// 1
     lv_obj_set_height(ui_SoftwareUpdateFeedback, LV_SIZE_CONTENT);    /// 1
     lv_obj_set_x(ui_SoftwareUpdateFeedback, 2);
-    lv_obj_set_y(ui_SoftwareUpdateFeedback, -9);
+    lv_obj_set_y(ui_SoftwareUpdateFeedback, 75);
     lv_obj_set_align(ui_SoftwareUpdateFeedback, LV_ALIGN_CENTER);
-    lv_label_set_text(ui_SoftwareUpdateFeedback, "Idle");
+    lv_label_set_text(ui_SoftwareUpdateFeedback, "Update Software");
     lv_obj_set_style_text_font(ui_SoftwareUpdateFeedback, &ui_font_HeadingDegree, LV_PART_MAIN | LV_STATE_DEFAULT);
+
+    ui_IPLabel = lv_label_create(ui_Options);
+    lv_obj_set_width(ui_IPLabel, LV_SIZE_CONTENT);   /// 1
+    lv_obj_set_height(ui_IPLabel, LV_SIZE_CONTENT);    /// 1
+    lv_obj_set_x(ui_IPLabel, 0);
+    lv_obj_set_y(ui_IPLabel, -160);
+    lv_obj_set_align(ui_IPLabel, LV_ALIGN_CENTER);
+    lv_label_set_text(ui_IPLabel, "IP:");
+    lv_obj_set_style_text_font(ui_IPLabel, &ui_font_HeadingDegree, LV_PART_MAIN | LV_STATE_DEFAULT);
+
+    ui_IPString = lv_label_create(ui_Options);
+    lv_obj_set_width(ui_IPString, LV_SIZE_CONTENT);   /// 1
+    lv_obj_set_height(ui_IPString, LV_SIZE_CONTENT);    /// 1
+    lv_obj_set_x(ui_IPString, 6);
+    lv_obj_set_y(ui_IPString, -70);
+    lv_obj_set_align(ui_IPString, LV_ALIGN_CENTER);
+    lv_label_set_text(ui_IPString, "198.198.919.191");
+    lv_obj_set_style_text_font(ui_IPString, &ui_font_HeadingDegree, LV_PART_MAIN | LV_STATE_DEFAULT);
 
     lv_obj_add_event_cb(ui_SoftwarUpdate, ui_event_SoftwarUpdate_SoftwarUpdate, LV_EVENT_ALL, NULL);
     lv_obj_add_event_cb(ui_Options, ui_event_Options, LV_EVENT_ALL, NULL);
     uic_SoftwareUpdateFeedback = ui_SoftwareUpdateFeedback;
+    uic_IPString = ui_IPString;
 
 }
 
@@ -64,5 +88,8 @@ void ui_Options_screen_destroy(void)
     ui_SoftwarUpdate = NULL;
     uic_SoftwareUpdateFeedback = NULL;
     ui_SoftwareUpdateFeedback = NULL;
+    ui_IPLabel = NULL;
+    uic_IPString = NULL;
+    ui_IPString = NULL;
 
 }

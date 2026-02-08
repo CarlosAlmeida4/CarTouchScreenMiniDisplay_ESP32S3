@@ -19,11 +19,30 @@ class OTAUpdater {
 
 public:
 
+    OTAUpdater() = default;
+
+
+    enum OTAStatus {
+        INIT,
+        READY,
+        UPDATING,
+        UPDATE_FAILED,
+        UPDATE_FINISHED
+    };
+
     void initWifi();
+    
+    /**
+     * @brief Start OTA update process
+     * Creates a task that handles the OTA download and update
+     */
+    void startUpdate();
     
 
 private:
     esp_netif_ip_info_t ip;
+
+    OTAStatus otaStatus = OTAStatus::INIT;
 
     static constexpr auto *TAG = "OTAUpdater";
 
@@ -38,9 +57,9 @@ private:
         void* event_data);
 
     void wifiEventHandler(
-                               esp_event_base_t event_base,
-                               int32_t event_id,
-                               void* event_data);
+                        esp_event_base_t event_base,
+                        int32_t event_id,
+                        void* event_data);
 };
 
 

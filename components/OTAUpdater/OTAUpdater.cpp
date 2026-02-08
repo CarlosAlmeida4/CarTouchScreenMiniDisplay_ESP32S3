@@ -48,6 +48,12 @@ void OTAUpdater::initWifi()
 
 }
 
+void OTAUpdater::startUpdate()
+{
+    ESP_LOGI(TAG, "OTA update requested from UI");
+    xTaskCreate(task_entry, "ota_task", 8192, this, 5, NULL);
+}
+
 void OTAUpdater::wifiEventHandlerEntry(
     void* arg,
     esp_event_base_t event_base,
@@ -93,8 +99,7 @@ void OTAUpdater::wifiEventHandler(
         ESP_LOGI("NET", "IP: " IPSTR,
                  IP2STR(&event->ip_info.ip));
 
-        // Start OTA only after IP is obtained
-        xTaskCreate(task_entry, "ota_task", 8192, this, 5, NULL);
+        otaStatus = OTAUpdater::READY;
     }
 }
 
@@ -107,6 +112,7 @@ void OTAUpdater::task_entry(void* arg)
 void OTAUpdater::OTAUpdaterTask()
 {
     ESP_LOGI(TAG, "Starting OTA...");
+    otaStatus = OTAUpdater::UPDATING;
 
     esp_http_client_config_t config = {
         .url = OTA_URL,
@@ -124,9 +130,11 @@ void OTAUpdater::OTAUpdaterTask()
 
     if (ret == ESP_OK) {
         ESP_LOGI(TAG, "OTA successful, rebooting...");
+        otaStatus = OTAUpdater::UPDATE_FINISHED;
         esp_restart();
     } else {
         ESP_LOGE(TAG, "OTA failed");
+        otaStatus = OTAUpdater::UPDATE_FAILED;
     }
 
     vTaskDelete(NULL);

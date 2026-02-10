@@ -73,16 +73,21 @@ CarTouchScreenMiniDisplay_ESP32S3/
 ### Main Components
 
 #### `main/`
+
 Application entry point with FreeRTOS task initialization.
 
 #### `components/display/`
+
 Display driver integration with LVGL, touch input handling, and rendering loop.
 
 #### `components/ui/`
+
 Auto-generated UI from SquareLine Studio (screens, components, fonts, images).
 
 #### `components/SensorLib/`
+
 Comprehensive sensor library supporting:
+
 - **IMU**: QMI8658 (accelerometer, gyroscope)
 - **Magnetometer**: QMC6310, BMM150
 - **Touch**: CST226, CST92xx, GT911
@@ -91,6 +96,7 @@ Comprehensive sensor library supporting:
 - **Haptic**: DRV2605 vibration motor
 
 #### `components/System/`
+
 System orchestration managing display, sensors, and OTA updates via FreeRTOS queues.
 
 ---
@@ -140,6 +146,7 @@ idf.py menuconfig
 ```
 
 Key settings to verify:
+
 - **Partition scheme**: Choose one that supports OTA (e.g., "Two OTA app slots")
 - **PSRAM**: Enable if connected
 - **Freq**: 240MHz recommended
@@ -170,6 +177,7 @@ To modify the user interface:
 ## Configuration
 
 Key files:
+
 - [`sdkconfig`](sdkconfig) - ESP-IDF configuration
 - [`partitions.csv`](partitions.csv) - Flash partition layout for OTA
 - [`components/System/System.hpp`](components/System/System.hpp) - System integration
@@ -179,6 +187,7 @@ Key files:
 ## Contributing
 
 Contributions are welcome! Areas for enhancement:
+
 - Additional sensor support
 - Improved OTA update mechanisms
 - Performance optimizations
@@ -189,6 +198,7 @@ Contributions are welcome! Areas for enhancement:
 ## License
 
 This project contains multiple licenses:
+
 - Project code: MIT License
 - Fonts: SIL Open Font License (OFL) - see `SquarelineProject/assets/*/OFL.txt`
 - LCD driver component: Apache 2.0 License

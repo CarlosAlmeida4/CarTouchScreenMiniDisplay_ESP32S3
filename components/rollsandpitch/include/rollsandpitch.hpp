@@ -8,6 +8,7 @@ struct RollPitch
 {
     float roll = 0.0f;
     float pitch = 0.0f;
+    float temperature = 0.0f;
 };
 
 #endif //ROLLANDPITCH_HPP

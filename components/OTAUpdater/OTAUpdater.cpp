@@ -48,6 +48,13 @@ void OTAUpdater::initWifi()
 
 }
 
+void OTAUpdater::triggerUpdate()
+{
+    ESP_LOGI(TAG, "OTA update requested from UI");
+    
+    xTaskCreate(task_entry, "ota_task", 8192, this, 5, NULL);
+}
+
 void OTAUpdater::wifiEventHandlerEntry(
     void* arg,
     esp_event_base_t event_base,
@@ -93,8 +100,7 @@ void OTAUpdater::wifiEventHandler(
         ESP_LOGI("NET", "IP: " IPSTR,
                  IP2STR(&event->ip_info.ip));
 
-        // Start OTA only after IP is obtained
-        xTaskCreate(task_entry, "ota_task", 8192, this, 5, NULL);
+        otaStatus = OTAUpdater::READY;
     }
 }
 
@@ -107,6 +113,23 @@ void OTAUpdater::task_entry(void* arg)
 void OTAUpdater::OTAUpdaterTask()
 {
     ESP_LOGI(TAG, "Starting OTA...");
+    
+    if(OTAUpdater::READY == otaStatus)
+    {
+    
+        m_SWUpdateFeedbackCallback("Started");
+    }
+    else if(OTAUpdater::UPDATE_FAILED == otaStatus)
+    {
+        m_SWUpdateFeedbackCallback("Retrying");
+    }
+    else if(OTAUpdater::INIT == otaStatus)
+    {
+        m_SWUpdateFeedbackCallback("No Connection");
+        return;
+    }
+
+    otaStatus = OTAUpdater::UPDATING;
 
     esp_http_client_config_t config = {
         .url = OTA_URL,
@@ -119,16 +142,25 @@ void OTAUpdater::OTAUpdaterTask()
         .http_config = &config,
     };
 
-
+    m_SWUpdateFeedbackCallback("updating");
     esp_err_t ret = esp_https_ota(&otaConfig);
 
     if (ret == ESP_OK) {
+        
         ESP_LOGI(TAG, "OTA successful, rebooting...");
+        m_SWUpdateFeedbackCallback("Rebooting");
+        otaStatus = OTAUpdater::UPDATE_FINISHED;
         esp_restart();
     } else {
         ESP_LOGE(TAG, "OTA failed");
+        m_SWUpdateFeedbackCallback("Update Failed");
+        otaStatus = OTAUpdater::UPDATE_FAILED;
     }
 
     vTaskDelete(NULL);
 }
 
+void OTAUpdater::setSWUpdateFeedback(std::function<void(const std::string&)> callback)
+{
+    m_SWUpdateFeedbackCallback = std::move(callback);
+}

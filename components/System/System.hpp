@@ -34,12 +34,26 @@ public:
         qmiItf.init();
         OTAUpd.initWifi();
 
-    }
+        /**
+         * Callback setting
+         */
+        display.setSoftwareUpdateHandler(
+            [this](lv_event_t* e)
+            {
+                OTAUpd.triggerUpdate();
+            });
 
-    void ota()
-    {
+        OTAUpd.setSWUpdateFeedback(
+            [this](const std::string& msg)
+            {
+                display.SWUpdateFeedback(msg);
+            }
+        );
 
-    }
+    } 
+
+    
+
 private:
       
     QueueHandle_t RollPitchQueue;

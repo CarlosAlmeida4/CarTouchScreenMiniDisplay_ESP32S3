@@ -12,4 +12,5 @@ idf_component_register(
         log
         SensorLib
         rollsandpitch
+        esp_netif 
 )

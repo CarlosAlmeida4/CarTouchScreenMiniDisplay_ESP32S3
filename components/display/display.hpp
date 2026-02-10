@@ -14,6 +14,8 @@
 #include "esp_lcd_panel_ops.h"
 #include "esp_err.h"
 #include "esp_log.h"
+#include "esp_netif.h"
+
 #include "sdkconfig.h"
 #include "freertos/queue.h"
 #include "SensorLib.h"
@@ -38,26 +40,32 @@ struct DisplayPins {
 };
 
 class Display {
-public:
-    explicit Display(QueueHandle_t q): Queue_(q) {}
-
+    public:
+    explicit Display(QueueHandle_t q): Queue_(q) {m_activeInstance = this;}
+    
     Display(const Display&) = delete;
     Display& operator=(const Display&) = delete;
     ~Display();
     
     void init();
+    void setSoftwareUpdateHandler(std::function<void(lv_event_t* )> callback);
     
-    static bool notifyLvglFlushReady(esp_lcd_panel_io_handle_t panel_io, esp_lcd_panel_io_event_data_t *edata, void *user_ctx);
+    void invokeSWUpdate(lv_event_t* e); //Needs to be public because its called from a external C function
+    void SWUpdateFeedback(const std::string& Feedback); //Updates the feedback message comming from OTA 
+    
+    static Display* m_activeInstance;
     
 private:
-    
+        
     QueueHandle_t Queue_;
-
+    
     static TouchDrvCST92xx touch;
-
+    
     static lv_disp_draw_buf_t disp_buf;
     static lv_disp_drv_t disp_drv;
     static SemaphoreHandle_t lvgl_mux;
+    
+    //----------Constants-------------//
     
     static constexpr auto *DISPLAY_TAG = "Display";
     static constexpr auto BACKLIGHTPIN = -1;
@@ -73,10 +81,10 @@ private:
     static constexpr uint8_t LVGL_TICK_PERIOD_MS = 10; // in milliseconds
     static constexpr uint32_t LVGL_TASK_STACK_SIZE = 1024 * 4; // in bytes
     static constexpr uint8_t LVGL_TASK_PRIORITY = 2;
-
+    
     static constexpr uint32_t LVGL_TASK_MAX_DELAY_MS = 500;
     static constexpr uint32_t LVGL_TASK_MIN_DELAY_MS = 1;
-
+    
     static constexpr DisplayPins Pins = {
         .pinNumLcdCs = GPIO_NUM_12,
         .pinNumLcdPclk = GPIO_NUM_38,
@@ -91,7 +99,9 @@ private:
         .TouchINT = GPIO_NUM_11,
         .TouchRST = GPIO_NUM_40
     }; 
-
+    
+    //----------Methods-------------//
+    
     void setup_sensor();
     static void lvglTouchCallBack(lv_indev_drv_t *drv, lv_indev_data_t *data);
     static void lvglFlushCallback(lv_disp_drv_t *drv, const lv_area_t *area, lv_color_t *color_map);
@@ -100,9 +110,12 @@ private:
     static void lvgl_unlock(void);
     static bool lvgl_lock(int timeout_ms);
     static void task_entry(void *arg);
-
+    static bool notifyLvglFlushReady(esp_lcd_panel_io_handle_t panel_io, esp_lcd_panel_io_event_data_t *edata, void *user_ctx);
+    
     void updateUI();
     void displayTask();
+    
+    std::function<void(lv_event_t* )> m_SoftwareUpdateHandler;
 };
 
 #endif // DISPLAY_HPP

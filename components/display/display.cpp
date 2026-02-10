@@ -15,6 +15,7 @@ lv_disp_drv_t Display::disp_drv{};
 lv_disp_draw_buf_t Display::disp_buf{};
 SemaphoreHandle_t Display::lvgl_mux = nullptr;
 TouchDrvCST92xx Display::touch{};
+Display* Display::m_activeInstance = nullptr;
 
 inline float normalize(float input)
 {
@@ -191,7 +192,6 @@ void Display::task_entry(void *arg)
     self->displayTask();
 }
 
-
 static inline bool lv_obj_ready(lv_obj_t * obj)
 {
     return obj &&
@@ -207,7 +207,6 @@ bool checkInclinometerFieldsVdl()
            lv_obj_ready(uic_RollB)     &&
            lv_obj_ready(uic_Pitch);
 }
-
 
 void Display::updateUI()
 {
@@ -228,17 +227,28 @@ void Display::updateUI()
         return;
     }
 
-        std::string rollStr  = turnFloat2Char(RP.roll);
-        std::string pitchStr = turnFloat2Char(RP.pitch);
+    char ip_str[16];
 
-        /*ESP_LOGI(DISPLAY_TAG,
-             "Roll: %.2f deg, Pitch: %.2f deg",
-             RP.roll, RP.pitch);*/
-        _ui_label_set_property(uic_RollText,_UI_LABEL_PROPERTY_TEXT,rollStr.c_str());
-        _ui_label_set_property(uic_PitchText,_UI_LABEL_PROPERTY_TEXT,pitchStr.c_str());
-        lv_slider_set_value(uic_RollA,(int32_t)(100-normalize(-RP.roll)), LV_ANIM_ON);
-        lv_slider_set_value(uic_RollB,(int32_t)(100-normalize(RP.roll)), LV_ANIM_ON);
-        lv_slider_set_value(uic_Pitch,(int32_t)normalize(RP.pitch), LV_ANIM_ON);
+    esp_netif_ip_info_t ip_info;
+    esp_netif_t *netif = esp_netif_get_handle_from_ifkey("WIFI_STA_DEF");
+
+    esp_netif_get_ip_info(netif, &ip_info);
+
+    sprintf(ip_str, IPSTR, IP2STR(&ip_info.ip));
+
+
+    std::string rollStr  = turnFloat2Char(RP.roll);
+    std::string pitchStr = turnFloat2Char(RP.pitch);
+    std::string TemperatureString = turnFloat2Char(RP.temperature);
+
+    _ui_label_set_property(uic_IPString,_UI_LABEL_PROPERTY_TEXT,ip_str);
+    _ui_label_set_property(uic_RollText,_UI_LABEL_PROPERTY_TEXT,rollStr.c_str());
+    _ui_label_set_property(uic_PitchText,_UI_LABEL_PROPERTY_TEXT,pitchStr.c_str());
+    _ui_label_set_property(uic_TemperatureReading,_UI_LABEL_PROPERTY_TEXT,TemperatureString.c_str());
+
+    lv_slider_set_value(uic_RollA,(int32_t)(100-normalize(-RP.roll)), LV_ANIM_ON);
+    lv_slider_set_value(uic_RollB,(int32_t)(100-normalize(RP.roll)), LV_ANIM_ON);
+    lv_slider_set_value(uic_Pitch,(int32_t)normalize(RP.pitch), LV_ANIM_ON);
 
 }
 
@@ -268,7 +278,6 @@ void Display::displayTask()
     }
 }
 
-
 bool Display::notifyLvglFlushReady(esp_lcd_panel_io_handle_t panel_io, esp_lcd_panel_io_event_data_t *edata, void *user_ctx) {
     lv_disp_drv_t *disp_driver = (lv_disp_drv_t *)user_ctx;
     lv_disp_flush_ready(disp_driver);
@@ -295,7 +304,7 @@ void Display::lvglTouchCallBack(lv_indev_drv_t *drv, lv_indev_data_t *data)
     }
 }
 
- void Display::lvglFlushCallback(lv_disp_drv_t *drv, const lv_area_t *area, lv_color_t *color_map)
+void Display::lvglFlushCallback(lv_disp_drv_t *drv, const lv_area_t *area, lv_color_t *color_map)
 {
     esp_lcd_panel_handle_t panel_handle = (esp_lcd_panel_handle_t)drv->user_data;
     const int offsetx1 = area->x1; //+ 0x16;
@@ -325,8 +334,6 @@ void Display::lvglTouchCallBack(lv_indev_drv_t *drv, lv_indev_data_t *data)
     // copy a buffer's content to a specific area of the display
     esp_lcd_panel_draw_bitmap(panel_handle, offsetx1, offsety1, offsetx2 + 1, offsety2 + 1, color_map);
 }
-
-
 
 void Display::lvglUpdateCallback(lv_disp_drv_t *drv)
 {
@@ -377,3 +384,40 @@ void Display::lvgl_unlock(void)
     xSemaphoreGive(lvgl_mux);
 }
 
+void Display::setSoftwareUpdateHandler(std::function<void(lv_event_t* )> callback)
+{
+    m_SoftwareUpdateHandler = std::move(callback);
+}
+
+void Display::invokeSWUpdate(lv_event_t* e)
+{
+    if(m_SoftwareUpdateHandler)
+    {
+        _ui_label_set_property(uic_SoftwareUpdateFeedback,_UI_LABEL_PROPERTY_TEXT,"In Progress");
+        m_SoftwareUpdateHandler(e);
+    }
+    else
+    {
+        _ui_label_set_property(uic_SoftwareUpdateFeedback,_UI_LABEL_PROPERTY_TEXT,"Error in Update");
+    }
+}
+
+void Display::SWUpdateFeedback(const std::string& Feedback)
+{
+    if(lvgl_lock(100))
+    {
+         if (lv_obj_ready(uic_SoftwareUpdateFeedback)) {
+                _ui_label_set_property(uic_SoftwareUpdateFeedback, 
+                    _UI_LABEL_PROPERTY_TEXT, Feedback.c_str());
+            }
+    }
+    lvgl_unlock();  
+}
+
+extern "C" void UI_RequestSWUpdate(lv_event_t * e)
+{
+    if(Display::m_activeInstance)
+    {
+        Display::m_activeInstance->invokeSWUpdate(e);
+    }
+}

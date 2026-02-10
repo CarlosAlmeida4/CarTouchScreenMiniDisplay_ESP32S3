@@ -12,15 +12,16 @@ extern "C" {
 
 #include "lvgl.h"
 
-#include "lv_i18n.h"
 #include "ui_helpers.h"
+#include "components/ui_comp.h"
+#include "components/ui_comp_hook.h"
 #include "ui_events.h"
 
 
 ///////////////////// SCREENS ////////////////////
 
 #include "screens/ui_Inclinometer.h"
-#include "screens/ui_Temperature.h"
+#include "screens/ui_Options.h"
 
 ///////////////////// VARIABLES ////////////////////
 
@@ -40,7 +41,6 @@ LV_FONT_DECLARE(ui_font_SmallerEmblemaOne);
 // UI INIT
 void ui_init(void);
 void ui_destroy(void);
-void ui_relocalize(void);
 
 #ifdef __cplusplus
 } /*extern "C"*/

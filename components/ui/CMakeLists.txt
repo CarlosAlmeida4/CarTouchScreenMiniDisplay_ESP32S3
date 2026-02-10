@@ -2,9 +2,11 @@ idf_component_register(
     SRCS
         "ui.c"
         "ui_helpers.c"
+		"components/ui_comp_softwarupdate.c"
+		"components/ui_comp.c"
         "components/ui_comp_hook.c"
         "screens/ui_Inclinometer.c"
-        "screens/ui_Temperature.c"
+        "screens/ui_Options.c"
         "images/ui_img_scale_revamp_png.c"
         "fonts/ui_font_Nabla_Big.c"
         "fonts/ui_font_HeadingDegree.c"

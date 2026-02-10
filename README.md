@@ -41,7 +41,7 @@ The UI is exported from SquareLine Studio and integrated directly into the ESP-I
 
 # User Interface
 
-![User Interface Design](\Designs\ScreenDesign.png)
+![User Interface Design](Designs/ScreenDesign.png)
 
 ---
 

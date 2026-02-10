@@ -1,75 +1,205 @@
-| Supported Targets | ESP32 | ESP32-C2 | ESP32-C3 | ESP32-C5 | ESP32-C6 | ESP32-C61 | ESP32-H2 | ESP32-H21 | ESP32-H4 | ESP32-P4 | ESP32-S2 | ESP32-S3 |
-| ----------------- | ----- | -------- | -------- | -------- | -------- | --------- | -------- | --------- | -------- | -------- | -------- | -------- |
+# CarTouchScreenMiniDisplay – ESP32-S3
 
-# FreeRTOS Real Time Stats Example
+Touchscreen mini display project for ESP32-S3 designed for automotive or embedded dashboard applications.  
+This project demonstrates how to build a responsive graphical user interface using **LVGL** and **SquareLine Studio**, running on an ESP32-S3 with a touch display.
 
-(See the README.md file in the upper level 'examples' directory for more information about examples.)
+The goal of this project is to create a small touchscreen UI to integrate into the middle display of a vehicle to act mostly as an inclinometer, but also as HMI to other vehicle information
 
-FreeRTOS provides the function `vTaskGetRunTimeStats()` to obtain CPU usage statistics of tasks. However, these statistics are with respect to the entire runtime of FreeRTOS (i.e. **run time stats**). Furthermore, statistics of `vTaskGetRunTimeStats()` are only valid whilst the timer for run time statistics has not overflowed.
+---
 
-This example demonstrates how to get CPU usage statistics of tasks with respect to a specified duration (i.e. **real time stats**) rather than over the entire runtime of FreeRTOS. The `print_real_time_stats()` function of this example demonstrates how this can be achieved.
+## Overview
 
-## How to use example
+This project implements:
 
-### Hardware Required
+- ESP32-S3 based touchscreen interface
+- UI designed in **SquareLine Studio**
+- Graphics powered by **LVGL**
+- ESP-IDF based firmware
+- Modular structure suitable for future telemetry or vehicle data integration
+- Over the air functionality
 
-This example should be able to run on any commonly available ESP32 development board.
+The UI is exported from SquareLine Studio and integrated directly into the ESP-IDF project. Application logic runs independently from the UI layer, allowing easy modification or replacement of screens without changing low-level display code.
 
-### Configure the project
+---
+
+## Features
+
+- Touchscreen graphical interface
+- LVGL-based UI rendering
+- SquareLine Studio workflow
+- ESP-IDF project structure
+- Ready for automotive UI extensions
+- Clean separation between:
+  - Display driver
+  - UI layer
+  - Application logic
+- **Sensor Integration**: QMI8658 IMU for inclinometer (roll/pitch), touch controller support
+- **OTA Updates**: Over-the-air firmware update capability
+- **Optional Sensors**: Support for magnetometer (BMM150), light sensor, RTC, vibration motor
+
+---
+
+# User Interface
+
+![User Interface Design](\Designs\ScreenDesign.png)
+
+---
+
+## Project Structure
 
 ```
+CarTouchScreenMiniDisplay_ESP32S3/
+│
+├── main/
+│ ├── main.cpp
+│ └── application logic
+│
+├── components/
+│ ├── display/          # Display driver & LVGL integration
+│ ├── ui/               # SquareLine Studio generated UI
+│ ├── SensorLib/        # Sensor drivers & interfaces
+│ ├── System/           # System management & task coordination
+│ ├── qmi8658cInterface/# IMU sensor interface
+│ ├── OTAUpdater/       # Over-the-air update handler
+│ └── esp_lcd_sh8601/   # LCD controller driver
+│
+├── SquarelineProject/  # SquareLine Studio project source
+├── CMakeLists.txt
+├── sdkconfig
+├── partitions.csv      # Flash partitions for OTA
+└── README.md
+```
+
+### Main Components
+
+#### `main/`
+Application entry point with FreeRTOS task initialization.
+
+#### `components/display/`
+Display driver integration with LVGL, touch input handling, and rendering loop.
+
+#### `components/ui/`
+Auto-generated UI from SquareLine Studio (screens, components, fonts, images).
+
+#### `components/SensorLib/`
+Comprehensive sensor library supporting:
+- **IMU**: QMI8658 (accelerometer, gyroscope)
+- **Magnetometer**: QMC6310, BMM150
+- **Touch**: CST226, CST92xx, GT911
+- **Light**: CM32181, LTR553
+- **RTC**: PCF8563, PCF85063
+- **Haptic**: DRV2605 vibration motor
+
+#### `components/System/`
+System orchestration managing display, sensors, and OTA updates via FreeRTOS queues.
+
+---
+
+## Requirements
+
+### Hardware
+
+- **ESP32-S3** Waveshare board ([guide](https://www.waveshare.com/wiki/ESP32-S3-Touch-AMOLED-1.75))
+- SH8601 AMOLED display (466×466)
+- CST226/CST92xx touch controller
+- Optional: QMI8658 IMU sensor breakout
+
+### Software
+
+- **ESP-IDF** v5.0 or newer
+- **Python** 3.7+ (installed by ESP-IDF)
+- **SquareLine Studio** 1.6.0+ (for UI editing)
+- **CMake** 3.16+
+
+---
+
+## Installation
+
+### 1. Install ESP-IDF
+
+```bash
+git clone https://github.com/espressif/esp-idf.git
+cd esp-idf
+git checkout v5.1  # or latest stable
+./install.sh
+source ./export.sh
+```
+
+### 2. Clone the Repository
+
+```bash
+git clone https://github.com/CarlosAlmeida4/CarTouchScreenMiniDisplay_ESP32S3.git
+cd CarTouchScreenMiniDisplay_ESP32S3
+```
+
+### 3. Configure Project
+
+```bash
+idf.py set-target esp32s3
 idf.py menuconfig
 ```
 
-* Select `Enable FreeRTOS to collect run time stats` under `Component Config > FreeRTOS` (this should be enabled in the example by default)
+Key settings to verify:
+- **Partition scheme**: Choose one that supports OTA (e.g., "Two OTA app slots")
+- **PSRAM**: Enable if connected
+- **Freq**: 240MHz recommended
 
-* `Choose the clock source for run time stats` configured under `Component Config > FreeRTOS`. The `esp_timer` should be selected be default. This option will affect the time unit resolution in which the statistics are measured with respect to.
+### 4. Build & Flash
 
-### Build and Flash
-
-Build the project and flash it to the board, then run monitor tool to view serial output:
-
-```
-idf.py -p PORT flash monitor
-```
-
-(Replace PORT with the name of the serial port to use.)
-
-(To exit the serial monitor, type ``Ctrl-]``.)
-
-See the Getting Started Guide for full steps to configure and use ESP-IDF to build projects.
-
-## Example Output
-
-The example should have the following log output:
-
-```
-...
-Getting real time stats over 100 ticks
-| Task | Run Time | Percentage
-| stats | 1304 | 0%
-| IDLE0 | 206251 | 10%
-| IDLE1 | 464785 | 23%
-| spin2 | 225389 | 11%
-| spin0 | 227174 | 11%
-| spin4 | 225303 | 11%
-| spin1 | 207264 | 10%
-| spin3 | 225331 | 11%
-| spin5 | 225369 | 11%
-| Tmr Svc | 0 | 0%
-| esp_timer | 0 | 0%
-| ipc1 | 0 | 0%
-| ipc0 | 0 | 0%
-Real time stats obtained
-...
+```bash
+idf.py build
+idf.py -p /dev/ttyUSB0 flash monitor  # Linux/Mac
+idf.py -p COM3 flash monitor          # Windows
 ```
 
-## Example Breakdown
+---
 
-### Spin tasks
+## Building the UI
 
-During the examples initialization process, multiple `spin` tasks are created. These tasks will simply spin a certain number of CPU cycles to consume CPU time, then block for a predetermined period.
+To modify the user interface:
 
-### Understanding the stats
+1. Open `SquarelineProject/CarTouchScreenMiniDisplay.slvs` in **SquareLine Studio**
+2. Edit screens/components as needed
+3. Export to `components/ui/` (GCC C project format)
+4. Rebuild the ESP-IDF project
 
-From the log output, it can be seen that the spin tasks consume nearly an equal amount of time over the specified stats collection period of `print_real_time_stats()`. The real time stats also display the CPU time consumption of other tasks created by default in ESP-IDF (e.g. `IDLE` and `ipc` tasks).
+⚠️ **Note**: Auto-generated UI files should not be manually edited. Make all UI changes in SquareLine Studio.
+
+---
+
+## Configuration
+
+Key files:
+- [`sdkconfig`](sdkconfig) - ESP-IDF configuration
+- [`partitions.csv`](partitions.csv) - Flash partition layout for OTA
+- [`components/System/System.hpp`](components/System/System.hpp) - System integration
+
+---
+
+## Contributing
+
+Contributions are welcome! Areas for enhancement:
+- Additional sensor support
+- Improved OTA update mechanisms
+- Performance optimizations
+- Additional UI screens
+
+---
+
+## License
+
+This project contains multiple licenses:
+- Project code: MIT License
+- Fonts: SIL Open Font License (OFL) - see `SquarelineProject/assets/*/OFL.txt`
+- LCD driver component: Apache 2.0 License
+
+See individual files for copyright information.
+
+---
+
+## Resources
+
+- [LVGL Documentation](https://docs.lvgl.io/)
+- [ESP-IDF Official Docs](https://docs.espressif.com/projects/esp-idf/)
+- [SquareLine Studio](https://www.squareline.io/)
+- [Waveshare ESP32-S3 AMOLED](https://www.waveshare.com/wiki/ESP32-S3-Touch-AMOLED-1.75)

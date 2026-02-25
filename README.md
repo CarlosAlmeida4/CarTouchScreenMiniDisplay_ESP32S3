@@ -106,9 +106,6 @@ System orchestration managing display, sensors, and OTA updates via FreeRTOS que
 ### Hardware
 
 - **ESP32-S3** Waveshare board ([guide](https://www.waveshare.com/wiki/ESP32-S3-Touch-AMOLED-1.75))
-- SH8601 AMOLED display (466×466)
-- CST226/CST92xx touch controller
-- Optional: QMI8658 IMU sensor breakout
 
 ### Software
 

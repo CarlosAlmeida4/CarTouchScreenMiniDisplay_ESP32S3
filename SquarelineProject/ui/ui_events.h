@@ -10,6 +10,7 @@
 extern "C" {
 #endif
 
+void UI_ConnectWifiCallback(lv_event_t * e);
 void UI_RequestSWUpdate(lv_event_t * e);
 
 #ifdef __cplusplus

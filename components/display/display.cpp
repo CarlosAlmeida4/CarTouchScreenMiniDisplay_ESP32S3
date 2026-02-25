@@ -421,3 +421,12 @@ extern "C" void UI_RequestSWUpdate(lv_event_t * e)
         Display::m_activeInstance->invokeSWUpdate(e);
     }
 }
+
+// TODO: Implement callback
+extern "C" void UI_ConnectWifiCallback(lv_event_t * e)
+{
+    if(Display::m_activeInstance)
+    {
+        //Display::m_activeInstance->invokeSWUpdate(e);
+    }
+}

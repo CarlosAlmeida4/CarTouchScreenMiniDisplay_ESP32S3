@@ -79,3 +79,4 @@ Desktop.ini
 SquarelineProject/backup
 components/OTAUpdater/Secrets.hpp
 Doku
+components/WifiManager/Secrets.hpp

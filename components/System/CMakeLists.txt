@@ -11,4 +11,5 @@ idf_component_register(
         qmi8658cInterface
         display
         OTAUpdater
+        WifiManager
 )

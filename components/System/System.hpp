@@ -14,7 +14,7 @@
 #include "display.hpp"
 #include "qmi8658cInterface.hpp"
 #include "OTAUpdater.hpp"
-
+#include "WifiManager.hpp"
 
 
 class System {
@@ -32,7 +32,7 @@ public:
     {
         display.init();
         qmiItf.init();
-        OTAUpd.initWifi();
+        WifiMgr.initWifi();
 
         /**
          * Callback setting
@@ -60,6 +60,7 @@ private:
     Display display;
     qmi8658cInterface qmiItf;
     OTAUpdater OTAUpd;
+    WifiManager WifiMgr;
 
 };
 

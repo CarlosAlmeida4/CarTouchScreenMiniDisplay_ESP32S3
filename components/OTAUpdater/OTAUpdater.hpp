@@ -1,8 +1,6 @@
 #ifndef OTA_UPDATER_HPP
 #define  OTA_UPDATER_HPP
 
-#include "Secrets.hpp"
-
 #include "esp_wifi.h"
 #include "esp_event.h"
 #include "esp_log.h"
@@ -30,8 +28,6 @@ public:
         UPDATE_FAILED,
         UPDATE_FINISHED
     };
-
-    void initWifi();
     
     /**
      * @brief Start OTA update process
@@ -43,7 +39,7 @@ public:
     
 
 private:
-    esp_netif_ip_info_t ip;
+    
 
     OTAStatus otaStatus = OTAStatus::INIT;
 

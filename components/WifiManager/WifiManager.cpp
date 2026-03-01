@@ -1,10 +1,28 @@
 #include "WifiManager.hpp"
 
+void WifiManager::task_entry(void* arg)
+{
+    auto* self = static_cast<WifiManager*>(arg);
+    self->WifiManagerTask(); 
+}
+
 void WifiManager::WifiManagerTask()
 {
     // If connected do whatever 
 
     //If not conncted,  uptade scan for access points
+    while(1)
+    {
+        {
+            std::lock_guard<std::mutex> lock(networkListMutex_);
+            for (auto it = availableNetworks_.begin();it!=availableNetworks_.end();++it) 
+            {
+                ESP_LOGI(TAG, "SSID \t\t%s", it->c_str());
+            }
+        }
+        
+        vTaskDelay(100 / portTICK_PERIOD_MS);
+    }
 }
 
 void WifiManager::initWifi()
@@ -44,7 +62,10 @@ void WifiManager::initWifi()
     ESP_ERROR_CHECK(esp_wifi_start());
 
     //Do initial wifi networks scan
-    esp_wifi_scan_start(NULL,false);
+    ESP_ERROR_CHECK(esp_wifi_scan_start(NULL,true));
+
+    //Initialize cyclic wifi task
+    xTaskCreate(task_entry,"Wifi Manager",4096,this,2,NULL);
     //TODO: this needs to be called to set the wifi connection
     //ESP_ERROR_CHECK(esp_wifi_set_config(WIFI_IF_STA, &wifi_config));
 }
@@ -53,20 +74,26 @@ void WifiManager::storeAPPoints()
 {
     uint16_t ap_count = 0;
     uint16_t number = DEFAULT_SCAN_LIST_SIZE;
-    wifi_ap_record_t ap_info[DEFAULT_SCAN_LIST_SIZE];
-
+    
     ESP_LOGI(TAG, "Max AP number ap_info can hold = %u", number);
     ESP_ERROR_CHECK(esp_wifi_scan_get_ap_num(&ap_count));
-    ESP_ERROR_CHECK(esp_wifi_scan_get_ap_records(&number, ap_info));
-     memset(ap_info, 0, sizeof(ap_info));
+    number = ap_count;
 
+    std::vector<wifi_ap_record_t> ap_info(ap_count);
+    
+    ESP_ERROR_CHECK(esp_wifi_scan_get_ap_records(&number, ap_info.data()));
+
+    std::lock_guard<std::mutex> lock(networkListMutex_);
+    availableNetworks_.clear();
     ESP_LOGI(TAG, "Total APs scanned = %u, actual AP number ap_info holds = %u", ap_count, number);
-    for (int i = 0; i < number; i++) {
-        ESP_LOGI(TAG, "SSID \t\t%s", ap_info[i].ssid);
-        ESP_LOGI(TAG, "RSSI \t\t%d", ap_info[i].rssi);
-        const char* CurrSSID = reinterpret_cast<const char*>(ap_info[i].ssid);
+    for (auto it = ap_info.begin();it!=ap_info.end();++it) {
+        ESP_LOGI(TAG, "SSID \t\t%s", it->ssid);
+        ESP_LOGI(TAG, "RSSI \t\t%d", it->rssi);
+        const char* CurrSSID = reinterpret_cast<const char*>(it->ssid);
+
         availableNetworks_.emplace_back(CurrSSID);
     }
+   
 }
 
 void WifiManager::wifiEventHandlerEntry(
@@ -76,6 +103,9 @@ void WifiManager::wifiEventHandlerEntry(
     void* event_data)
 {
     auto *self = static_cast<WifiManager*>(arg);
+
+    ESP_LOGI("STACK", "High water mark: %u",
+         uxTaskGetStackHighWaterMark(NULL));
     if(self)
     {
         self->wifiEventHandler(event_base,event_id,event_data);
@@ -87,24 +117,25 @@ void WifiManager::wifiEventHandler(
                                int32_t event_id,
                                void* event_data)
 {
+    ESP_LOGI(TAG, "Event Base: %d", event_base);
     if (event_base == WIFI_EVENT) {
 
         switch (event_id) {
 
         case WIFI_EVENT_STA_START:
-            ESP_LOGI(TAG, "WiFi started, connecting...");
-            esp_wifi_connect();
+            ESP_LOGI(TAG, "WiFi started");
+            //esp_wifi_connect();
             break;
 
         case WIFI_EVENT_STA_DISCONNECTED:
             ESP_LOGW(TAG, "Disconnected, retrying...");
-            esp_wifi_connect();
+            //esp_wifi_connect();
             break;
 
         case WIFI_EVENT_SCAN_DONE:
-            ESP_LOGW(TAG, "Wifi networks available");
+            ESP_LOGI(TAG, "Wifi Scan Finished");
             storeAPPoints();
-
+            break;
         default:
             break;
         }

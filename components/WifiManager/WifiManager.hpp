@@ -31,15 +31,17 @@ class WifiManager
     };
 
     WifiManager() = default;
-    WifiManager(const WifiManager&) = delete;
-    WifiManager& operator=(const WifiManager&) = delete;
+    //WifiManager(const WifiManager&) = delete;
+    //WifiManager& operator=(const WifiManager&) = delete;
     ~WifiManager() = default;
     void initWifi();
     
 
     private:
     
-    static constexpr std::size_t DEFAULT_SCAN_LIST_SIZE = 15;
+    std::mutex networkListMutex_;
+    
+    static constexpr std::size_t DEFAULT_SCAN_LIST_SIZE = 5;
 
     static constexpr auto *TAG = "WifiManager";
 
@@ -56,20 +58,21 @@ class WifiManager
         },
     };
 
-    void WifiManagerTask();
-
+    
     static void wifiEventHandlerEntry(
         void* arg,
         esp_event_base_t event_base,
         int32_t event_id,
         void* event_data);
-
-    void wifiEventHandler(
-                        esp_event_base_t event_base,
-                        int32_t event_id,
-                        void* event_data);
-    
+        
+        void wifiEventHandler(
+            esp_event_base_t event_base,
+            int32_t event_id,
+            void* event_data);
+            
+    void WifiManagerTask();
     void storeAPPoints();
+    static void task_entry(void* arg);
 };
 
 

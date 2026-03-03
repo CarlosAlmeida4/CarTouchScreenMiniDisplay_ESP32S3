@@ -8,25 +8,50 @@ void WifiManager::task_entry(void* arg)
 
 void WifiManager::WifiManagerTask()
 {
-    // If connected do whatever 
-
-    //If not conncted,  uptade scan for access points
+    
+    assert(Queue_!=nullptr);
+    
     while(1)
     {
+
+        if(WifiManagerStatus::CONNECTED == connectionStatus_)
         {
-            std::lock_guard<std::mutex> lock(networkListMutex_);
-            for (auto it = availableNetworks_.begin();it!=availableNetworks_.end();++it) 
+            vTaskDelay(100 / portTICK_PERIOD_MS);
+        }
+        else if(WifiManagerStatus::SCANNING == connectionStatus_)
+        {
             {
-                ESP_LOGI(TAG, "SSID \t\t%s", it->c_str());
+                std::lock_guard<std::mutex> lock(networkListMutex_);
+                if(!availableNetworks_.empty())
+                {
+                    std::string dropdownDisplay;
+                    dropdownDisplay.clear();
+                    for (size_t i = 0; i < availableNetworks_.size(); ++i)
+                    {
+                        dropdownDisplay += availableNetworks_[i];
+                        if (i + 1 < availableNetworks_.size())
+                            dropdownDisplay += '\n';
+                    }
+     
+                    WifiManagerPipeline WifiMgrPip{};
+
+                    auto len = std::min<size_t>(dropdownDisplay.size(),(sizeof(WifiMgrPip.AvailableNetworks) - 1));
+                    std::memcpy(WifiMgrPip.AvailableNetworks,dropdownDisplay.c_str(),len);
+
+                    xQueueOverwrite(Queue_,&WifiMgrPip);
+                }
+                
             }
+            
+            vTaskDelay(1000 / portTICK_PERIOD_MS);
         }
         
-        vTaskDelay(100 / portTICK_PERIOD_MS);
     }
 }
 
 void WifiManager::initWifi()
 {
+    connectionStatus_ = WifiManagerStatus::INIT;
     ESP_ERROR_CHECK(nvs_flash_init());
     ESP_ERROR_CHECK(esp_netif_init());
     ESP_ERROR_CHECK(esp_event_loop_create_default());

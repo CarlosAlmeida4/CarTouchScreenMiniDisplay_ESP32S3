@@ -210,15 +210,28 @@ bool checkInclinometerFieldsVdl()
 
 void Display::updateUI()
 {
-    RollPitch RP{0,0};
+
 
     if (!ui_ready.load(std::memory_order_acquire)) {
         return;
     }
 
-    // Receive data WITHOUT LVGL lock
+    //ESP_LOGI("UI", "Current screen: %p", lv_scr_act());
+    //Update screen depdending on which is currently loaded
+    lv_obj_t* scr_act = lv_scr_act();
 
-    if (!xQueueReceive(Queue_, &RP, 0)) {
+    if(scr_act == ui_Inclinometer){InclinometerUI();}
+    if(scr_act == ui_Wifi){WifiUI();}
+
+
+}
+
+void Display::InclinometerUI()
+{
+    ESP_LOGD(DISPLAY_TAG, "Inclinometer UI is active");
+    RollPitch RP{0,0};
+
+    if (!xQueueReceive(RollPitchQueue_, &RP, 0)) {
         return;
     }
 
@@ -252,9 +265,31 @@ void Display::updateUI()
 
 }
 
+void Display::WifiUI()
+{
+    //ESP_LOGD(DISPLAY_TAG, "Wifi UI is active");
+    WifiManagerPipeline WifiMgrPip{};
+    static char CurrentAvailableNetworks[200];
+    
+    if (!xQueueReceive(WifiQueue_, &WifiMgrPip, 0)) {return;}
+
+    if(WifiManagerStatus::SCANNING == WifiMgrPip.WifiStatus)
+    {
+        if(strcmp(CurrentAvailableNetworks,WifiMgrPip.AvailableNetworks) == 0)
+        {
+            //Dont update the dropdown list
+        }
+        else
+        {
+            lv_dropdown_set_options(ui_WifiAPList,WifiMgrPip.AvailableNetworks);
+        }
+    }
+    
+}
+
 void Display::displayTask() 
 {
-    ESP_LOGI(DISPLAY_TAG, "Starting LVGL task");
+    //ESP_LOGD(DISPLAY_TAG, "Starting LVGL task");
     uint32_t task_delay_ms = LVGL_TASK_MAX_DELAY_MS;
     while (1)
     {

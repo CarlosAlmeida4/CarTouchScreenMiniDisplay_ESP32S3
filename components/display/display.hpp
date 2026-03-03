@@ -21,7 +21,7 @@
 #include "SensorLib.h"
 #include "TouchDrvCST92xx.h"
 #include "esp_lcd_sh8601.h"
-#include "rollsandpitch.hpp"
+#include "PipelineTypes.hpp"
 #include <bits/stdc++.h>
 
 struct DisplayPins {
@@ -41,7 +41,8 @@ struct DisplayPins {
 
 class Display {
     public:
-    explicit Display(QueueHandle_t q): Queue_(q) {m_activeInstance = this;}
+    explicit Display(QueueHandle_t  RPQueue,QueueHandle_t  WifiQueue):  RollPitchQueue_(RPQueue),
+    WifiQueue_(WifiQueue) {m_activeInstance = this;}
     
     Display(const Display&) = delete;
     Display& operator=(const Display&) = delete;
@@ -57,7 +58,8 @@ class Display {
     
 private:
         
-    QueueHandle_t Queue_;
+    QueueHandle_t RollPitchQueue_;
+    QueueHandle_t WifiQueue_;
     
     static TouchDrvCST92xx touch;
     
@@ -115,6 +117,10 @@ private:
     void updateUI();
     void displayTask();
     
+    void InclinometerUI();
+    void WifiUI();
+
+
     std::function<void(lv_event_t* )> m_SoftwareUpdateHandler;
 };
 

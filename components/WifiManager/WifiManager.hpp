@@ -15,22 +15,16 @@
 #include <iostream>
 #include <cstddef>
 
+#include "PipelineTypes.hpp"
+
 class WifiManager
 {
     using List = std::vector<std::string>;
 
     public:
 
-    enum WifiManagerStatus {
-        INIT,
-        READY,
-        DISCONNECTED,
-        CONNECTING,
-        CONNECTED,
-        CONNECTION_FAILED
-    };
 
-    WifiManager() = default;
+    WifiManager(QueueHandle_t q): Queue_(q) {}
     //WifiManager(const WifiManager&) = delete;
     //WifiManager& operator=(const WifiManager&) = delete;
     ~WifiManager() = default;
@@ -40,16 +34,13 @@ class WifiManager
     private:
     
     std::mutex networkListMutex_;
-    
     static constexpr std::size_t DEFAULT_SCAN_LIST_SIZE = 5;
-
     static constexpr auto *TAG = "WifiManager";
-
     esp_netif_ip_info_t ip;
-
     WifiManagerStatus connectionStatus_ = WifiManagerStatus::INIT;
-
     List availableNetworks_;
+    QueueHandle_t Queue_;
+
 
     wifi_config_t wifi_config = {
         .sta = {
@@ -65,10 +56,10 @@ class WifiManager
         int32_t event_id,
         void* event_data);
         
-        void wifiEventHandler(
-            esp_event_base_t event_base,
-            int32_t event_id,
-            void* event_data);
+    void wifiEventHandler(
+        esp_event_base_t event_base,
+        int32_t event_id,
+        void* event_data);
             
     void WifiManagerTask();
     void storeAPPoints();

@@ -8,5 +8,5 @@ idf_component_register(
         SensorLib
         driver
         freertos
-        rollsandpitch
+        PipelineTypes
 )

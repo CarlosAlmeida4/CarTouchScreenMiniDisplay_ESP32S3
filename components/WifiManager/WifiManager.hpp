@@ -63,6 +63,7 @@ class WifiManager
             
     void WifiManagerTask();
     void storeAPPoints();
+    void changeStatus(WifiManagerStatus status);
     static void task_entry(void* arg);
 };
 

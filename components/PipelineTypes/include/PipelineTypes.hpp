@@ -12,6 +12,8 @@ enum WifiManagerStatus {
     CONNECTING,
     CONNECTED,
     SCANNING,
+    SCANNING_READY,
+    SCANNING_FINISHED,
     CONNECTION_FAILED
 };
 

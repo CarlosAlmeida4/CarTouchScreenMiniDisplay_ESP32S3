@@ -211,7 +211,6 @@ bool checkInclinometerFieldsVdl()
 void Display::updateUI()
 {
 
-
     if (!ui_ready.load(std::memory_order_acquire)) {
         return;
     }
@@ -222,7 +221,6 @@ void Display::updateUI()
 
     if(scr_act == ui_Inclinometer){InclinometerUI();}
     if(scr_act == ui_Wifi){WifiUI();}
-
 
 }
 
@@ -273,16 +271,9 @@ void Display::WifiUI()
     
     if (!xQueueReceive(WifiQueue_, &WifiMgrPip, 0)) {return;}
 
-    if(WifiManagerStatus::SCANNING == WifiMgrPip.WifiStatus)
+    if(WifiManagerStatus::SCANNING_FINISHED == WifiMgrPip.WifiStatus)
     {
-        if(strcmp(CurrentAvailableNetworks,WifiMgrPip.AvailableNetworks) == 0)
-        {
-            //Dont update the dropdown list
-        }
-        else
-        {
-            lv_dropdown_set_options(ui_WifiAPList,WifiMgrPip.AvailableNetworks);
-        }
+        lv_dropdown_set_options(ui_WifiAPList,WifiMgrPip.AvailableNetworks);
     }
     
 }

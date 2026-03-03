@@ -1,5 +1,11 @@
 #include "WifiManager.hpp"
 
+inline void WifiManager::changeStatus(WifiManagerStatus status)
+{
+    connectionStatus_ = status;
+}
+
+
 void WifiManager::task_entry(void* arg)
 {
     auto* self = static_cast<WifiManager*>(arg);
@@ -13,45 +19,55 @@ void WifiManager::WifiManagerTask()
     
     while(1)
     {
+        switch (connectionStatus_)
+        {
+            case WifiManagerStatus::CONNECTED:
+                vTaskDelay(100 / portTICK_PERIOD_MS);
+                break;
 
-        if(WifiManagerStatus::CONNECTED == connectionStatus_)
-        {
-            vTaskDelay(100 / portTICK_PERIOD_MS);
-        }
-        else if(WifiManagerStatus::SCANNING == connectionStatus_)
-        {
-            {
-                std::lock_guard<std::mutex> lock(networkListMutex_);
-                if(!availableNetworks_.empty())
-                {
-                    std::string dropdownDisplay;
-                    dropdownDisplay.clear();
-                    for (size_t i = 0; i < availableNetworks_.size(); ++i)
+            case WifiManagerStatus::SCANNING_FINISHED:
+                {            
+                    std::lock_guard<std::mutex> lock(networkListMutex_);
+                    if(!availableNetworks_.empty())
                     {
-                        dropdownDisplay += availableNetworks_[i];
-                        if (i + 1 < availableNetworks_.size())
-                            dropdownDisplay += '\n';
+                        std::string dropdownDisplay;
+                        dropdownDisplay.clear();
+                        for (size_t i = 0; i < availableNetworks_.size(); ++i)
+                        {
+                            dropdownDisplay += availableNetworks_[i];
+                            if (i + 1 < availableNetworks_.size())
+                                dropdownDisplay += '\n';
+                        }
+
+                        WifiManagerPipeline WifiMgrPip{};
+                        WifiMgrPip.WifiStatus = connectionStatus_;
+                        
+                        auto len = std::min<size_t>(dropdownDisplay.size(),(sizeof(WifiMgrPip.AvailableNetworks) - 1));
+                        std::memcpy(WifiMgrPip.AvailableNetworks,dropdownDisplay.c_str(),len);
+
+                        xQueueOverwrite(Queue_,&WifiMgrPip);
                     }
-     
-                    WifiManagerPipeline WifiMgrPip{};
 
-                    auto len = std::min<size_t>(dropdownDisplay.size(),(sizeof(WifiMgrPip.AvailableNetworks) - 1));
-                    std::memcpy(WifiMgrPip.AvailableNetworks,dropdownDisplay.c_str(),len);
+                } 
+                vTaskDelay(1000 / portTICK_PERIOD_MS);
+                break;
 
-                    xQueueOverwrite(Queue_,&WifiMgrPip);
-                }
+            case WifiManagerStatus::SCANNING_READY: //TODO! : implement routine to jump to scanning ready
+                vTaskDelay(1000 / portTICK_PERIOD_MS);
+                break;
                 
-            }
-            
-            vTaskDelay(1000 / portTICK_PERIOD_MS);
+            default:
+                break;
         }
-        
+
+
     }
+
 }
 
 void WifiManager::initWifi()
 {
-    connectionStatus_ = WifiManagerStatus::INIT;
+    changeStatus(WifiManagerStatus::INIT);
     ESP_ERROR_CHECK(nvs_flash_init());
     ESP_ERROR_CHECK(esp_netif_init());
     ESP_ERROR_CHECK(esp_event_loop_create_default());
@@ -78,15 +94,15 @@ void WifiManager::initWifi()
         NULL));
 
     esp_netif_get_ip_info(
-    esp_netif_get_handle_from_ifkey("WIFI_STA_DEF"),
-    &ip);
+    esp_netif_get_handle_from_ifkey("WIFI_STA_DEF"),&ip);
 
     ESP_LOGI("NET", "IP: " IPSTR, IP2STR(&ip.ip));
 
     ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_STA));
     ESP_ERROR_CHECK(esp_wifi_start());
-
+    
     //Do initial wifi networks scan
+    changeStatus(WifiManagerStatus::SCANNING);
     ESP_ERROR_CHECK(esp_wifi_scan_start(NULL,true));
 
     //Initialize cyclic wifi task
@@ -97,6 +113,7 @@ void WifiManager::initWifi()
 
 void WifiManager::storeAPPoints()
 {
+    changeStatus(WifiManagerStatus::SCANNING_FINISHED);
     uint16_t ap_count = 0;
     uint16_t number = DEFAULT_SCAN_LIST_SIZE;
     
@@ -120,6 +137,7 @@ void WifiManager::storeAPPoints()
     }
    
 }
+
 
 void WifiManager::wifiEventHandlerEntry(
     void* arg,

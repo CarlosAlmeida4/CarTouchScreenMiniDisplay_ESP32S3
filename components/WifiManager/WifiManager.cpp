@@ -161,7 +161,7 @@ void WifiManager::wifiEventHandler(
                                int32_t event_id,
                                void* event_data)
 {
-    ESP_LOGI(TAG, "Event Base: %d", event_base);
+    //ESP_LOGI(TAG, "Event Base: %d", event_base);
     if (event_base == WIFI_EVENT) {
 
         switch (event_id) {

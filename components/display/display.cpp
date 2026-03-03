@@ -208,6 +208,10 @@ bool checkInclinometerFieldsVdl()
            lv_obj_ready(uic_Pitch);
 }
 
+/*
+    SCREEN Handlers
+*/
+
 void Display::updateUI()
 {
 
@@ -303,6 +307,10 @@ void Display::displayTask()
         vTaskDelay(pdMS_TO_TICKS(task_delay_ms));
     }
 }
+
+/*
+    LVGL functions
+*/
 
 bool Display::notifyLvglFlushReady(esp_lcd_panel_io_handle_t panel_io, esp_lcd_panel_io_event_data_t *edata, void *user_ctx) {
     lv_disp_drv_t *disp_driver = (lv_disp_drv_t *)user_ctx;
@@ -410,10 +418,18 @@ void Display::lvgl_unlock(void)
     xSemaphoreGive(lvgl_mux);
 }
 
+/*
+    Callbacks
+*/
+
 void Display::setSoftwareUpdateHandler(std::function<void(lv_event_t* )> callback)
 {
     m_SoftwareUpdateHandler = std::move(callback);
 }
+
+/*
+    Label properties settings
+*/
 
 void Display::invokeSWUpdate(lv_event_t* e)
 {
@@ -439,6 +455,10 @@ void Display::SWUpdateFeedback(const std::string& Feedback)
     }
     lvgl_unlock();  
 }
+
+/*
+    C Callbacks
+*/
 
 extern "C" void UI_RequestSWUpdate(lv_event_t * e)
 {

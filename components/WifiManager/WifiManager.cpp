@@ -2,7 +2,8 @@
 
 inline void WifiManager::changeStatus(WifiManagerStatus status)
 {
-    connectionStatus_ = status;
+    if(status)
+    {connectionStatus_ = status;}
 }
 
 

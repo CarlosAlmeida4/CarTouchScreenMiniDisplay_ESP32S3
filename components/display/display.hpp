@@ -50,9 +50,12 @@ class Display {
     
     void init();
     void setSoftwareUpdateHandler(std::function<void(lv_event_t* )> callback);
+    void setWifiConnectionHandler(std::function<void(const std::string&,const std::string&)>callback);
     
     void invokeSWUpdate(lv_event_t* e); //Needs to be public because its called from a external C function
+    void invokeWifiConnection(const std::string& ssid,const std::string& passwrd);
     void SWUpdateFeedback(const std::string& Feedback); //Updates the feedback message comming from OTA 
+    void WifiConnectionFeedback(const std::string& Feedback);//Updates the feedback message comming from WifiManager
     
     static Display* m_activeInstance;
     
@@ -122,6 +125,7 @@ private:
 
 
     std::function<void(lv_event_t* )> m_SoftwareUpdateHandler;
+    std::function<void(const std::string& ,const std::string& )> m_WifiConnectionHandler;
 };
 
 #endif // DISPLAY_HPP

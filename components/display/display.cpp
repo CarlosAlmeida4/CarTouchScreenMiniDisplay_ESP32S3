@@ -427,6 +427,11 @@ void Display::setSoftwareUpdateHandler(std::function<void(lv_event_t* )> callbac
     m_SoftwareUpdateHandler = std::move(callback);
 }
 
+void Display::setWifiConnectionHandler(std::function<void(const std::string&,const std::string&)>callback)
+{
+    m_WifiConnectionHandler = std::move(callback);
+}
+
 /*
     Label properties settings
 */
@@ -444,12 +449,42 @@ void Display::invokeSWUpdate(lv_event_t* e)
     }
 }
 
+void Display::invokeWifiConnection(const std::string& ssid,const std::string& passwrd)
+{
+    if(m_WifiConnectionHandler)
+    {
+        _ui_label_set_property(uic_SoftwareUpdateFeedback,_UI_LABEL_PROPERTY_TEXT,"Connecting");
+        m_WifiConnectionHandler(ssid,passwrd);
+    }
+    else
+    {
+        _ui_label_set_property(uic_SoftwareUpdateFeedback,_UI_LABEL_PROPERTY_TEXT,"Error Connecting");
+    }
+}
+
+/*
+    Feedback callers
+*/
+
 void Display::SWUpdateFeedback(const std::string& Feedback)
 {
     if(lvgl_lock(100))
     {
          if (lv_obj_ready(uic_SoftwareUpdateFeedback)) {
                 _ui_label_set_property(uic_SoftwareUpdateFeedback, 
+                    _UI_LABEL_PROPERTY_TEXT, Feedback.c_str());
+            }
+    }
+    lvgl_unlock();  
+}
+
+void Display::WifiConnectionFeedback(const std::string& Feedback)
+{
+    
+    if(lvgl_lock(100))
+    {
+        if (lv_obj_ready(uic_WifiConnectFeedback)) {
+                _ui_label_set_property(uic_WifiConnectFeedback, 
                     _UI_LABEL_PROPERTY_TEXT, Feedback.c_str());
             }
     }
@@ -471,8 +506,13 @@ extern "C" void UI_RequestSWUpdate(lv_event_t * e)
 // TODO: Implement callback
 extern "C" void UI_ConnectWifiCallback(lv_event_t * e)
 {
+    char ssidbuf[33] = {};
+    lv_dropdown_get_selected_str(ui_WifiAPList,ssidbuf,sizeof(ssidbuf));
+    const char *ssidpswrd = lv_textarea_get_text(uic_WifiPassword);
+    ESP_LOGI("Display", "SSID \t\t%s", ssidbuf);
+    ESP_LOGI("Display", "Password \t\t%s", ssidpswrd);
     if(Display::m_activeInstance)
     {
-        //Display::m_activeInstance->invokeSWUpdate(e);
+        //Display::m_activeInstance->invokeWifiConnection();
     }
 }

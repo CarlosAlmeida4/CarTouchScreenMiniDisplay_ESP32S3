@@ -21,8 +21,10 @@ class System {
 public:
 
     System(): RollPitchQueue(xQueueCreate(1,sizeof(RollPitch))),
-    WifiMgrQueue(xQueueCreate(1,sizeof(WifiManagerPipeline))),display(RollPitchQueue,WifiMgrQueue),
-    qmiItf(RollPitchQueue),WifiMgr(WifiMgrQueue) {}
+    WifiMgrQueue(xQueueCreate(1,sizeof(WifiManagerPipeline))),
+    display(RollPitchQueue,WifiMgrQueue),
+    qmiItf(RollPitchQueue),
+    WifiMgr(WifiMgrQueue) {}
 
     System(const System&) = delete;
     System& operator=(const System&) = delete;

@@ -109,7 +109,7 @@ void WifiManager::initWifi()
     //Initialize cyclic wifi task
     xTaskCreate(task_entry,"Wifi Manager",4096,this,2,NULL);
     //TODO: this needs to be called to set the wifi connection
-    //ESP_ERROR_CHECK(esp_wifi_set_config(WIFI_IF_STA, &wifi_config));
+    
 }
 
 void WifiManager::storeAPPoints()
@@ -139,6 +139,26 @@ void WifiManager::storeAPPoints()
    
 }
 
+void WifiManager::WifiConnect(std::string ssid, std::string passwrd)
+{
+    ESP_LOGI(TAG, "SSID \t\t%s", ssid.c_str());
+    ESP_LOGI(TAG, "Password \t\t%s", passwrd.c_str());
+
+    if(ssid.empty() || passwrd.empty())
+    {
+        //TODO! m_WifiConnectionCallback("Empty Field");
+        return;
+    }
+
+    size_t ssid_len = std::min(ssid.size(), sizeof(wifi_config.sta.ssid) - 1);
+    size_t pwd_len = std::min(passwrd.size(), sizeof(wifi_config.sta.password) - 1);
+    
+    std::memcpy(wifi_config.sta.ssid,ssid.data(),ssid_len);
+    std::memcpy(wifi_config.sta.password,passwrd.data(),pwd_len);
+    
+    ESP_ERROR_CHECK(esp_wifi_set_config(WIFI_IF_STA, &wifi_config));
+    esp_wifi_connect();
+}
 
 void WifiManager::wifiEventHandlerEntry(
     void* arg,
@@ -168,16 +188,19 @@ void WifiManager::wifiEventHandler(
 
         case WIFI_EVENT_STA_START:
             ESP_LOGI(TAG, "WiFi started");
+            
             //esp_wifi_connect();
             break;
 
         case WIFI_EVENT_STA_DISCONNECTED:
             ESP_LOGW(TAG, "Disconnected, retrying...");
-            //esp_wifi_connect();
+            //TODO! m_WifiConnectionCallback("Disconnected");
+            esp_wifi_connect();
             break;
 
         case WIFI_EVENT_SCAN_DONE:
             ESP_LOGI(TAG, "Wifi Scan Finished");
+            //TODO! m_WifiConnectionCallback("Scanning");
             storeAPPoints();
             break;
         default:

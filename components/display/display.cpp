@@ -454,7 +454,7 @@ void Display::invokeWifiConnection(const std::string& ssid,const std::string& pa
     if(m_WifiConnectionHandler)
     {
         _ui_label_set_property(uic_SoftwareUpdateFeedback,_UI_LABEL_PROPERTY_TEXT,"Connecting");
-        m_WifiConnectionHandler(ssid,passwrd);
+        m_WifiConnectionHandler(std::move(ssid),std::move(passwrd));
     }
     else
     {
@@ -513,6 +513,8 @@ extern "C" void UI_ConnectWifiCallback(lv_event_t * e)
     ESP_LOGI("Display", "Password \t\t%s", ssidpswrd);
     if(Display::m_activeInstance)
     {
-        //Display::m_activeInstance->invokeWifiConnection();
+        std::string ssid(ssidbuf);
+        std::string passwrd(ssidpswrd);
+        Display::m_activeInstance->invokeWifiConnection(ssid,passwrd);
     }
 }

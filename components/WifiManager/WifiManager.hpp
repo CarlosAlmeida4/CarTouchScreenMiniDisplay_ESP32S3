@@ -29,7 +29,9 @@ class WifiManager
     //WifiManager& operator=(const WifiManager&) = delete;
     ~WifiManager() = default;
     void initWifi();
+    void setWifiConnectionFeedback(std::function<void(const std::string&)> callback);
     
+    void WifiConnect(std::string ssid, std::string passwrd);
 
     private:
     
@@ -65,6 +67,8 @@ class WifiManager
     void storeAPPoints();
     void changeStatus(WifiManagerStatus status);
     static void task_entry(void* arg);
+
+    std::function<void(const std::string&)> m_WifiConnectionCallback;
 };
 
 

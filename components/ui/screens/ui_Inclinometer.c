@@ -5,7 +5,6 @@
 
 #include "../ui.h"
 
-lv_obj_t * uic_TemperatureReading;
 lv_obj_t * uic_RollText;
 lv_obj_t * uic_PitchText;
 lv_obj_t * uic_Pitch;
@@ -14,14 +13,11 @@ lv_obj_t * uic_RollA;
 lv_obj_t * ui_Inclinometer = NULL;
 lv_obj_t * ui_RollA = NULL;
 lv_obj_t * ui_RollB = NULL;
-lv_obj_t * ui_LateralScale = NULL;
 lv_obj_t * ui_Pitch = NULL;
 lv_obj_t * ui_PitchText = NULL;
 lv_obj_t * ui_RollText = NULL;
 lv_obj_t * ui_PitchName = NULL;
 lv_obj_t * ui_RollName = NULL;
-lv_obj_t * ui_TemperatureReading = NULL;
-lv_obj_t * ui_TemperatureName = NULL;
 // event funtions
 void ui_event_Inclinometer(lv_event_t * e)
 {
@@ -48,9 +44,9 @@ void ui_Inclinometer_screen_init(void)
     lv_slider_set_value(ui_RollA, 50, LV_ANIM_OFF);
     if(lv_slider_get_mode(ui_RollA) == LV_SLIDER_MODE_RANGE) lv_slider_set_left_value(ui_RollA, 0, LV_ANIM_OFF);
     lv_obj_set_width(ui_RollA, 171);
-    lv_obj_set_height(ui_RollA, 226);
-    lv_obj_set_x(ui_RollA, -163);
-    lv_obj_set_y(ui_RollA, -39);
+    lv_obj_set_height(ui_RollA, 318);
+    lv_obj_set_x(ui_RollA, -161);
+    lv_obj_set_y(ui_RollA, -5);
     lv_obj_set_align(ui_RollA, LV_ALIGN_CENTER);
     lv_obj_clear_flag(ui_RollA, LV_OBJ_FLAG_CLICKABLE);      /// Flags
     lv_obj_set_style_radius(ui_RollA, 4, LV_PART_MAIN | LV_STATE_DEFAULT);
@@ -75,9 +71,9 @@ void ui_Inclinometer_screen_init(void)
     lv_slider_set_value(ui_RollB, 50, LV_ANIM_OFF);
     if(lv_slider_get_mode(ui_RollB) == LV_SLIDER_MODE_RANGE) lv_slider_set_left_value(ui_RollB, 0, LV_ANIM_OFF);
     lv_obj_set_width(ui_RollB, 151);
-    lv_obj_set_height(ui_RollB, 226);
-    lv_obj_set_x(ui_RollB, 157);
-    lv_obj_set_y(ui_RollB, -39);
+    lv_obj_set_height(ui_RollB, 315);
+    lv_obj_set_x(ui_RollB, 156);
+    lv_obj_set_y(ui_RollB, -4);
     lv_obj_set_align(ui_RollB, LV_ALIGN_CENTER);
     lv_obj_clear_flag(ui_RollB, LV_OBJ_FLAG_CLICKABLE);      /// Flags
     lv_obj_set_style_radius(ui_RollB, 4, LV_PART_MAIN | LV_STATE_DEFAULT);
@@ -97,25 +93,14 @@ void ui_Inclinometer_screen_init(void)
     lv_obj_set_style_blend_mode(ui_RollB, LV_BLEND_MODE_NORMAL, LV_PART_KNOB | LV_STATE_DEFAULT);
     lv_obj_set_style_opa(ui_RollB, 0, LV_PART_KNOB | LV_STATE_DEFAULT);
 
-    ui_LateralScale = lv_img_create(ui_Inclinometer);
-    lv_img_set_src(ui_LateralScale, &ui_img_scale_revamp_png);
-    lv_obj_set_width(ui_LateralScale, LV_SIZE_CONTENT);   /// 1
-    lv_obj_set_height(ui_LateralScale, LV_SIZE_CONTENT);    /// 1
-    lv_obj_set_x(ui_LateralScale, 2);
-    lv_obj_set_y(ui_LateralScale, -2);
-    lv_obj_set_align(ui_LateralScale, LV_ALIGN_CENTER);
-    lv_obj_add_flag(ui_LateralScale, LV_OBJ_FLAG_ADV_HITTEST);     /// Flags
-    lv_obj_clear_flag(ui_LateralScale, LV_OBJ_FLAG_SCROLLABLE);      /// Flags
-    lv_img_set_zoom(ui_LateralScale, 700);
-
     ui_Pitch = lv_slider_create(ui_Inclinometer);
     lv_slider_set_range(ui_Pitch, 25, 100);
     lv_slider_set_value(ui_Pitch, 50, LV_ANIM_OFF);
     if(lv_slider_get_mode(ui_Pitch) == LV_SLIDER_MODE_RANGE) lv_slider_set_left_value(ui_Pitch, 0, LV_ANIM_OFF);
-    lv_obj_set_width(ui_Pitch, 118);
-    lv_obj_set_height(ui_Pitch, 226);
-    lv_obj_set_x(ui_Pitch, -1);
-    lv_obj_set_y(ui_Pitch, -38);
+    lv_obj_set_width(ui_Pitch, 154);
+    lv_obj_set_height(ui_Pitch, 318);
+    lv_obj_set_x(ui_Pitch, 3);
+    lv_obj_set_y(ui_Pitch, -5);
     lv_obj_set_align(ui_Pitch, LV_ALIGN_CENTER);
     lv_obj_clear_flag(ui_Pitch, LV_OBJ_FLAG_CLICKABLE);      /// Flags
     lv_obj_set_style_radius(ui_Pitch, 4, LV_PART_MAIN | LV_STATE_DEFAULT);
@@ -147,8 +132,8 @@ void ui_Inclinometer_screen_init(void)
     ui_RollText = lv_label_create(ui_Inclinometer);
     lv_obj_set_width(ui_RollText, LV_SIZE_CONTENT);   /// 1
     lv_obj_set_height(ui_RollText, LV_SIZE_CONTENT);    /// 1
-    lv_obj_set_x(ui_RollText, 27);
-    lv_obj_set_y(ui_RollText, 135);
+    lv_obj_set_x(ui_RollText, 28);
+    lv_obj_set_y(ui_RollText, -191);
     lv_obj_set_align(ui_RollText, LV_ALIGN_CENTER);
     lv_label_set_text(ui_RollText, "-45");
     lv_obj_set_style_text_font(ui_RollText, &ui_font_HeadingDegree, LV_PART_MAIN | LV_STATE_DEFAULT);
@@ -165,29 +150,11 @@ void ui_Inclinometer_screen_init(void)
     ui_RollName = lv_label_create(ui_Inclinometer);
     lv_obj_set_width(ui_RollName, LV_SIZE_CONTENT);   /// 1
     lv_obj_set_height(ui_RollName, LV_SIZE_CONTENT);    /// 1
-    lv_obj_set_x(ui_RollName, -45);
-    lv_obj_set_y(ui_RollName, 134);
+    lv_obj_set_x(ui_RollName, -56);
+    lv_obj_set_y(ui_RollName, -193);
     lv_obj_set_align(ui_RollName, LV_ALIGN_CENTER);
     lv_label_set_text(ui_RollName, "Roll");
     lv_obj_set_style_text_font(ui_RollName, &ui_font_SmallerEmblemaOne, LV_PART_MAIN | LV_STATE_DEFAULT);
-
-    ui_TemperatureReading = lv_label_create(ui_Inclinometer);
-    lv_obj_set_width(ui_TemperatureReading, LV_SIZE_CONTENT);   /// 1
-    lv_obj_set_height(ui_TemperatureReading, LV_SIZE_CONTENT);    /// 1
-    lv_obj_set_x(ui_TemperatureReading, -48);
-    lv_obj_set_y(ui_TemperatureReading, -188);
-    lv_obj_set_align(ui_TemperatureReading, LV_ALIGN_CENTER);
-    lv_label_set_text(ui_TemperatureReading, "25");
-    lv_obj_set_style_text_font(ui_TemperatureReading, &ui_font_HeadingDegree, LV_PART_MAIN | LV_STATE_DEFAULT);
-
-    ui_TemperatureName = lv_label_create(ui_Inclinometer);
-    lv_obj_set_width(ui_TemperatureName, LV_SIZE_CONTENT);   /// 1
-    lv_obj_set_height(ui_TemperatureName, LV_SIZE_CONTENT);    /// 1
-    lv_obj_set_x(ui_TemperatureName, 37);
-    lv_obj_set_y(ui_TemperatureName, -190);
-    lv_obj_set_align(ui_TemperatureName, LV_ALIGN_CENTER);
-    lv_label_set_text(ui_TemperatureName, "Celsius");
-    lv_obj_set_style_text_font(ui_TemperatureName, &ui_font_SmallerEmblemaOne, LV_PART_MAIN | LV_STATE_DEFAULT);
 
     lv_obj_add_event_cb(ui_Inclinometer, ui_event_Inclinometer, LV_EVENT_ALL, NULL);
     uic_RollA = ui_RollA;
@@ -195,7 +162,6 @@ void ui_Inclinometer_screen_init(void)
     uic_Pitch = ui_Pitch;
     uic_PitchText = ui_PitchText;
     uic_RollText = ui_RollText;
-    uic_TemperatureReading = ui_TemperatureReading;
 
 }
 
@@ -209,7 +175,6 @@ void ui_Inclinometer_screen_destroy(void)
     ui_RollA = NULL;
     uic_RollB = NULL;
     ui_RollB = NULL;
-    ui_LateralScale = NULL;
     uic_Pitch = NULL;
     ui_Pitch = NULL;
     uic_PitchText = NULL;
@@ -218,8 +183,5 @@ void ui_Inclinometer_screen_destroy(void)
     ui_RollText = NULL;
     ui_PitchName = NULL;
     ui_RollName = NULL;
-    uic_TemperatureReading = NULL;
-    ui_TemperatureReading = NULL;
-    ui_TemperatureName = NULL;
 
 }

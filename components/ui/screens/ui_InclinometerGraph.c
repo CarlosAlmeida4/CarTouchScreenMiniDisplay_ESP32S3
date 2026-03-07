@@ -5,12 +5,15 @@
 
 #include "../ui.h"
 
+lv_obj_t * uic_TemperatureReading;
 lv_obj_t * uic_PitchGraph;
 lv_obj_t * uic_RollGraph;
 lv_obj_t * uic_InclinometerGraph;
 lv_obj_t * ui_InclinometerGraph = NULL;
 lv_obj_t * ui_RollGraph = NULL;
 lv_obj_t * ui_PitchGraph = NULL;
+lv_obj_t * ui_TemperatureReading = NULL;
+lv_obj_t * ui_TemperatureName = NULL;
 // event funtions
 void ui_event_InclinometerGraph(lv_event_t * e)
 {
@@ -31,9 +34,9 @@ void ui_InclinometerGraph_screen_init(void)
 
     ui_RollGraph = lv_chart_create(ui_InclinometerGraph);
     lv_obj_set_width(ui_RollGraph, 245);
-    lv_obj_set_height(ui_RollGraph, 140);
-    lv_obj_set_x(ui_RollGraph, 3);
-    lv_obj_set_y(ui_RollGraph, -102);
+    lv_obj_set_height(ui_RollGraph, 93);
+    lv_obj_set_x(ui_RollGraph, 4);
+    lv_obj_set_y(ui_RollGraph, -81);
     lv_obj_set_align(ui_RollGraph, LV_ALIGN_CENTER);
     lv_chart_set_type(ui_RollGraph, LV_CHART_TYPE_LINE);
     lv_chart_set_axis_tick(ui_RollGraph, LV_CHART_AXIS_PRIMARY_X, 10, 5, 5, 2, true, 50);
@@ -59,10 +62,29 @@ void ui_InclinometerGraph_screen_init(void)
     static lv_coord_t ui_PitchGraph_series_1_array[] = { 0, 10, 20, 40, 80, 80, 40, 20, 10, 0 };
     lv_chart_set_ext_y_array(ui_PitchGraph, ui_PitchGraph_series_1, ui_PitchGraph_series_1_array);
 
+    ui_TemperatureReading = lv_label_create(ui_InclinometerGraph);
+    lv_obj_set_width(ui_TemperatureReading, LV_SIZE_CONTENT);   /// 1
+    lv_obj_set_height(ui_TemperatureReading, LV_SIZE_CONTENT);    /// 1
+    lv_obj_set_x(ui_TemperatureReading, -54);
+    lv_obj_set_y(ui_TemperatureReading, -180);
+    lv_obj_set_align(ui_TemperatureReading, LV_ALIGN_CENTER);
+    lv_label_set_text(ui_TemperatureReading, "25");
+    lv_obj_set_style_text_font(ui_TemperatureReading, &ui_font_HeadingDegree, LV_PART_MAIN | LV_STATE_DEFAULT);
+
+    ui_TemperatureName = lv_label_create(ui_InclinometerGraph);
+    lv_obj_set_width(ui_TemperatureName, LV_SIZE_CONTENT);   /// 1
+    lv_obj_set_height(ui_TemperatureName, LV_SIZE_CONTENT);    /// 1
+    lv_obj_set_x(ui_TemperatureName, 36);
+    lv_obj_set_y(ui_TemperatureName, -184);
+    lv_obj_set_align(ui_TemperatureName, LV_ALIGN_CENTER);
+    lv_label_set_text(ui_TemperatureName, "Celsius");
+    lv_obj_set_style_text_font(ui_TemperatureName, &ui_font_SmallerEmblemaOne, LV_PART_MAIN | LV_STATE_DEFAULT);
+
     lv_obj_add_event_cb(ui_InclinometerGraph, ui_event_InclinometerGraph, LV_EVENT_ALL, NULL);
     uic_InclinometerGraph = ui_InclinometerGraph;
     uic_RollGraph = ui_RollGraph;
     uic_PitchGraph = ui_PitchGraph;
+    uic_TemperatureReading = ui_TemperatureReading;
 
 }
 
@@ -77,5 +99,8 @@ void ui_InclinometerGraph_screen_destroy(void)
     ui_RollGraph = NULL;
     uic_PitchGraph = NULL;
     ui_PitchGraph = NULL;
+    uic_TemperatureReading = NULL;
+    ui_TemperatureReading = NULL;
+    ui_TemperatureName = NULL;
 
 }

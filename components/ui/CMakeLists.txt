@@ -9,7 +9,6 @@ idf_component_register(
 		"screens/ui_Inclinometer.c"
 		"screens/ui_Wifi.c"
 		"screens/ui_OTAUpdate.c"
-        "images/ui_img_scale_revamp_png.c"
         "fonts/ui_font_Nabla_Big.c"
         "fonts/ui_font_HeadingDegree.c"
         "fonts/ui_font_SmallerEmblemaOne.c"

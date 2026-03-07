@@ -54,7 +54,7 @@ public:
         display.setWifiConnectionHandler(
             [this](const std::string& ssid, const std::string& passwrd)
             {
-                WifiMgr.WifiConnect(ssid,passwrd);
+                WifiMgr.WifiConnectRequest(ssid,passwrd);
             }
         );
 
@@ -65,7 +65,7 @@ public:
             }
         );
 
-        
+
         WifiMgr.initWifi();
 
 

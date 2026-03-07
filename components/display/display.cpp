@@ -481,14 +481,12 @@ void Display::SWUpdateFeedback(const std::string& Feedback)
 void Display::WifiConnectionFeedback(const std::string& Feedback)
 {
     
-    if(lvgl_lock(100))
+    if (lv_obj_ready(uic_WifiConnectFeedback)) 
     {
-        if (lv_obj_ready(uic_WifiConnectFeedback)) {
-                _ui_label_set_property(uic_WifiConnectFeedback, 
-                    _UI_LABEL_PROPERTY_TEXT, Feedback.c_str());
-            }
+        _ui_label_set_property(uic_WifiConnectFeedback, 
+        _UI_LABEL_PROPERTY_TEXT, Feedback.c_str());
     }
-    lvgl_unlock();  
+
 }
 
 /*

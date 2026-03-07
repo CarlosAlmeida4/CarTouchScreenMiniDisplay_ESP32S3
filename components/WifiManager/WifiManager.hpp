@@ -31,7 +31,7 @@ class WifiManager
     void initWifi();
     void setWifiConnectionFeedback(std::function<void(const std::string&)> callback);
     
-    void WifiConnect(std::string ssid, std::string passwrd);
+    void WifiConnectRequest(std::string ssid, std::string passwrd);
 
     private:
     
@@ -66,6 +66,7 @@ class WifiManager
     void WifiManagerTask();
     void storeAPPoints();
     void changeStatus(WifiManagerStatus status);
+    void WifiConnect(const std::string ssid,const std::string pwd);
     static void task_entry(void* arg);
 
     std::function<void(const std::string&)> m_WifiConnectionCallback;

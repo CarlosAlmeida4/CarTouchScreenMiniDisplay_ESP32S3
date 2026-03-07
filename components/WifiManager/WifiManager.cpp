@@ -20,9 +20,11 @@ void WifiManager::WifiManagerTask()
     
     while(1)
     {
+        //ESP_LOGI(TAG, "Wifi Status %d", connectionStatus_);
         switch (connectionStatus_)
         {
             case WifiManagerStatus::CONNECTED:
+                if(m_WifiConnectionCallback)m_WifiConnectionCallback("Connected");
                 vTaskDelay(100 / portTICK_PERIOD_MS);
                 break;
 
@@ -48,13 +50,35 @@ void WifiManager::WifiManagerTask()
 
                         xQueueOverwrite(Queue_,&WifiMgrPip);
                     }
+                     
 
                 } 
+                //Check if any of the found networks is a known network  
+                for(auto currSSID:availableNetworks_)
+                {
+                    if(WIFI_AP.contains(currSSID))
+                    {
+                        ESP_LOGI(TAG, "Known SSID %s", currSSID.c_str());
+                        changeStatus(WifiManagerStatus::READY_TO_CONNECT);
+                        //Known currSSID, connect to it
+                        WifiConnect(currSSID,WIFI_AP[currSSID]);
+                    }
+                }
+    
+                if(connectionStatus_!=WifiManagerStatus::READY_TO_CONNECT || connectionStatus_!=WifiManagerStatus::CONNECTING)
+                {
+                    //If no known wifi was found, restart searching
+                    changeStatus(WifiManagerStatus::SCANNING_READY);
+                    
+                }
                 vTaskDelay(1000 / portTICK_PERIOD_MS);
                 break;
 
-            case WifiManagerStatus::SCANNING_READY: //TODO! : implement routine to jump to scanning ready
+            case WifiManagerStatus::SCANNING_READY:
+                changeStatus(WifiManagerStatus::SCANNING);
+                ESP_ERROR_CHECK(esp_wifi_scan_start(NULL,true));
                 vTaskDelay(1000 / portTICK_PERIOD_MS);
+                
                 break;
                 
             default:
@@ -113,18 +137,17 @@ void WifiManager::initWifi()
 
 void WifiManager::storeAPPoints()
 {
-    changeStatus(WifiManagerStatus::SCANNING_FINISHED);
     uint16_t ap_count = 0;
     uint16_t number = DEFAULT_SCAN_LIST_SIZE;
     
     ESP_LOGI(TAG, "Max AP number ap_info can hold = %u", number);
     ESP_ERROR_CHECK(esp_wifi_scan_get_ap_num(&ap_count));
     number = ap_count;
-
+    
     std::vector<wifi_ap_record_t> ap_info(ap_count);
     
     ESP_ERROR_CHECK(esp_wifi_scan_get_ap_records(&number, ap_info.data()));
-
+    
     std::lock_guard<std::mutex> lock(networkListMutex_);
     availableNetworks_.clear();
     ESP_LOGI(TAG, "Total APs scanned = %u, actual AP number ap_info holds = %u", ap_count, number);
@@ -132,13 +155,13 @@ void WifiManager::storeAPPoints()
         ESP_LOGI(TAG, "SSID \t\t%s", it->ssid);
         ESP_LOGI(TAG, "RSSI \t\t%d", it->rssi);
         const char* CurrSSID = reinterpret_cast<const char*>(it->ssid);
-
+        
         availableNetworks_.emplace_back(CurrSSID);
     }
-   
+    changeStatus(WifiManagerStatus::SCANNING_FINISHED);
 }
 
-void WifiManager::WifiConnect(std::string ssid, std::string passwrd)
+void WifiManager::WifiConnectRequest(std::string ssid, std::string passwrd)
 {
     ESP_LOGI(TAG, "SSID \t\t%s", ssid.c_str());
     ESP_LOGI(TAG, "Password \t\t%s", passwrd.c_str());
@@ -148,12 +171,22 @@ void WifiManager::WifiConnect(std::string ssid, std::string passwrd)
         if(m_WifiConnectionCallback)m_WifiConnectionCallback("Empty Field");
         return;
     }
+    
+    if(connectionStatus_ != WifiManagerStatus::CONNECTED) { WifiConnect(ssid,passwrd); }
+    
+    else
+    {
+        if(m_WifiConnectionCallback)m_WifiConnectionCallback("Connected");
+    }
+}
 
+void WifiManager::WifiConnect(const std::string ssid,const std::string pwd)
+{
     size_t ssid_len = std::min(ssid.size(), sizeof(wifi_config.sta.ssid) - 1);
-    size_t pwd_len = std::min(passwrd.size(), sizeof(wifi_config.sta.password) - 1);
+    size_t pwd_len = std::min(pwd.size(), sizeof(wifi_config.sta.password) - 1);
     
     std::memcpy(wifi_config.sta.ssid,ssid.data(),ssid_len);
-    std::memcpy(wifi_config.sta.password,passwrd.data(),pwd_len);
+    std::memcpy(wifi_config.sta.password,pwd.data(),pwd_len);
     
     ESP_ERROR_CHECK(esp_wifi_set_config(WIFI_IF_STA, &wifi_config));
     esp_wifi_connect();
@@ -207,7 +240,7 @@ void WifiManager::wifiEventHandler(
         case WIFI_EVENT_SCAN_DONE:
             ESP_LOGI(TAG, "Wifi Scan Finished");
             if(m_WifiConnectionCallback)m_WifiConnectionCallback("Scanning");
-            storeAPPoints();
+            if(connectionStatus_==WifiManagerStatus::SCANNING){storeAPPoints();};
             break;
         default:
             break;

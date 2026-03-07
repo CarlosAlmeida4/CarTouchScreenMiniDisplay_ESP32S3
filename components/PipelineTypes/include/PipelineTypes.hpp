@@ -7,7 +7,7 @@
 
 enum WifiManagerStatus {
     INIT,
-    READY,
+    READY_TO_CONNECT,
     DISCONNECTED,
     CONNECTING,
     CONNECTED,

@@ -32,9 +32,6 @@ extern "C" {
 
 extern lv_obj_t * ui____initial_actions0;
 
-// IMAGES AND IMAGE SETS
-LV_IMG_DECLARE(ui_img_scale_revamp_png);    // assets/Scale_revamp.png
-
 // FONTS
 LV_FONT_DECLARE(ui_font_Nabla_Big);
 LV_FONT_DECLARE(ui_font_HeadingDegree);

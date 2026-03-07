@@ -17,10 +17,13 @@ extern void ui_event_InclinometerGraph(lv_event_t * e);
 extern lv_obj_t * ui_InclinometerGraph;
 extern lv_obj_t * ui_RollGraph;
 extern lv_obj_t * ui_PitchGraph;
+extern lv_obj_t * ui_TemperatureReading;
+extern lv_obj_t * ui_TemperatureName;
 // CUSTOM VARIABLES
 extern lv_obj_t * uic_InclinometerGraph;
 extern lv_obj_t * uic_RollGraph;
 extern lv_obj_t * uic_PitchGraph;
+extern lv_obj_t * uic_TemperatureReading;
 
 #ifdef __cplusplus
 } /*extern "C"*/

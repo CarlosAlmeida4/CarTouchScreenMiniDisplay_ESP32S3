@@ -36,7 +36,7 @@ public:
         qmiItf.init();
         WifiMgr.initWifi();
 
-        /**
+                /**
          * Callback setting
          */
         display.setSoftwareUpdateHandler(
@@ -56,6 +56,13 @@ public:
             [this](const std::string& ssid, const std::string& passwrd)
             {
                 WifiMgr.WifiConnect(ssid,passwrd);
+            }
+        );
+
+        WifiMgr.setWifiConnectionFeedback(
+            [this](const std::string& msg)
+            {
+                display.WifiConnectionFeedback(msg);
             }
         );
 

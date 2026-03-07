@@ -468,14 +468,12 @@ void Display::invokeWifiConnection(const std::string& ssid,const std::string& pa
 
 void Display::SWUpdateFeedback(const std::string& Feedback)
 {
-    if(lvgl_lock(100))
-    {
-         if (lv_obj_ready(uic_SoftwareUpdateFeedback)) {
+
+    if (lv_obj_ready(uic_SoftwareUpdateFeedback)) {
                 _ui_label_set_property(uic_SoftwareUpdateFeedback, 
                     _UI_LABEL_PROPERTY_TEXT, Feedback.c_str());
-            }
     }
-    lvgl_unlock();  
+
 }
 
 void Display::WifiConnectionFeedback(const std::string& Feedback)

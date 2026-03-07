@@ -181,6 +181,22 @@ Key files:
 
 ---
 
+## OTA Example Usage
+
+From the folder on the dev PC run a small http server
+
+```bash
+python -m http.server 8000
+```
+
+Currently the target expect a static IP address, you can find it on the `OTAUpdater` source file
+
+----
+
+
+
+
+
 ## Contributing
 
 Contributions are welcome! Areas for enhancement:

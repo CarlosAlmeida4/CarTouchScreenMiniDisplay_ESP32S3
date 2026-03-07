@@ -80,3 +80,4 @@ SquarelineProject/backup
 components/OTAUpdater/Secrets.hpp
 Doku
 components/WifiManager/Secrets.hpp
+components/WifiManager/Secrets.cpp

@@ -1,6 +1,7 @@
 idf_component_register(
     SRCS
         "WifiManager.cpp"
+        "Secrets.cpp"
     INCLUDE_DIRS
         "."
     REQUIRES

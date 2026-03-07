@@ -108,7 +108,6 @@ void WifiManager::initWifi()
 
     //Initialize cyclic wifi task
     xTaskCreate(task_entry,"Wifi Manager",4096,this,2,NULL);
-    //TODO: this needs to be called to set the wifi connection
     
 }
 
@@ -146,7 +145,7 @@ void WifiManager::WifiConnect(std::string ssid, std::string passwrd)
 
     if(ssid.empty() || passwrd.empty())
     {
-        //TODO! m_WifiConnectionCallback("Empty Field");
+        if(m_WifiConnectionCallback)m_WifiConnectionCallback("Empty Field");
         return;
     }
 
@@ -158,6 +157,7 @@ void WifiManager::WifiConnect(std::string ssid, std::string passwrd)
     
     ESP_ERROR_CHECK(esp_wifi_set_config(WIFI_IF_STA, &wifi_config));
     esp_wifi_connect();
+    changeStatus(WifiManagerStatus::CONNECTING);
 }
 
 void WifiManager::wifiEventHandlerEntry(
@@ -176,6 +176,11 @@ void WifiManager::wifiEventHandlerEntry(
     }
 }
 
+void WifiManager::setWifiConnectionFeedback(std::function<void(const std::string&)> callback)
+{
+    m_WifiConnectionCallback = std::move(callback);
+}
+
 void WifiManager::wifiEventHandler(
                                esp_event_base_t event_base,
                                int32_t event_id,
@@ -188,19 +193,20 @@ void WifiManager::wifiEventHandler(
 
         case WIFI_EVENT_STA_START:
             ESP_LOGI(TAG, "WiFi started");
-            
+            //m_WifiConnectionCallback("Ready");
             //esp_wifi_connect();
             break;
 
         case WIFI_EVENT_STA_DISCONNECTED:
             ESP_LOGW(TAG, "Disconnected, retrying...");
-            //TODO! m_WifiConnectionCallback("Disconnected");
+            changeStatus(WifiManagerStatus::DISCONNECTED);
+            if(m_WifiConnectionCallback)m_WifiConnectionCallback("Disconnected");
             esp_wifi_connect();
             break;
 
         case WIFI_EVENT_SCAN_DONE:
             ESP_LOGI(TAG, "Wifi Scan Finished");
-            //TODO! m_WifiConnectionCallback("Scanning");
+            if(m_WifiConnectionCallback)m_WifiConnectionCallback("Scanning");
             storeAPPoints();
             break;
         default:
@@ -216,6 +222,6 @@ void WifiManager::wifiEventHandler(
         ESP_LOGI("NET", "IP: " IPSTR,
                  IP2STR(&event->ip_info.ip));
 
-        connectionStatus_ = WifiManagerStatus::READY;
+        changeStatus(WifiManagerStatus::CONNECTED);
     }
 }

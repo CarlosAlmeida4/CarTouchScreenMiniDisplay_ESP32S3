@@ -106,9 +106,6 @@ System orchestration managing display, sensors, and OTA updates via FreeRTOS que
 ### Hardware
 
 - **ESP32-S3** Waveshare board ([guide](https://www.waveshare.com/wiki/ESP32-S3-Touch-AMOLED-1.75))
-- SH8601 AMOLED display (466×466)
-- CST226/CST92xx touch controller
-- Optional: QMI8658 IMU sensor breakout
 
 ### Software
 
@@ -183,6 +180,22 @@ Key files:
 - [`components/System/System.hpp`](components/System/System.hpp) - System integration
 
 ---
+
+## OTA Example Usage
+
+From the folder on the dev PC run a small http server
+
+```bash
+python -m http.server 8000
+```
+
+Currently the target expect a static IP address, you can find it on the `OTAUpdater` source file
+
+----
+
+
+
+
 
 ## Contributing
 

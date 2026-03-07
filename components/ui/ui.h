@@ -20,8 +20,10 @@ extern "C" {
 
 ///////////////////// SCREENS ////////////////////
 
+#include "screens/ui_InclinometerGraph.h"
 #include "screens/ui_Inclinometer.h"
-#include "screens/ui_Options.h"
+#include "screens/ui_Wifi.h"
+#include "screens/ui_OTAUpdate.h"
 
 ///////////////////// VARIABLES ////////////////////
 

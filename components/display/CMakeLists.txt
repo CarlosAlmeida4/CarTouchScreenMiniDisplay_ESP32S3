@@ -11,6 +11,6 @@ idf_component_register(
         freertos
         log
         SensorLib
-        rollsandpitch
+        PipelineTypes
         esp_netif 
 )

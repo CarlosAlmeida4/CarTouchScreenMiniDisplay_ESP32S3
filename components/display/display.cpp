@@ -208,17 +208,32 @@ bool checkInclinometerFieldsVdl()
            lv_obj_ready(uic_Pitch);
 }
 
+/*
+    SCREEN Handlers
+*/
+
 void Display::updateUI()
 {
-    RollPitch RP{0,0};
 
     if (!ui_ready.load(std::memory_order_acquire)) {
         return;
     }
 
-    // Receive data WITHOUT LVGL lock
+    //ESP_LOGI("UI", "Current screen: %p", lv_scr_act());
+    //Update screen depdending on which is currently loaded
+    lv_obj_t* scr_act = lv_scr_act();
 
-    if (!xQueueReceive(Queue_, &RP, 0)) {
+    if(scr_act == ui_Inclinometer){InclinometerUI();}
+    if(scr_act == ui_Wifi){WifiUI();}
+
+}
+
+void Display::InclinometerUI()
+{
+    ESP_LOGD(DISPLAY_TAG, "Inclinometer UI is active");
+    RollPitch RP{0,0};
+
+    if (!xQueueReceive(RollPitchQueue_, &RP, 0)) {
         return;
     }
 
@@ -252,9 +267,24 @@ void Display::updateUI()
 
 }
 
+void Display::WifiUI()
+{
+    //ESP_LOGD(DISPLAY_TAG, "Wifi UI is active");
+    WifiManagerPipeline WifiMgrPip{};
+    static char CurrentAvailableNetworks[200];
+    
+    if (!xQueueReceive(WifiQueue_, &WifiMgrPip, 0)) {return;}
+
+    if(WifiManagerStatus::SCANNING_FINISHED == WifiMgrPip.WifiStatus)
+    {
+        lv_dropdown_set_options(ui_WifiAPList,WifiMgrPip.AvailableNetworks);
+    }
+    
+}
+
 void Display::displayTask() 
 {
-    ESP_LOGI(DISPLAY_TAG, "Starting LVGL task");
+    //ESP_LOGD(DISPLAY_TAG, "Starting LVGL task");
     uint32_t task_delay_ms = LVGL_TASK_MAX_DELAY_MS;
     while (1)
     {
@@ -277,6 +307,10 @@ void Display::displayTask()
         vTaskDelay(pdMS_TO_TICKS(task_delay_ms));
     }
 }
+
+/*
+    LVGL functions
+*/
 
 bool Display::notifyLvglFlushReady(esp_lcd_panel_io_handle_t panel_io, esp_lcd_panel_io_event_data_t *edata, void *user_ctx) {
     lv_disp_drv_t *disp_driver = (lv_disp_drv_t *)user_ctx;
@@ -384,10 +418,23 @@ void Display::lvgl_unlock(void)
     xSemaphoreGive(lvgl_mux);
 }
 
+/*
+    Callbacks
+*/
+
 void Display::setSoftwareUpdateHandler(std::function<void(lv_event_t* )> callback)
 {
     m_SoftwareUpdateHandler = std::move(callback);
 }
+
+void Display::setWifiConnectionHandler(std::function<void(const std::string&,const std::string&)>callback)
+{
+    m_WifiConnectionHandler = std::move(callback);
+}
+
+/*
+    Label properties settings
+*/
 
 void Display::invokeSWUpdate(lv_event_t* e)
 {
@@ -402,22 +449,68 @@ void Display::invokeSWUpdate(lv_event_t* e)
     }
 }
 
+void Display::invokeWifiConnection(const std::string& ssid,const std::string& passwrd)
+{
+    if(m_WifiConnectionHandler)
+    {
+        _ui_label_set_property(uic_SoftwareUpdateFeedback,_UI_LABEL_PROPERTY_TEXT,"Connecting");
+        m_WifiConnectionHandler(std::move(ssid),std::move(passwrd));
+    }
+    else
+    {
+        _ui_label_set_property(uic_SoftwareUpdateFeedback,_UI_LABEL_PROPERTY_TEXT,"Error Connecting");
+    }
+}
+
+/*
+    Feedback callers
+*/
+
 void Display::SWUpdateFeedback(const std::string& Feedback)
 {
-    if(lvgl_lock(100))
-    {
-         if (lv_obj_ready(uic_SoftwareUpdateFeedback)) {
+
+    if (lv_obj_ready(uic_SoftwareUpdateFeedback)) {
                 _ui_label_set_property(uic_SoftwareUpdateFeedback, 
                     _UI_LABEL_PROPERTY_TEXT, Feedback.c_str());
-            }
     }
-    lvgl_unlock();  
+
 }
+
+void Display::WifiConnectionFeedback(const std::string& Feedback)
+{
+    
+    if (lv_obj_ready(uic_WifiConnectFeedback)) 
+    {
+        _ui_label_set_property(uic_WifiConnectFeedback, 
+        _UI_LABEL_PROPERTY_TEXT, Feedback.c_str());
+    }
+
+}
+
+/*
+    C Callbacks
+*/
 
 extern "C" void UI_RequestSWUpdate(lv_event_t * e)
 {
     if(Display::m_activeInstance)
     {
         Display::m_activeInstance->invokeSWUpdate(e);
+    }
+}
+
+// TODO: Implement callback
+extern "C" void UI_ConnectWifiCallback(lv_event_t * e)
+{
+    char ssidbuf[33] = {};
+    lv_dropdown_get_selected_str(ui_WifiAPList,ssidbuf,sizeof(ssidbuf));
+    const char *ssidpswrd = lv_textarea_get_text(uic_WifiPassword);
+    ESP_LOGI("Display", "SSID \t\t%s", ssidbuf);
+    ESP_LOGI("Display", "Password \t\t%s", ssidpswrd);
+    if(Display::m_activeInstance)
+    {
+        std::string ssid(ssidbuf);
+        std::string passwrd(ssidpswrd);
+        Display::m_activeInstance->invokeWifiConnection(ssid,passwrd);
     }
 }

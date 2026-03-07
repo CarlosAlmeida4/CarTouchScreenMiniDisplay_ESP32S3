@@ -14,7 +14,7 @@
 #include "freertos/queue.h"
 #include "SensorLib.h"
 #include "SensorQMI8658.hpp"
-#include "rollsandpitch.hpp"
+#include "PipelineTypes.hpp"
 
 
 struct qmi8652Pins 

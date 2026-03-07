@@ -14,15 +14,17 @@
 #include "display.hpp"
 #include "qmi8658cInterface.hpp"
 #include "OTAUpdater.hpp"
-
+#include "WifiManager.hpp"
 
 
 class System {
 public:
 
     System(): RollPitchQueue(xQueueCreate(1,sizeof(RollPitch))),
-    display(RollPitchQueue),
-    qmiItf(RollPitchQueue) {}
+    WifiMgrQueue(xQueueCreate(1,sizeof(WifiManagerPipeline))),
+    display(RollPitchQueue,WifiMgrQueue),
+    qmiItf(RollPitchQueue),
+    WifiMgr(WifiMgrQueue) {}
 
     System(const System&) = delete;
     System& operator=(const System&) = delete;
@@ -32,8 +34,7 @@ public:
     {
         display.init();
         qmiItf.init();
-        OTAUpd.initWifi();
-
+        
         /**
          * Callback setting
          */
@@ -50,16 +51,35 @@ public:
             }
         );
 
+        display.setWifiConnectionHandler(
+            [this](const std::string& ssid, const std::string& passwrd)
+            {
+                WifiMgr.WifiConnectRequest(ssid,passwrd);
+            }
+        );
+
+        WifiMgr.setWifiConnectionFeedback(
+            [this](const std::string& msg)
+            {
+                display.WifiConnectionFeedback(msg);
+            }
+        );
+
+
+        WifiMgr.initWifi();
+
+
     } 
 
     
 
 private:
       
-    QueueHandle_t RollPitchQueue;
+    QueueHandle_t RollPitchQueue,WifiMgrQueue;
     Display display;
     qmi8658cInterface qmiItf;
     OTAUpdater OTAUpd;
+    WifiManager WifiMgr;
 
 };
 

@@ -21,7 +21,7 @@
 #include "SensorLib.h"
 #include "TouchDrvCST92xx.h"
 #include "esp_lcd_sh8601.h"
-#include "rollsandpitch.hpp"
+#include "PipelineTypes.hpp"
 #include <bits/stdc++.h>
 
 struct DisplayPins {
@@ -41,7 +41,8 @@ struct DisplayPins {
 
 class Display {
     public:
-    explicit Display(QueueHandle_t q): Queue_(q) {m_activeInstance = this;}
+    explicit Display(QueueHandle_t  RPQueue,QueueHandle_t  WifiQueue):  RollPitchQueue_(RPQueue),
+    WifiQueue_(WifiQueue) {m_activeInstance = this;}
     
     Display(const Display&) = delete;
     Display& operator=(const Display&) = delete;
@@ -49,15 +50,19 @@ class Display {
     
     void init();
     void setSoftwareUpdateHandler(std::function<void(lv_event_t* )> callback);
+    void setWifiConnectionHandler(std::function<void(const std::string&,const std::string&)>callback);
     
     void invokeSWUpdate(lv_event_t* e); //Needs to be public because its called from a external C function
+    void invokeWifiConnection(const std::string& ssid,const std::string& passwrd);
     void SWUpdateFeedback(const std::string& Feedback); //Updates the feedback message comming from OTA 
+    void WifiConnectionFeedback(const std::string& Feedback);//Updates the feedback message comming from WifiManager
     
     static Display* m_activeInstance;
     
 private:
         
-    QueueHandle_t Queue_;
+    QueueHandle_t RollPitchQueue_;
+    QueueHandle_t WifiQueue_;
     
     static TouchDrvCST92xx touch;
     
@@ -115,7 +120,12 @@ private:
     void updateUI();
     void displayTask();
     
+    void InclinometerUI();
+    void WifiUI();
+
+
     std::function<void(lv_event_t* )> m_SoftwareUpdateHandler;
+    std::function<void(const std::string& ,const std::string& )> m_WifiConnectionHandler;
 };
 
 #endif // DISPLAY_HPP

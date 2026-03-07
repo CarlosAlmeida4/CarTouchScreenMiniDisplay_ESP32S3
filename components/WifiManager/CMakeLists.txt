@@ -1,0 +1,18 @@
+idf_component_register(
+    SRCS
+        "WifiManager.cpp"
+        "Secrets.cpp"
+    INCLUDE_DIRS
+        "."
+    REQUIRES
+        log
+        driver
+        freertos 
+        app_update   
+        esp_netif 
+        mbedtls 
+        nvs_flash 
+        esp_wifi 
+        esp_psram     
+        PipelineTypes
+)

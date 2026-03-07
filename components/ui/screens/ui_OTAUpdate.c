@@ -7,19 +7,20 @@
 
 lv_obj_t * uic_IPString;
 lv_obj_t * uic_SoftwareUpdateFeedback;
-lv_obj_t * ui_Options = NULL;
+lv_obj_t * uic_OTAUpdate;
+lv_obj_t * ui_OTAUpdate = NULL;
 lv_obj_t * ui_SoftwarUpdate = NULL;
 lv_obj_t * ui_SoftwareUpdateFeedback = NULL;
 lv_obj_t * ui_IPLabel = NULL;
 lv_obj_t * ui_IPString = NULL;
 // event funtions
-void ui_event_Options(lv_event_t * e)
+void ui_event_OTAUpdate(lv_event_t * e)
 {
     lv_event_code_t event_code = lv_event_get_code(e);
 
-    if(event_code == LV_EVENT_GESTURE &&  lv_indev_get_gesture_dir(lv_indev_get_act()) == LV_DIR_LEFT) {
+    if(event_code == LV_EVENT_GESTURE &&  lv_indev_get_gesture_dir(lv_indev_get_act()) == LV_DIR_RIGHT) {
         lv_indev_wait_release(lv_indev_get_act());
-        _ui_screen_change(&ui_Inclinometer, LV_SCR_LOAD_ANIM_FADE_ON, 500, 0, &ui_Inclinometer_screen_init);
+        _ui_screen_change(&ui_Wifi, LV_SCR_LOAD_ANIM_MOVE_RIGHT, 500, 0, &ui_Wifi_screen_init);
     }
 }
 
@@ -34,18 +35,18 @@ void ui_event_SoftwarUpdate_SoftwarUpdate(lv_event_t * e)
 
 // build funtions
 
-void ui_Options_screen_init(void)
+void ui_OTAUpdate_screen_init(void)
 {
-    ui_Options = lv_obj_create(NULL);
-    lv_obj_clear_flag(ui_Options, LV_OBJ_FLAG_SCROLLABLE);      /// Flags
+    ui_OTAUpdate = lv_obj_create(NULL);
+    lv_obj_clear_flag(ui_OTAUpdate, LV_OBJ_FLAG_SCROLLABLE);      /// Flags
 
-    ui_SoftwarUpdate = ui_SoftwarUpdate_create(ui_Options);
+    ui_SoftwarUpdate = ui_SoftwarUpdate_create(ui_OTAUpdate);
     lv_obj_set_width(ui_SoftwarUpdate, 466);
     lv_obj_set_height(ui_SoftwarUpdate, 186);
     lv_obj_set_x(ui_SoftwarUpdate, 1);
     lv_obj_set_y(ui_SoftwarUpdate, 139);
 
-    ui_SoftwareUpdateFeedback = lv_label_create(ui_Options);
+    ui_SoftwareUpdateFeedback = lv_label_create(ui_OTAUpdate);
     lv_obj_set_width(ui_SoftwareUpdateFeedback, LV_SIZE_CONTENT);   /// 1
     lv_obj_set_height(ui_SoftwareUpdateFeedback, LV_SIZE_CONTENT);    /// 1
     lv_obj_set_x(ui_SoftwareUpdateFeedback, 2);
@@ -54,7 +55,7 @@ void ui_Options_screen_init(void)
     lv_label_set_text(ui_SoftwareUpdateFeedback, "Update Software");
     lv_obj_set_style_text_font(ui_SoftwareUpdateFeedback, &ui_font_HeadingDegree, LV_PART_MAIN | LV_STATE_DEFAULT);
 
-    ui_IPLabel = lv_label_create(ui_Options);
+    ui_IPLabel = lv_label_create(ui_OTAUpdate);
     lv_obj_set_width(ui_IPLabel, LV_SIZE_CONTENT);   /// 1
     lv_obj_set_height(ui_IPLabel, LV_SIZE_CONTENT);    /// 1
     lv_obj_set_x(ui_IPLabel, 0);
@@ -63,7 +64,7 @@ void ui_Options_screen_init(void)
     lv_label_set_text(ui_IPLabel, "IP:");
     lv_obj_set_style_text_font(ui_IPLabel, &ui_font_HeadingDegree, LV_PART_MAIN | LV_STATE_DEFAULT);
 
-    ui_IPString = lv_label_create(ui_Options);
+    ui_IPString = lv_label_create(ui_OTAUpdate);
     lv_obj_set_width(ui_IPString, LV_SIZE_CONTENT);   /// 1
     lv_obj_set_height(ui_IPString, LV_SIZE_CONTENT);    /// 1
     lv_obj_set_x(ui_IPString, 6);
@@ -73,18 +74,20 @@ void ui_Options_screen_init(void)
     lv_obj_set_style_text_font(ui_IPString, &ui_font_HeadingDegree, LV_PART_MAIN | LV_STATE_DEFAULT);
 
     lv_obj_add_event_cb(ui_SoftwarUpdate, ui_event_SoftwarUpdate_SoftwarUpdate, LV_EVENT_ALL, NULL);
-    lv_obj_add_event_cb(ui_Options, ui_event_Options, LV_EVENT_ALL, NULL);
+    lv_obj_add_event_cb(ui_OTAUpdate, ui_event_OTAUpdate, LV_EVENT_ALL, NULL);
+    uic_OTAUpdate = ui_OTAUpdate;
     uic_SoftwareUpdateFeedback = ui_SoftwareUpdateFeedback;
     uic_IPString = ui_IPString;
 
 }
 
-void ui_Options_screen_destroy(void)
+void ui_OTAUpdate_screen_destroy(void)
 {
-    if(ui_Options) lv_obj_del(ui_Options);
+    if(ui_OTAUpdate) lv_obj_del(ui_OTAUpdate);
 
     // NULL screen variables
-    ui_Options = NULL;
+    uic_OTAUpdate = NULL;
+    ui_OTAUpdate = NULL;
     ui_SoftwarUpdate = NULL;
     uic_SoftwareUpdateFeedback = NULL;
     ui_SoftwareUpdateFeedback = NULL;

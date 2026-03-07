@@ -3,24 +3,25 @@
 // LVGL version: 8.3.11
 // Project name: CarTouchScreenMiniDisplay
 
-#ifndef UI_OPTIONS_H
-#define UI_OPTIONS_H
+#ifndef UI_OTAUPDATE_H
+#define UI_OTAUPDATE_H
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-// SCREEN: ui_Options
-extern void ui_Options_screen_init(void);
-extern void ui_Options_screen_destroy(void);
-extern void ui_event_Options(lv_event_t * e);
-extern lv_obj_t * ui_Options;
+// SCREEN: ui_OTAUpdate
+extern void ui_OTAUpdate_screen_init(void);
+extern void ui_OTAUpdate_screen_destroy(void);
+extern void ui_event_OTAUpdate(lv_event_t * e);
+extern lv_obj_t * ui_OTAUpdate;
 extern void ui_event_SoftwarUpdate_SoftwarUpdate(lv_event_t * e);
 extern lv_obj_t * ui_SoftwarUpdate;
 extern lv_obj_t * ui_SoftwareUpdateFeedback;
 extern lv_obj_t * ui_IPLabel;
 extern lv_obj_t * ui_IPString;
 // CUSTOM VARIABLES
+extern lv_obj_t * uic_OTAUpdate;
 extern lv_obj_t * uic_SoftwareUpdateFeedback;
 extern lv_obj_t * uic_IPString;
 

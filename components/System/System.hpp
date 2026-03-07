@@ -34,9 +34,8 @@ public:
     {
         display.init();
         qmiItf.init();
-        WifiMgr.initWifi();
-
-                /**
+        
+        /**
          * Callback setting
          */
         display.setSoftwareUpdateHandler(
@@ -65,6 +64,10 @@ public:
                 display.WifiConnectionFeedback(msg);
             }
         );
+
+        
+        WifiMgr.initWifi();
+
 
     } 
 

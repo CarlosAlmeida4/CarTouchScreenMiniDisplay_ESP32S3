@@ -30,6 +30,7 @@ class WifiManager
     ~WifiManager() = default;
     void initWifi();
     void setWifiConnectionFeedback(std::function<void(const std::string&)> callback);
+    void setConnectionStateHandler(std::function<void(bool)> callback);
     
     void WifiConnectRequest(std::string ssid, std::string passwrd);
 
@@ -70,6 +71,7 @@ class WifiManager
     static void task_entry(void* arg);
 
     std::function<void(const std::string&)> m_WifiConnectionCallback;
+    std::function<void(bool)> m_ConnectionStateCallback;
 };
 
 

@@ -1,0 +1,13 @@
+idf_component_register(
+    SRCS
+        "Diagnostics.cpp"
+    INCLUDE_DIRS
+        "."
+    REQUIRES
+        esp_http_server
+        esp_wifi
+        esp_timer
+        esp_system
+        esp_partition
+        log
+)

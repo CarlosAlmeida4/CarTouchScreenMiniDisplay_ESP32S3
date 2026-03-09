@@ -15,6 +15,7 @@
 #include "qmi8658cInterface.hpp"
 #include "OTAUpdater.hpp"
 #include "WifiManager.hpp"
+#include "Diagnostics.hpp"
 
 
 class System {
@@ -32,6 +33,9 @@ public:
     
     void start()
     {
+        diagnostics.init(500, 220);
+        diagnostics.installLogSink();
+
         display.init();
         qmiItf.init();
         
@@ -65,6 +69,17 @@ public:
             }
         );
 
+        WifiMgr.setConnectionStateHandler(
+            [this](bool connected)
+            {
+                if (connected) {
+                    diagnostics.onWifiConnected();
+                } else {
+                    diagnostics.onWifiDisconnected();
+                }
+            }
+        );
+
 
         WifiMgr.initWifi();
 
@@ -80,6 +95,7 @@ private:
     qmi8658cInterface qmiItf;
     OTAUpdater OTAUpd;
     WifiManager WifiMgr;
+    DiagnosticsService diagnostics;
 
 };
 

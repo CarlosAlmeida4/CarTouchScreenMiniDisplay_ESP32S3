@@ -65,7 +65,8 @@ void WifiManager::WifiManagerTask()
                     }
                 }
     
-                if(connectionStatus_!=WifiManagerStatus::READY_TO_CONNECT || connectionStatus_!=WifiManagerStatus::CONNECTING)
+                if(connectionStatus_!=WifiManagerStatus::READY_TO_CONNECT || connectionStatus_!=WifiManagerStatus::CONNECTING 
+                    || connectionStatus_!=WifiManagerStatus::CONNECTED)
                 {
                     //If no known wifi was found, restart searching
                     changeStatus(WifiManagerStatus::SCANNING_READY);

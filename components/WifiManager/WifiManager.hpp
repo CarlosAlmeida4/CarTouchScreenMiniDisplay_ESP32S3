@@ -14,6 +14,7 @@
 #include <functional>
 #include <iostream>
 #include <cstddef>
+#include <atomic>
 
 #include "PipelineTypes.hpp"
 
@@ -30,6 +31,7 @@ class WifiManager
     ~WifiManager() = default;
     void initWifi();
     void setWifiConnectionFeedback(std::function<void(const std::string&)> callback);
+    void setConnectionStateHandler(std::function<void(bool)> callback);
     
     void WifiConnectRequest(std::string ssid, std::string passwrd);
 
@@ -67,9 +69,12 @@ class WifiManager
     void storeAPPoints();
     void changeStatus(WifiManagerStatus status);
     void WifiConnect(const std::string ssid,const std::string pwd);
+    void setPendingConnectionState(bool connected);
     static void task_entry(void* arg);
 
     std::function<void(const std::string&)> m_WifiConnectionCallback;
+    std::function<void(bool)> m_ConnectionStateCallback;
+    std::atomic<int> pendingConnectionState_ {-1};
 };
 
 

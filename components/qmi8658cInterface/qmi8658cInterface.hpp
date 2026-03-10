@@ -47,6 +47,7 @@ private:
     static constexpr uint8_t I2C_MASTER_TX_BUF_DISABLE = 0; /*!< I2C master doesn't need buffer */
     static constexpr uint8_t I2C_MASTER_RX_BUF_DISABLE = 0; /*!< I2C master doesn't need buffer */
     static constexpr unsigned int I2C_MASTER_TIMEOUT_MS = 1000;
+    static constexpr unsigned int QMI_TASK_TIME_MS = 40;
 
     static SensorQMI8658 qmi;
     static RollPitch RP;    

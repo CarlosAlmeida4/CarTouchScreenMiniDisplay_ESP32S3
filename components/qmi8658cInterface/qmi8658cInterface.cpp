@@ -27,7 +27,7 @@ void qmi8658cInterface::setup_sensor()
     // Configure accelerometer
     qmi.configAccelerometer(
         SensorQMI8658::ACC_RANGE_4G,
-        SensorQMI8658::ACC_ODR_1000Hz,
+        SensorQMI8658::ACC_ODR_31_25Hz,
         SensorQMI8658::LPF_MODE_3,
         true
     );
@@ -61,7 +61,7 @@ void qmi8658cInterface::read_sensor_data() {
         } else {
             ESP_LOGW(QMI8658C_TAG, "Data not ready yet");
         }
-        vTaskDelay(10 / portTICK_PERIOD_MS);
+        vTaskDelay(QMI_TASK_TIME_MS / portTICK_PERIOD_MS);
     }
 }
 

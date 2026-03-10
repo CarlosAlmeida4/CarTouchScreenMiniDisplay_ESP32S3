@@ -30,7 +30,6 @@ void WifiManager::WifiManagerTask()
         {
             case WifiManagerStatus::CONNECTED:
                 if(m_WifiConnectionCallback)m_WifiConnectionCallback("Connected");
-                vTaskDelay(100 / portTICK_PERIOD_MS);
                 break;
 
             case WifiManagerStatus::SCANNING_FINISHED:
@@ -67,30 +66,46 @@ void WifiManager::WifiManagerTask()
                         changeStatus(WifiManagerStatus::READY_TO_CONNECT);
                         //Known currSSID, connect to it
                         WifiConnect(currSSID,WIFI_AP[currSSID]);
+                        break;
                     }
                 }
     
-                if(connectionStatus_!=WifiManagerStatus::READY_TO_CONNECT || connectionStatus_!=WifiManagerStatus::CONNECTING 
-                    || connectionStatus_!=WifiManagerStatus::CONNECTED)
+                if(connectionStatus_!=WifiManagerStatus::READY_TO_CONNECT && connectionStatus_!=WifiManagerStatus::CONNECTING 
+                    && connectionStatus_!=WifiManagerStatus::CONNECTED)
                 {
                     //If no known wifi was found, restart searching
                     changeStatus(WifiManagerStatus::SCANNING_READY);
                     
                 }
-                vTaskDelay(1000 / portTICK_PERIOD_MS);
+                
                 break;
 
             case WifiManagerStatus::SCANNING_READY:
-                changeStatus(WifiManagerStatus::SCANNING);
-                ESP_ERROR_CHECK(esp_wifi_scan_start(NULL,true));
-                vTaskDelay(1000 / portTICK_PERIOD_MS);
-                
+                {
+                    changeStatus(WifiManagerStatus::SCANNING);
+                    esp_err_t errScan = esp_wifi_scan_start(NULL, true);
+                    if (errScan == ESP_ERR_WIFI_STATE)
+                    {
+                        // If auto-connect is already in progress, do not abort.
+                        ESP_LOGW(TAG, "Initial scan skipped: STA is connecting");
+                        changeStatus(WifiManagerStatus::SCANNING_READY);
+                    }
+                    else
+                    {
+                        ESP_ERROR_CHECK(errScan);
+                    }
+                    }
                 break;
-                
+            case INIT:
+            case READY_TO_CONNECT:
+            case DISCONNECTED:
+            case CONNECTING:
+            case SCANNING:
+            case CONNECTION_FAILED:
             default:
                 break;
         }
-
+        vTaskDelay(1000 / portTICK_PERIOD_MS);
 
     }
 
@@ -188,11 +203,13 @@ void WifiManager::WifiConnectRequest(std::string ssid, std::string passwrd)
 
 void WifiManager::WifiConnect(const std::string ssid,const std::string pwd)
 {
+    memset(&wifi_config,0,sizeof(wifi_config));
+
     size_t ssid_len = std::min(ssid.size(), sizeof(wifi_config.sta.ssid) - 1);
     size_t pwd_len = std::min(pwd.size(), sizeof(wifi_config.sta.password) - 1);
     
-    std::memcpy(wifi_config.sta.ssid,ssid.data(),ssid_len);
-    std::memcpy(wifi_config.sta.password,pwd.data(),pwd_len);
+    std::memcpy(wifi_config.sta.ssid,ssid.c_str(),ssid_len);
+    std::memcpy(wifi_config.sta.password,pwd.c_str(),pwd_len);
     
     ESP_ERROR_CHECK(esp_wifi_set_config(WIFI_IF_STA, &wifi_config));
     esp_wifi_connect();

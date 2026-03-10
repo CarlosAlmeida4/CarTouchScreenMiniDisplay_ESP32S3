@@ -20,6 +20,11 @@ void WifiManager::WifiManagerTask()
     
     while(1)
     {
+        int pendingState = pendingConnectionState_.exchange(-1);
+        if (pendingState != -1 && m_ConnectionStateCallback) {
+            m_ConnectionStateCallback(pendingState == 1);
+        }
+
         //ESP_LOGI(TAG, "Wifi Status %d", connectionStatus_);
         switch (connectionStatus_)
         {
@@ -220,6 +225,11 @@ void WifiManager::setConnectionStateHandler(std::function<void(bool)> callback)
     m_ConnectionStateCallback = std::move(callback);
 }
 
+void WifiManager::setPendingConnectionState(bool connected)
+{
+    pendingConnectionState_.store(connected ? 1 : 0);
+}
+
 void WifiManager::wifiEventHandler(
                                esp_event_base_t event_base,
                                int32_t event_id,
@@ -240,7 +250,7 @@ void WifiManager::wifiEventHandler(
             ESP_LOGW(TAG, "Disconnected, retrying...");
             changeStatus(WifiManagerStatus::DISCONNECTED);
             if(m_WifiConnectionCallback)m_WifiConnectionCallback("Disconnected");
-            if(m_ConnectionStateCallback)m_ConnectionStateCallback(false);
+            setPendingConnectionState(false);
             esp_wifi_connect();
             break;
 
@@ -263,6 +273,6 @@ void WifiManager::wifiEventHandler(
                  IP2STR(&event->ip_info.ip));
 
         changeStatus(WifiManagerStatus::CONNECTED);
-        if(m_ConnectionStateCallback)m_ConnectionStateCallback(true);
+        setPendingConnectionState(true);
     }
 }

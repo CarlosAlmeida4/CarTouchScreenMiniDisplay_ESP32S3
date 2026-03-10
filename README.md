@@ -191,11 +191,21 @@ python -m http.server 8000
 
 Currently the target expect a static IP address, you can find it on the `OTAUpdater` source file
 
+## Remote Debugging Script
+
+```bash
+python tools/poll_diag_logs.py --host xxx.xxx.xx.xx
+
+
+python tools/poll_diag_logs.py --host xxx.xxx.xx.xx --output logs.txt
+python tools/poll_diag_logs.py --host xxx.xxx.xx.xx --token your-token
+python tools/poll_diag_logs.py --host xxx.xxx.xx.xx --cursor-file .diag.cursor --limit 120
+python tools/poll_diag_logs.py --host xxx.xxx.xx.xx --once
+```
+
+
+
 ----
-
-
-
-
 
 ## Contributing
 

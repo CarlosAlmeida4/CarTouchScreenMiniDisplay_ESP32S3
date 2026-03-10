@@ -91,7 +91,7 @@
 
 #define SENSORLIB_I2C_MASTER_TX_BUF_DISABLE   0                          /*!< I2C master doesn't need buffer */
 #define SENSORLIB_I2C_MASTER_RX_BUF_DISABLE   0                          /*!< I2C master doesn't need buffer */
-#define SENSORLIB_I2C_MASTER_TIMEOUT_MS       1000
+#define SENSORLIB_I2C_MASTER_TIMEOUT_MS       100
 #define SENSORLIB_I2C_MASTER_SEEED            400000
 
 #endif

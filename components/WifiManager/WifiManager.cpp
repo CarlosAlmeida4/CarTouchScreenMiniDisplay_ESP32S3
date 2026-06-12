@@ -35,6 +35,9 @@ void WifiManager::WifiManagerTask()
             case WifiManagerStatus::SCANNING_FINISHED:
                 {            
                     std::lock_guard<std::mutex> lock(networkListMutex_);
+                    // Safe to log here - this runs in WiFi Manager task with plenty of stack
+                    ESP_LOGI(TAG, "Wifi Scan found %u networks", availableNetworks_.size());
+                    
                     if(!availableNetworks_.empty())
                     {
                         std::string dropdownDisplay;
@@ -171,8 +174,8 @@ void WifiManager::storeAPPoints()
     std::lock_guard<std::mutex> lock(networkListMutex_);
     availableNetworks_.clear();
     
-    // Minimal logging to prevent stack overflow in event handler context
-    ESP_LOGI(TAG, "Wifi Scan: found %u APs", number);
+    // NO LOGGING IN EVENT HANDLER CONTEXT - causes stack overflow in sys_evt task
+    // Log from main WiFi task instead
     
     for (auto it = ap_info.begin();it!=ap_info.end();++it) {
         const char* CurrSSID = reinterpret_cast<const char*>(it->ssid);

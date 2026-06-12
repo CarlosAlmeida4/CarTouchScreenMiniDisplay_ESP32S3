@@ -161,7 +161,6 @@ void WifiManager::storeAPPoints()
     uint16_t ap_count = 0;
     uint16_t number = DEFAULT_SCAN_LIST_SIZE;
     
-    ESP_LOGI(TAG, "Max AP number ap_info can hold = %u", number);
     ESP_ERROR_CHECK(esp_wifi_scan_get_ap_num(&ap_count));
     number = ap_count;
     
@@ -171,14 +170,15 @@ void WifiManager::storeAPPoints()
     
     std::lock_guard<std::mutex> lock(networkListMutex_);
     availableNetworks_.clear();
-    ESP_LOGI(TAG, "Total APs scanned = %u, actual AP number ap_info holds = %u", ap_count, number);
+    
+    // Minimal logging to prevent stack overflow in event handler context
+    ESP_LOGI(TAG, "Wifi Scan: found %u APs", number);
+    
     for (auto it = ap_info.begin();it!=ap_info.end();++it) {
-        ESP_LOGI(TAG, "SSID \t\t%s", it->ssid);
-        ESP_LOGI(TAG, "RSSI \t\t%d", it->rssi);
         const char* CurrSSID = reinterpret_cast<const char*>(it->ssid);
-        
         availableNetworks_.emplace_back(CurrSSID);
     }
+    
     changeStatus(WifiManagerStatus::SCANNING_FINISHED);
 }
 
@@ -264,7 +264,8 @@ void WifiManager::wifiEventHandler(
             break;
 
         case WIFI_EVENT_STA_DISCONNECTED:
-            ESP_LOGW(TAG, "Disconnected, retrying...");
+            // Use lighter logging - avoid format strings in event context
+            ESP_LOGW(TAG, "WiFi disconnected");
             changeStatus(WifiManagerStatus::DISCONNECTED);
             if(m_WifiConnectionCallback)m_WifiConnectionCallback("Disconnected");
             setPendingConnectionState(false);
@@ -272,7 +273,7 @@ void WifiManager::wifiEventHandler(
             break;
 
         case WIFI_EVENT_SCAN_DONE:
-            ESP_LOGI(TAG, "Wifi Scan Finished");
+            // Minimal logging before potentially heavy operation
             if(m_WifiConnectionCallback)m_WifiConnectionCallback("Scanning");
             if(connectionStatus_==WifiManagerStatus::SCANNING){storeAPPoints();};
             break;

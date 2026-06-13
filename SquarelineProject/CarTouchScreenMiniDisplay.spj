@@ -3413,7 +3413,7 @@
               {
                 "nid": 1050,
                 "strtype": "IMAGE/Scale",
-                "integer": 256,
+                "integer": 200,
                 "InheritedType": 6
               },
               {
@@ -3577,6 +3577,33 @@
                           255
                         ],
                         "InheritedType": 7
+                      },
+                      {
+                        "nid": 10530,
+                        "flags": 256,
+                        "strtype": "_style/Bg_gradiens_Color",
+                        "intarray": [
+                          255,
+                          255,
+                          255
+                        ],
+                        "InheritedType": 7
+                      },
+                      {
+                        "nid": 10540,
+                        "flags": 16,
+                        "strtype": "_style/Bg_gradient_params",
+                        "intarray": [
+                          70,
+                          170
+                        ],
+                        "InheritedType": 7
+                      },
+                      {
+                        "nid": 10550,
+                        "strtype": "_style/Gradient direction",
+                        "strval": "HOR",
+                        "InheritedType": 3
                       }
                     ],
                     "InheritedType": 1
@@ -6321,7 +6348,7 @@
     "separate_screen_save": false,
     "hierarchy_state_save": false,
     "reverse_event_order": false,
-    "backup_cnt": 60,
+    "backup_cnt": 62,
     "autosave_cnt": 0,
     "group_color_cnt": 0,
     "imagebytearrayprefix": "",

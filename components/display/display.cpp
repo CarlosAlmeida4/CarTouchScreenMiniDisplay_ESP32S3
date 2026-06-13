@@ -223,7 +223,7 @@ void Display::updateUI()
     //Update screen depdending on which is currently loaded
     lv_obj_t* scr_act = lv_scr_act();
 
-    if(scr_act == ui_Inclinometer){InclinometerUI();}
+    if(scr_act == ui_Inclinometer || scr_act == ui_InclinometerNew){InclinometerUI();}
     if(scr_act == ui_Wifi){WifiUI();}
 
 }
@@ -266,8 +266,9 @@ void Display::InclinometerUI()
     lv_slider_set_value(uic_Pitch,(int32_t)normalize(RP.pitch), LV_ANIM_ON);
 
     lv_slider_set_value(uic_PitchNew,(int32_t)normalize(RP.pitch), LV_ANIM_ON);
+    
 
-    lv_img_set_angle(uic_PajeroRoll, static_cast<int32_t>(RP.roll));
+    lv_img_set_angle(uic_PajeroRoll, static_cast<int32_t>((RP.roll)*10));
 
 }
 

@@ -34,6 +34,7 @@ extern "C" {
 extern lv_obj_t * ui____initial_actions0;
 
 // IMAGES AND IMAGE SETS
+LV_IMG_DECLARE(ui_img_rollpajero2_png);    // assets/RollPajero2.png
 LV_IMG_DECLARE(ui_img_540754542);    // assets/mitsubishi-pajero.png
 
 // FONTS

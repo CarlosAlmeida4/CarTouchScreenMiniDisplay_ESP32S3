@@ -8,6 +8,7 @@ SET(SOURCES components/ui_comp_softwarupdate.c
     ui.c
     components/ui_comp_hook.c
     ui_helpers.c
+    images/ui_img_rollpajero2_png.c
     images/ui_img_540754542.c
     fonts/ui_font_Nabla_Big.c
     fonts/ui_font_HeadingDegree.c

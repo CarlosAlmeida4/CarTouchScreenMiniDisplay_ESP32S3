@@ -41,7 +41,7 @@ void ui_InclinometerNew_screen_init(void)
     lv_obj_set_style_bg_grad_dir(ui_InclinometerNew, LV_GRAD_DIR_VER, LV_PART_MAIN | LV_STATE_DEFAULT);
 
     ui_PajeroPitch = lv_img_create(ui_InclinometerNew);
-    lv_img_set_src(ui_PajeroPitch, &ui_img_rollpajero2_png);
+    lv_img_set_src(ui_PajeroPitch, &ui_img_rollpajero2_zip_png);
     lv_obj_set_width(ui_PajeroPitch, LV_SIZE_CONTENT);   /// 1
     lv_obj_set_height(ui_PajeroPitch, LV_SIZE_CONTENT);    /// 1
     lv_obj_set_x(ui_PajeroPitch, -1);
@@ -49,10 +49,10 @@ void ui_InclinometerNew_screen_init(void)
     lv_obj_set_align(ui_PajeroPitch, LV_ALIGN_BOTTOM_MID);
     lv_obj_add_flag(ui_PajeroPitch, LV_OBJ_FLAG_ADV_HITTEST);     /// Flags
     lv_obj_clear_flag(ui_PajeroPitch, LV_OBJ_FLAG_SCROLLABLE);      /// Flags
-    lv_img_set_zoom(ui_PajeroPitch, 160);
+    lv_img_set_zoom(ui_PajeroPitch, 170);
 
     ui_PajeroRoll = lv_img_create(ui_InclinometerNew);
-    lv_img_set_src(ui_PajeroRoll, &ui_img_540754542);
+    lv_img_set_src(ui_PajeroRoll, &ui_img_555283202);
     lv_obj_set_width(ui_PajeroRoll, LV_SIZE_CONTENT);   /// 1
     lv_obj_set_height(ui_PajeroRoll, LV_SIZE_CONTENT);    /// 1
     lv_obj_set_x(ui_PajeroRoll, -1);
@@ -60,6 +60,7 @@ void ui_InclinometerNew_screen_init(void)
     lv_obj_set_align(ui_PajeroRoll, LV_ALIGN_CENTER);
     lv_obj_add_flag(ui_PajeroRoll, LV_OBJ_FLAG_ADV_HITTEST);     /// Flags
     lv_obj_clear_flag(ui_PajeroRoll, LV_OBJ_FLAG_SCROLLABLE);      /// Flags
+    lv_img_set_zoom(ui_PajeroRoll, 250);
 
     ui_ResetInclinometer = lv_btn_create(ui_InclinometerNew);
     lv_obj_set_width(ui_ResetInclinometer, 80);
@@ -72,6 +73,10 @@ void ui_InclinometerNew_screen_init(void)
     lv_obj_set_style_radius(ui_ResetInclinometer, 1000, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_bg_color(ui_ResetInclinometer, lv_color_hex(0xDFFF0A), LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_bg_opa(ui_ResetInclinometer, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_grad_color(ui_ResetInclinometer, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_main_stop(ui_ResetInclinometer, 70, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_grad_stop(ui_ResetInclinometer, 170, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_grad_dir(ui_ResetInclinometer, LV_GRAD_DIR_HOR, LV_PART_MAIN | LV_STATE_DEFAULT);
 
     lv_obj_add_event_cb(ui_InclinometerNew, ui_event_InclinometerNew, LV_EVENT_ALL, NULL);
     uic_PajeroPitch = ui_PajeroPitch;

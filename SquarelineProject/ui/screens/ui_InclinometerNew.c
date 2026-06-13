@@ -5,11 +5,13 @@
 
 #include "../ui.h"
 
+lv_obj_t * uic_ResetInclinometer;
 lv_obj_t * uic_PajeroRoll;
+lv_obj_t * uic_PajeroPitch;
 lv_obj_t * ui_InclinometerNew = NULL;
-lv_obj_t * ui_Image1 = NULL;
+lv_obj_t * ui_PajeroPitch = NULL;
 lv_obj_t * ui_PajeroRoll = NULL;
-lv_obj_t * ui_Button1 = NULL;
+lv_obj_t * ui_ResetInclinometer = NULL;
 // event funtions
 void ui_event_InclinometerNew(lv_event_t * e)
 {
@@ -38,16 +40,16 @@ void ui_InclinometerNew_screen_init(void)
     lv_obj_set_style_bg_grad_stop(ui_InclinometerNew, 150, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_bg_grad_dir(ui_InclinometerNew, LV_GRAD_DIR_VER, LV_PART_MAIN | LV_STATE_DEFAULT);
 
-    ui_Image1 = lv_img_create(ui_InclinometerNew);
-    lv_img_set_src(ui_Image1, &ui_img_rollpajero2_png);
-    lv_obj_set_width(ui_Image1, LV_SIZE_CONTENT);   /// 1
-    lv_obj_set_height(ui_Image1, LV_SIZE_CONTENT);    /// 1
-    lv_obj_set_x(ui_Image1, -1);
-    lv_obj_set_y(ui_Image1, -45);
-    lv_obj_set_align(ui_Image1, LV_ALIGN_BOTTOM_MID);
-    lv_obj_add_flag(ui_Image1, LV_OBJ_FLAG_ADV_HITTEST);     /// Flags
-    lv_obj_clear_flag(ui_Image1, LV_OBJ_FLAG_SCROLLABLE);      /// Flags
-    lv_img_set_zoom(ui_Image1, 160);
+    ui_PajeroPitch = lv_img_create(ui_InclinometerNew);
+    lv_img_set_src(ui_PajeroPitch, &ui_img_rollpajero2_png);
+    lv_obj_set_width(ui_PajeroPitch, LV_SIZE_CONTENT);   /// 1
+    lv_obj_set_height(ui_PajeroPitch, LV_SIZE_CONTENT);    /// 1
+    lv_obj_set_x(ui_PajeroPitch, -1);
+    lv_obj_set_y(ui_PajeroPitch, -45);
+    lv_obj_set_align(ui_PajeroPitch, LV_ALIGN_BOTTOM_MID);
+    lv_obj_add_flag(ui_PajeroPitch, LV_OBJ_FLAG_ADV_HITTEST);     /// Flags
+    lv_obj_clear_flag(ui_PajeroPitch, LV_OBJ_FLAG_SCROLLABLE);      /// Flags
+    lv_img_set_zoom(ui_PajeroPitch, 160);
 
     ui_PajeroRoll = lv_img_create(ui_InclinometerNew);
     lv_img_set_src(ui_PajeroRoll, &ui_img_540754542);
@@ -59,20 +61,22 @@ void ui_InclinometerNew_screen_init(void)
     lv_obj_add_flag(ui_PajeroRoll, LV_OBJ_FLAG_ADV_HITTEST);     /// Flags
     lv_obj_clear_flag(ui_PajeroRoll, LV_OBJ_FLAG_SCROLLABLE);      /// Flags
 
-    ui_Button1 = lv_btn_create(ui_InclinometerNew);
-    lv_obj_set_width(ui_Button1, 80);
-    lv_obj_set_height(ui_Button1, 75);
-    lv_obj_set_x(ui_Button1, 129);
-    lv_obj_set_y(ui_Button1, -189);
-    lv_obj_set_align(ui_Button1, LV_ALIGN_CENTER);
-    lv_obj_add_flag(ui_Button1, LV_OBJ_FLAG_SCROLL_ON_FOCUS);     /// Flags
-    lv_obj_clear_flag(ui_Button1, LV_OBJ_FLAG_SCROLLABLE);      /// Flags
-    lv_obj_set_style_radius(ui_Button1, 1000, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_bg_color(ui_Button1, lv_color_hex(0xDFFF0A), LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_bg_opa(ui_Button1, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
+    ui_ResetInclinometer = lv_btn_create(ui_InclinometerNew);
+    lv_obj_set_width(ui_ResetInclinometer, 80);
+    lv_obj_set_height(ui_ResetInclinometer, 75);
+    lv_obj_set_x(ui_ResetInclinometer, 129);
+    lv_obj_set_y(ui_ResetInclinometer, -189);
+    lv_obj_set_align(ui_ResetInclinometer, LV_ALIGN_CENTER);
+    lv_obj_add_flag(ui_ResetInclinometer, LV_OBJ_FLAG_SCROLL_ON_FOCUS);     /// Flags
+    lv_obj_clear_flag(ui_ResetInclinometer, LV_OBJ_FLAG_SCROLLABLE);      /// Flags
+    lv_obj_set_style_radius(ui_ResetInclinometer, 1000, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_color(ui_ResetInclinometer, lv_color_hex(0xDFFF0A), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_opa(ui_ResetInclinometer, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
 
     lv_obj_add_event_cb(ui_InclinometerNew, ui_event_InclinometerNew, LV_EVENT_ALL, NULL);
+    uic_PajeroPitch = ui_PajeroPitch;
     uic_PajeroRoll = ui_PajeroRoll;
+    uic_ResetInclinometer = ui_ResetInclinometer;
 
 }
 
@@ -82,9 +86,11 @@ void ui_InclinometerNew_screen_destroy(void)
 
     // NULL screen variables
     ui_InclinometerNew = NULL;
-    ui_Image1 = NULL;
+    uic_PajeroPitch = NULL;
+    ui_PajeroPitch = NULL;
     uic_PajeroRoll = NULL;
     ui_PajeroRoll = NULL;
-    ui_Button1 = NULL;
+    uic_ResetInclinometer = NULL;
+    ui_ResetInclinometer = NULL;
 
 }

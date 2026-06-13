@@ -265,6 +265,10 @@ void Display::InclinometerUI()
     lv_slider_set_value(uic_RollB,(int32_t)(100-normalize(RP.roll)), LV_ANIM_ON);
     lv_slider_set_value(uic_Pitch,(int32_t)normalize(RP.pitch), LV_ANIM_ON);
 
+    lv_slider_set_value(uic_PitchNew,(int32_t)normalize(RP.pitch), LV_ANIM_ON);
+
+    lv_img_set_angle(uic_PajeroRoll, static_cast<int32_t>(RP.roll));
+
 }
 
 void Display::WifiUI()

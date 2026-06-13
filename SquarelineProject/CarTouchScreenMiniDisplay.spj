@@ -3218,7 +3218,7 @@
               {
                 "nid": 1020,
                 "strtype": "IMAGE/Asset",
-                "strval": "assets/RollPajero2.png",
+                "strval": "assets/RollPajero2_zip.png",
                 "InheritedType": 5
               },
               {
@@ -3239,7 +3239,7 @@
               {
                 "nid": 1050,
                 "strtype": "IMAGE/Scale",
-                "integer": 160,
+                "integer": 170,
                 "InheritedType": 6
               },
               {
@@ -3392,7 +3392,7 @@
               {
                 "nid": 1020,
                 "strtype": "IMAGE/Asset",
-                "strval": "assets/mitsubishi-pajero.png",
+                "strval": "assets/mitsubishi-pajero_zip.png",
                 "InheritedType": 5
               },
               {
@@ -3413,7 +3413,7 @@
               {
                 "nid": 1050,
                 "strtype": "IMAGE/Scale",
-                "integer": 200,
+                "integer": 250,
                 "InheritedType": 6
               },
               {
@@ -4992,6 +4992,7 @@
           {
             "disabled": false,
             "nid": 1001233,
+            "flags": 1048576,
             "strtype": "_event/EventHandler",
             "strval": "GESTURE_RIGHT(GESTURE)",
             "childs": [
@@ -6348,13 +6349,13 @@
     "separate_screen_save": false,
     "hierarchy_state_save": false,
     "reverse_event_order": false,
-    "backup_cnt": 62,
+    "backup_cnt": 65,
     "autosave_cnt": 0,
     "group_color_cnt": 0,
     "imagebytearrayprefix": "",
     "lvgl_version": "8.3.11",
     "callfuncsexport": "CPP_FILE",
-    "imageexport": "SOURCE",
+    "imageexport": "BINARY_LVGL",
     "lvgl_include_path": "lvgl.h",
     "naming": "Name",
     "naming_force_lowercase": false,

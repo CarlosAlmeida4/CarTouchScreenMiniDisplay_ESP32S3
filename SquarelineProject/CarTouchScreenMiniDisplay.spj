@@ -1631,6 +1631,7 @@
               },
               {
                 "nid": 40,
+                "flags": 1048576,
                 "strtype": "OBJECT/Transform",
                 "InheritedType": 1
               },
@@ -1667,6 +1668,7 @@
               },
               {
                 "nid": 90,
+                "flags": 1048576,
                 "strtype": "OBJECT/Flags",
                 "InheritedType": 1
               },
@@ -1678,6 +1680,7 @@
               },
               {
                 "nid": 225,
+                "flags": 1048576,
                 "strtype": "OBJECT/Scrolling",
                 "InheritedType": 1
               },
@@ -1707,12 +1710,12 @@
               },
               {
                 "nid": 320,
+                "flags": 1048576,
                 "strtype": "OBJECT/States",
                 "InheritedType": 1
               },
               {
                 "nid": 1010,
-                "flags": 1048576,
                 "strtype": "SLIDER/Slider",
                 "InheritedType": 1
               },
@@ -3121,8 +3124,8 @@
                 "flags": 17,
                 "strtype": "OBJECT/Position",
                 "intarray": [
-                  -2,
-                  0
+                  -1,
+                  -1
                 ],
                 "InheritedType": 7
               },
@@ -3132,7 +3135,7 @@
                 "strtype": "OBJECT/Size",
                 "intarray": [
                   465,
-                  509
+                  467
                 ],
                 "InheritedType": 7
               },
@@ -3149,15 +3152,67 @@
               },
               {
                 "nid": 90,
-                "flags": 1048576,
                 "strtype": "OBJECT/Flags",
                 "InheritedType": 1
               },
               {
+                "nid": 110,
+                "strtype": "OBJECT/Clickable",
+                "strval": "False",
+                "InheritedType": 2
+              },
+              {
+                "nid": 130,
+                "strtype": "OBJECT/Press_lock",
+                "strval": "False",
+                "InheritedType": 2
+              },
+              {
+                "nid": 140,
+                "strtype": "OBJECT/Click_focusable",
+                "strval": "False",
+                "InheritedType": 2
+              },
+              {
+                "nid": 210,
+                "strtype": "OBJECT/Gesture_bubble",
+                "strval": "False",
+                "InheritedType": 2
+              },
+              {
+                "nid": 220,
+                "strtype": "OBJECT/Snappable",
+                "strval": "False",
+                "InheritedType": 2
+              },
+              {
                 "nid": 225,
-                "flags": 1048576,
                 "strtype": "OBJECT/Scrolling",
                 "InheritedType": 1
+              },
+              {
+                "nid": 230,
+                "strtype": "OBJECT/Scrollable",
+                "strval": "False",
+                "InheritedType": 2
+              },
+              {
+                "nid": 240,
+                "strtype": "OBJECT/Scroll_elastic",
+                "strval": "False",
+                "InheritedType": 2
+              },
+              {
+                "nid": 250,
+                "strtype": "OBJECT/Scroll_momentum",
+                "strval": "False",
+                "InheritedType": 2
+              },
+              {
+                "nid": 270,
+                "strtype": "OBJECT/Scroll_chain",
+                "strval": "False",
+                "InheritedType": 2
               },
               {
                 "nid": 300,
@@ -3366,8 +3421,8 @@
                 "flags": 17,
                 "strtype": "OBJECT/Position",
                 "intarray": [
-                  -2,
-                  -7
+                  2,
+                  4
                 ],
                 "InheritedType": 7
               },
@@ -3469,13 +3524,14 @@
                 "strtype": "IMAGE/Pivot",
                 "intarray": [
                   0,
-                  1000
+                  0
                 ],
                 "InheritedType": 7
               },
               {
                 "nid": 1040,
                 "strtype": "IMAGE/Rotation",
+                "integer": 9,
                 "InheritedType": 6
               },
               {
@@ -3590,16 +3646,49 @@
                 "strval": "DEFAULT",
                 "childs": [
                   {
+                    "nid": 10510,
+                    "strtype": "_style/Bg_Radius",
+                    "integer": 1000,
+                    "InheritedType": 6
+                  },
+                  {
                     "nid": 10520,
                     "flags": 4096,
                     "strtype": "_style/Bg_Color",
                     "intarray": [
-                      53,
-                      65,
-                      214,
+                      224,
+                      240,
+                      90,
                       255
                     ],
                     "InheritedType": 7
+                  },
+                  {
+                    "nid": 10530,
+                    "flags": 256,
+                    "strtype": "_style/Bg_gradiens_Color",
+                    "intarray": [
+                      53,
+                      65,
+                      214
+                    ],
+                    "InheritedType": 7
+                  },
+                  {
+                    "nid": 10540,
+                    "flags": 16,
+                    "strtype": "_style/Bg_gradient_params",
+                    "intarray": [
+                      0,
+                      25
+                    ],
+                    "InheritedType": 7
+                  },
+                  {
+                    "nid": 10550,
+                    "strtype": "_style/Gradient direction",
+                    "strval": "VER",
+                    "InheritedType": 3
                   }
                 ],
                 "InheritedType": 1
@@ -6164,7 +6253,7 @@
   },
   "animations": [],
   "selected_theme": "Default",
-  "selected_screen": "GUID58698730-828799S15272555",
+  "selected_screen": "GUID39790559-923514S6625164",
   "info": {
     "name": "CarTouchScreenMiniDisplay.spj",
     "depth": 2,
@@ -6193,7 +6282,7 @@
     "separate_screen_save": false,
     "hierarchy_state_save": false,
     "reverse_event_order": false,
-    "backup_cnt": 51,
+    "backup_cnt": 54,
     "autosave_cnt": 0,
     "group_color_cnt": 0,
     "imagebytearrayprefix": "",

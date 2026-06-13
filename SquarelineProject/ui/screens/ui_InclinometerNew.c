@@ -30,17 +30,25 @@ void ui_event_InclinometerNew(lv_event_t * e)
 void ui_InclinometerNew_screen_init(void)
 {
     ui_InclinometerNew = lv_obj_create(NULL);
-    lv_obj_set_style_bg_color(ui_InclinometerNew, lv_color_hex(0x3541D6), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_radius(ui_InclinometerNew, 1000, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_color(ui_InclinometerNew, lv_color_hex(0xE0F05A), LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_bg_opa(ui_InclinometerNew, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_grad_color(ui_InclinometerNew, lv_color_hex(0x3541D6), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_main_stop(ui_InclinometerNew, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_grad_stop(ui_InclinometerNew, 25, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_grad_dir(ui_InclinometerNew, LV_GRAD_DIR_VER, LV_PART_MAIN | LV_STATE_DEFAULT);
 
     ui_PitchNew = lv_slider_create(ui_InclinometerNew);
     lv_slider_set_value(ui_PitchNew, 50, LV_ANIM_OFF);
     if(lv_slider_get_mode(ui_PitchNew) == LV_SLIDER_MODE_RANGE) lv_slider_set_left_value(ui_PitchNew, 0, LV_ANIM_OFF);
     lv_obj_set_width(ui_PitchNew, 465);
-    lv_obj_set_height(ui_PitchNew, 509);
-    lv_obj_set_x(ui_PitchNew, -2);
-    lv_obj_set_y(ui_PitchNew, 0);
+    lv_obj_set_height(ui_PitchNew, 467);
+    lv_obj_set_x(ui_PitchNew, -1);
+    lv_obj_set_y(ui_PitchNew, -1);
     lv_obj_set_align(ui_PitchNew, LV_ALIGN_CENTER);
+    lv_obj_clear_flag(ui_PitchNew, LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_CLICK_FOCUSABLE |
+                      LV_OBJ_FLAG_GESTURE_BUBBLE | LV_OBJ_FLAG_SNAPPABLE | LV_OBJ_FLAG_SCROLLABLE | LV_OBJ_FLAG_SCROLL_ELASTIC |
+                      LV_OBJ_FLAG_SCROLL_MOMENTUM | LV_OBJ_FLAG_SCROLL_CHAIN);     /// Flags
     lv_obj_set_style_radius(ui_PitchNew, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_bg_color(ui_PitchNew, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_bg_opa(ui_PitchNew, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
@@ -56,12 +64,12 @@ void ui_InclinometerNew_screen_init(void)
     lv_img_set_src(ui_PajeroRoll, &ui_img_540754542);
     lv_obj_set_width(ui_PajeroRoll, LV_SIZE_CONTENT);   /// 1
     lv_obj_set_height(ui_PajeroRoll, LV_SIZE_CONTENT);    /// 1
-    lv_obj_set_x(ui_PajeroRoll, -2);
-    lv_obj_set_y(ui_PajeroRoll, -7);
+    lv_obj_set_x(ui_PajeroRoll, 2);
+    lv_obj_set_y(ui_PajeroRoll, 4);
     lv_obj_set_align(ui_PajeroRoll, LV_ALIGN_CENTER);
     lv_obj_add_flag(ui_PajeroRoll, LV_OBJ_FLAG_ADV_HITTEST);     /// Flags
     lv_obj_clear_flag(ui_PajeroRoll, LV_OBJ_FLAG_SCROLLABLE);      /// Flags
-    lv_img_set_pivot(ui_PajeroRoll, 0, 1000);
+    lv_img_set_angle(ui_PajeroRoll, 9);
 
     lv_obj_add_event_cb(ui_InclinometerNew, ui_event_InclinometerNew, LV_EVENT_ALL, NULL);
     uic_PitchNew = ui_PitchNew;

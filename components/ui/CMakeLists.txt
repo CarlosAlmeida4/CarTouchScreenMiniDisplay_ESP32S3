@@ -10,6 +10,7 @@ idf_component_register(
 		"screens/ui_InclinometerNew.c"
 		"screens/ui_Wifi.c"
 		"screens/ui_OTAUpdate.c"
+		"images/ui_img_rollpajero2_png.c"
 		"images/ui_img_540754542.c"
         "fonts/ui_font_Nabla_Big.c"
         "fonts/ui_font_HeadingDegree.c"

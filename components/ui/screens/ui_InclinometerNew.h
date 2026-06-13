@@ -15,10 +15,10 @@ extern void ui_InclinometerNew_screen_init(void);
 extern void ui_InclinometerNew_screen_destroy(void);
 extern void ui_event_InclinometerNew(lv_event_t * e);
 extern lv_obj_t * ui_InclinometerNew;
-extern lv_obj_t * ui_PitchNew;
+extern lv_obj_t * ui_Image1;
 extern lv_obj_t * ui_PajeroRoll;
+extern lv_obj_t * ui_Button1;
 // CUSTOM VARIABLES
-extern lv_obj_t * uic_PitchNew;
 extern lv_obj_t * uic_PajeroRoll;
 
 #ifdef __cplusplus

@@ -538,3 +538,9 @@ extern "C" void UI_ConnectWifiCallback(lv_event_t * e)
         Display::m_activeInstance->invokeWifiConnection(ssid,passwrd);
     }
 }
+
+// TODO: Implement callback to QMI interface class, there the class shall store the offset in flash values and apply them to the roll and pitch variables
+extern "C" void UI_ZeroOutInclinometer(lv_event_t * e)
+{
+
+}

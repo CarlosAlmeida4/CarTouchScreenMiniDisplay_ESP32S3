@@ -17,6 +17,7 @@ extern void ui_event_InclinometerNew(lv_event_t * e);
 extern lv_obj_t * ui_InclinometerNew;
 extern lv_obj_t * ui_PajeroPitch;
 extern lv_obj_t * ui_PajeroRoll;
+extern void ui_event_ResetInclinometer(lv_event_t * e);
 extern lv_obj_t * ui_ResetInclinometer;
 extern lv_obj_t * ui_RollTextNew;
 extern lv_obj_t * ui_PitchTextNew;

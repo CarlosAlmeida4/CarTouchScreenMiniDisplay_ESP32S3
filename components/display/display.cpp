@@ -223,7 +223,8 @@ void Display::updateUI()
     //Update screen depdending on which is currently loaded
     lv_obj_t* scr_act = lv_scr_act();
 
-    if(scr_act == ui_Inclinometer || scr_act == ui_InclinometerNew){InclinometerUI();}
+    if(scr_act == ui_Inclinometer){InclinometerUI();}
+    if(scr_act == ui_InclinometerNew){InclinometerNewUI();}
     if(scr_act == ui_Wifi){WifiUI();}
 
 }
@@ -265,11 +266,29 @@ void Display::InclinometerUI()
     lv_slider_set_value(uic_RollB,(int32_t)(100-normalize(RP.roll)), LV_ANIM_ON);
     lv_slider_set_value(uic_Pitch,(int32_t)normalize(RP.pitch), LV_ANIM_ON);
 
+}
+
+void Display::InclinometerNewUI()
+{
+    RollPitch RP{0,0};
+
+    if (!xQueueReceive(RollPitchQueue_, &RP, 0)) {
+        return;
+    }
+
+    // Now touch LVGL
+    if (!checkInclinometerFieldsVdl()) {
+        return;
+    }
+
+    std::string rollStr  = turnFloat2Char(RP.roll);
+    std::string pitchStr = turnFloat2Char(RP.pitch);
+
+    _ui_label_set_property(uic_RollTextNew,_UI_LABEL_PROPERTY_TEXT,rollStr.c_str());
+    _ui_label_set_property(uic_PitchTextNew,_UI_LABEL_PROPERTY_TEXT,pitchStr.c_str());
+
     lv_img_set_angle(uic_PajeroPitch,static_cast<int32_t>((RP.pitch)*10));
-    
-
     lv_img_set_angle(uic_PajeroRoll, static_cast<int32_t>((RP.roll)*10));
-
 }
 
 void Display::WifiUI()

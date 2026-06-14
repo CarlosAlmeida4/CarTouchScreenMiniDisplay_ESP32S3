@@ -121,7 +121,9 @@ private:
     void displayTask();
     
     void InclinometerUI();
+    void InclinometerNewUI();
     void WifiUI();
+
 
 
     std::function<void(lv_event_t* )> m_SoftwareUpdateHandler;

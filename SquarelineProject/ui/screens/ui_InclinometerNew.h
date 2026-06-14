@@ -18,10 +18,14 @@ extern lv_obj_t * ui_InclinometerNew;
 extern lv_obj_t * ui_PajeroPitch;
 extern lv_obj_t * ui_PajeroRoll;
 extern lv_obj_t * ui_ResetInclinometer;
+extern lv_obj_t * ui_RollTextNew;
+extern lv_obj_t * ui_PitchTextNew;
 // CUSTOM VARIABLES
 extern lv_obj_t * uic_PajeroPitch;
 extern lv_obj_t * uic_PajeroRoll;
 extern lv_obj_t * uic_ResetInclinometer;
+extern lv_obj_t * uic_RollTextNew;
+extern lv_obj_t * uic_PitchTextNew;
 
 #ifdef __cplusplus
 } /*extern "C"*/

@@ -8,8 +8,8 @@ SET(SOURCES components/ui_comp_softwarupdate.c
     ui.c
     components/ui_comp_hook.c
     ui_helpers.c
-    images/ui_img_rollpajero2_zip_png.c
-    images/ui_img_555283202.c
+    images/ui_img_rollpajero2_reduced_png.c
+    images/ui_img_rollreduced_png.c
     fonts/ui_font_Nabla_Big.c
     fonts/ui_font_HeadingDegree.c
     fonts/ui_font_SmallerEmblemaOne.c)

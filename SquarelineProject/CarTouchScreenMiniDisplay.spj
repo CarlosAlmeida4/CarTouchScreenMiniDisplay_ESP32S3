@@ -3124,8 +3124,8 @@
                 "flags": 17,
                 "strtype": "OBJECT/Position",
                 "intarray": [
-                  27,
-                  -86
+                  41,
+                  -91
                 ],
                 "InheritedType": 7
               },
@@ -3298,8 +3298,8 @@
                 "flags": 17,
                 "strtype": "OBJECT/Position",
                 "intarray": [
-                  -68,
-                  -88
+                  -94,
+                  -104
                 ],
                 "InheritedType": 7
               },
@@ -3408,6 +3408,7 @@
               {
                 "nid": 1040,
                 "strtype": "IMAGE/Rotation",
+                "integer": -450,
                 "InheritedType": 6
               },
               {
@@ -3446,6 +3447,7 @@
               },
               {
                 "nid": 20,
+                "flags": 1048576,
                 "strtype": "OBJECT/Layout",
                 "InheritedType": 1
               },
@@ -3464,6 +3466,7 @@
               },
               {
                 "nid": 40,
+                "flags": 1048576,
                 "strtype": "OBJECT/Transform",
                 "InheritedType": 1
               },
@@ -3472,8 +3475,8 @@
                 "flags": 17,
                 "strtype": "OBJECT/Position",
                 "intarray": [
-                  129,
-                  -142
+                  150,
+                  -149
                 ],
                 "InheritedType": 7
               },
@@ -3496,6 +3499,7 @@
               {
                 "nid": 75,
                 "strtype": "OBJECT/Extend_click_area",
+                "integer": 25,
                 "InheritedType": 6
               },
               {
@@ -3583,9 +3587,9 @@
                         "flags": 256,
                         "strtype": "_style/Bg_gradiens_Color",
                         "intarray": [
-                          223,
-                          255,
-                          10
+                          53,
+                          65,
+                          214
                         ],
                         "InheritedType": 7
                       },
@@ -3594,15 +3598,15 @@
                         "flags": 16,
                         "strtype": "_style/Bg_gradient_params",
                         "intarray": [
-                          70,
-                          170
+                          160,
+                          250
                         ],
                         "InheritedType": 7
                       },
                       {
                         "nid": 10550,
                         "strtype": "_style/Gradient direction",
-                        "strval": "HOR",
+                        "strval": "VER",
                         "InheritedType": 3
                       }
                     ],
@@ -3613,6 +3617,71 @@
                 "strtype": "BUTTON/Style_main",
                 "strval": "lv.PART.MAIN, Rectangle, Pad, Text, Transform",
                 "InheritedType": 11
+              },
+              {
+                "disabled": false,
+                "nid": 1001257,
+                "strtype": "_event/EventHandler",
+                "strval": "CLICKED",
+                "childs": [
+                  {
+                    "nid": 1001258,
+                    "strtype": "_event/name",
+                    "strval": "ZeroOutInclinometer",
+                    "InheritedType": 10
+                  },
+                  {
+                    "nid": 1001259,
+                    "strtype": "_event/condition_C",
+                    "strval": "",
+                    "InheritedType": 10
+                  },
+                  {
+                    "nid": 1001260,
+                    "strtype": "_event/condition_P",
+                    "strval": "",
+                    "InheritedType": 10
+                  },
+                  {
+                    "nid": 1001261,
+                    "strtype": "_event/action",
+                    "strval": "CALL FUNCTION",
+                    "childs": [
+                      {
+                        "nid": 1001262,
+                        "strtype": "CALL FUNCTION/Name",
+                        "strval": "CALL FUNCTION",
+                        "InheritedType": 10
+                      },
+                      {
+                        "nid": 1001263,
+                        "strtype": "CALL FUNCTION/Call",
+                        "strval": "<{Function_name}>( event_struct )",
+                        "InheritedType": 10
+                      },
+                      {
+                        "nid": 1001264,
+                        "strtype": "CALL FUNCTION/CallC",
+                        "strval": "<{Function_name}>( e );",
+                        "InheritedType": 10
+                      },
+                      {
+                        "nid": 1001265,
+                        "strtype": "CALL FUNCTION/Function_name",
+                        "strval": "UI_ZeroOutInclinometer",
+                        "InheritedType": 10
+                      },
+                      {
+                        "nid": 1001266,
+                        "strtype": "CALL FUNCTION/Dont_export_function",
+                        "strval": "True",
+                        "InheritedType": 2
+                      }
+                    ],
+                    "InheritedType": 10
+                  }
+                ],
+                "InheritedType": 4
               }
             ],
             "saved_objtypeKey": "BUTTON"
@@ -3662,8 +3731,8 @@
                 "flags": 17,
                 "strtype": "OBJECT/Position",
                 "intarray": [
-                  84,
-                  -57
+                  46,
+                  -83
                 ],
                 "InheritedType": 7
               },
@@ -3830,8 +3899,8 @@
                 "flags": 17,
                 "strtype": "OBJECT/Position",
                 "intarray": [
-                  -159,
-                  97
+                  -151,
+                  100
                 ],
                 "InheritedType": 7
               },
@@ -6685,7 +6754,7 @@
     "separate_screen_save": false,
     "hierarchy_state_save": false,
     "reverse_event_order": false,
-    "backup_cnt": 67,
+    "backup_cnt": 68,
     "autosave_cnt": 0,
     "group_color_cnt": 0,
     "imagebytearrayprefix": "",
@@ -6696,7 +6765,7 @@
     "naming": "Name",
     "naming_force_lowercase": false,
     "naming_add_subcomponent": false,
-    "nidcnt": 1001257,
+    "nidcnt": 1001267,
     "BitDepth": 16,
     "Name": "CarTouchScreenMiniDisplay"
   }

@@ -224,6 +224,7 @@ void Display::updateUI()
     lv_obj_t* scr_act = lv_scr_act();
 
     if(scr_act == ui_Inclinometer){InclinometerUI();}
+    if(scr_act == ui_InclinometerNew){InclinometerNewUI();}
     if(scr_act == ui_Wifi){WifiUI();}
 
 }
@@ -265,6 +266,29 @@ void Display::InclinometerUI()
     lv_slider_set_value(uic_RollB,(int32_t)(100-normalize(RP.roll)), LV_ANIM_ON);
     lv_slider_set_value(uic_Pitch,(int32_t)normalize(RP.pitch), LV_ANIM_ON);
 
+}
+
+void Display::InclinometerNewUI()
+{
+    RollPitch RP{0,0};
+
+    if (!xQueueReceive(RollPitchQueue_, &RP, 0)) {
+        return;
+    }
+
+    // Now touch LVGL
+    if (!checkInclinometerFieldsVdl()) {
+        return;
+    }
+
+    std::string rollStr  = turnFloat2Char(RP.roll);
+    std::string pitchStr = turnFloat2Char(RP.pitch);
+
+    _ui_label_set_property(uic_RollTextNew,_UI_LABEL_PROPERTY_TEXT,rollStr.c_str());
+    _ui_label_set_property(uic_PitchTextNew,_UI_LABEL_PROPERTY_TEXT,pitchStr.c_str());
+
+    lv_img_set_angle(uic_PajeroPitch,static_cast<int32_t>((RP.pitch)*10));
+    lv_img_set_angle(uic_PajeroRoll, static_cast<int32_t>((RP.roll)*10));
 }
 
 void Display::WifiUI()
@@ -432,6 +456,11 @@ void Display::setWifiConnectionHandler(std::function<void(const std::string&,con
     m_WifiConnectionHandler = std::move(callback);
 }
 
+void Display::setInclinometerResetHandler(std::function<void(void)>callback)
+{
+    m_ResetInclinometerHandler = std::move(callback);
+}
+
 /*
     Label properties settings
 */
@@ -459,6 +488,18 @@ void Display::invokeWifiConnection(const std::string& ssid,const std::string& pa
     else
     {
         _ui_label_set_property(uic_SoftwareUpdateFeedback,_UI_LABEL_PROPERTY_TEXT,"Error Connecting");
+    }
+}
+
+void Display::invokeInclinometerReset()
+{
+    if(m_ResetInclinometerHandler!=nullptr)
+    {   
+        m_ResetInclinometerHandler();
+    }
+    else
+    {
+        ESP_LOGI(DISPLAY_TAG,"Inclinometer reset function not available");
     }
 }
 
@@ -512,5 +553,14 @@ extern "C" void UI_ConnectWifiCallback(lv_event_t * e)
         std::string ssid(ssidbuf);
         std::string passwrd(ssidpswrd);
         Display::m_activeInstance->invokeWifiConnection(ssid,passwrd);
+    }
+}
+
+// TODO: Implement callback to QMI interface class, there the class shall store the offset in flash values and apply them to the roll and pitch variables
+extern "C" void UI_ZeroOutInclinometer(lv_event_t * e)
+{
+    if(Display::m_activeInstance)
+    {
+        Display::m_activeInstance->invokeInclinometerReset();
     }
 }

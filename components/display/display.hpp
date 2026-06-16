@@ -51,12 +51,13 @@ class Display {
     void init();
     void setSoftwareUpdateHandler(std::function<void(lv_event_t* )> callback);
     void setWifiConnectionHandler(std::function<void(const std::string&,const std::string&)>callback);
+    void setInclinometerResetHandler(std::function<void(void)>);
     
     void invokeSWUpdate(lv_event_t* e); //Needs to be public because its called from a external C function
     void invokeWifiConnection(const std::string& ssid,const std::string& passwrd);
+    void invokeInclinometerReset(void);//Informs the Inclinometer that it needs to use the current values as zero
     void SWUpdateFeedback(const std::string& Feedback); //Updates the feedback message comming from OTA 
     void WifiConnectionFeedback(const std::string& Feedback);//Updates the feedback message comming from WifiManager
-    
     static Display* m_activeInstance;
     
 private:
@@ -83,7 +84,7 @@ private:
     static constexpr uint8_t I2C_MASTER_RX_BUF_DISABLE = 0; /*!< I2C master doesn't need buffer */
     static constexpr unsigned int I2C_MASTER_TIMEOUT_MS = 1000;
     static constexpr int LVGL_BUF_HEIGHT = LCD_V_RES/4; // in pixels
-    static constexpr uint8_t LVGL_TICK_PERIOD_MS = 10; // in milliseconds
+    static constexpr uint8_t LVGL_TICK_PERIOD_MS = 5; // in milliseconds
     static constexpr uint32_t LVGL_TASK_STACK_SIZE = 1024 * 4; // in bytes
     static constexpr uint8_t LVGL_TASK_PRIORITY = 2;
     
@@ -121,11 +122,14 @@ private:
     void displayTask();
     
     void InclinometerUI();
+    void InclinometerNewUI();
     void WifiUI();
+
 
 
     std::function<void(lv_event_t* )> m_SoftwareUpdateHandler;
     std::function<void(const std::string& ,const std::string& )> m_WifiConnectionHandler;
+    std::function<void(void)> m_ResetInclinometerHandler;
 };
 
 #endif // DISPLAY_HPP

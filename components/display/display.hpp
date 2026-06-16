@@ -51,12 +51,13 @@ class Display {
     void init();
     void setSoftwareUpdateHandler(std::function<void(lv_event_t* )> callback);
     void setWifiConnectionHandler(std::function<void(const std::string&,const std::string&)>callback);
+    void setInclinometerResetHandler(std::function<void(void)>);
     
     void invokeSWUpdate(lv_event_t* e); //Needs to be public because its called from a external C function
     void invokeWifiConnection(const std::string& ssid,const std::string& passwrd);
+    void invokeInclinometerReset(void);//Informs the Inclinometer that it needs to use the current values as zero
     void SWUpdateFeedback(const std::string& Feedback); //Updates the feedback message comming from OTA 
     void WifiConnectionFeedback(const std::string& Feedback);//Updates the feedback message comming from WifiManager
-    
     static Display* m_activeInstance;
     
 private:
@@ -128,6 +129,7 @@ private:
 
     std::function<void(lv_event_t* )> m_SoftwareUpdateHandler;
     std::function<void(const std::string& ,const std::string& )> m_WifiConnectionHandler;
+    std::function<void(void)> m_ResetInclinometerHandler;
 };
 
 #endif // DISPLAY_HPP

@@ -30,7 +30,7 @@ build/
 *.map
 flasher_args.json # Generated in build directory
 sdkconfig.old
-sdkconfig
+
 
 # ESP-IDF dependencies
 # For older versions or manual component management
@@ -81,3 +81,5 @@ components/OTAUpdater/Secrets.hpp
 Doku
 components/WifiManager/Secrets.hpp
 components/WifiManager/Secrets.cpp
+components/esp_lcd_sh8601/test_apps/sdkconfig
+test_apps/component_unit_tests/sdkconfig

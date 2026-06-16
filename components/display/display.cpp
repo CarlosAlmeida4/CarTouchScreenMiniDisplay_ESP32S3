@@ -456,6 +456,11 @@ void Display::setWifiConnectionHandler(std::function<void(const std::string&,con
     m_WifiConnectionHandler = std::move(callback);
 }
 
+void Display::setInclinometerResetHandler(std::function<void(void)>callback)
+{
+    m_ResetInclinometerHandler = std::move(callback);
+}
+
 /*
     Label properties settings
 */
@@ -483,6 +488,18 @@ void Display::invokeWifiConnection(const std::string& ssid,const std::string& pa
     else
     {
         _ui_label_set_property(uic_SoftwareUpdateFeedback,_UI_LABEL_PROPERTY_TEXT,"Error Connecting");
+    }
+}
+
+void Display::invokeInclinometerReset()
+{
+    if(m_ResetInclinometerHandler!=nullptr)
+    {   
+        m_ResetInclinometerHandler();
+    }
+    else
+    {
+        ESP_LOGI(DISPLAY_TAG,"Inclinometer reset function not available");
     }
 }
 
@@ -542,5 +559,8 @@ extern "C" void UI_ConnectWifiCallback(lv_event_t * e)
 // TODO: Implement callback to QMI interface class, there the class shall store the offset in flash values and apply them to the roll and pitch variables
 extern "C" void UI_ZeroOutInclinometer(lv_event_t * e)
 {
-
+    if(Display::m_activeInstance)
+    {
+        Display::m_activeInstance->invokeInclinometerReset();
+    }
 }

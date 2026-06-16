@@ -4,6 +4,12 @@
 
 SensorQMI8658 qmi8658cInterface::qmi{};
 RollPitch qmi8658cInterface::RP{};
+RollPitch qmi8658cInterface::RPOffset
+{
+    .roll = 0,
+    .pitch = 0,
+    .temperature = 0
+};
 
 IMUdata acc;
 IMUdata gyr;
@@ -65,6 +71,23 @@ void qmi8658cInterface::read_sensor_data() {
     }
 }
 
+void qmi8658cInterface::setInclinometerOffset()
+{
+    //Get current Roll and pitch
+    RollPitch rp{};
+    if (qmi.getDataReady()) {
+            RollPitch rp{};
+            if (getPitchAndRoll(rp)) 
+            {
+                RPOffset = rp;//use current position as offset, it will zero out
+                ESP_LOGI(QMI8658C_TAG, "Current Offset \n roll: %f \n pitch: %f",RPOffset.roll);
+            }
+            else
+            {
+                ESP_LOGE(QMI8658C_TAG, "Failed to get offset from data");
+            }
+    }
+}
 bool qmi8658cInterface::getPitchAndRoll(RollPitch& out)
 {
     IMUdata acc{};
@@ -88,9 +111,14 @@ bool qmi8658cInterface::getPitchAndRoll(RollPitch& out)
     out.roll  = atan(mask) * RAD_TO_DEG;
     out.pitch = atan2(acc.z,acc.x) * RAD_TO_DEG;
     out.temperature = qmi.getTemperature_C();
-    /*ESP_LOGI(QMI8658C_TAG,
+
+    //Apply offset
+    out.roll  -= RPOffset.roll;
+    out.pitch -= RPOffset.pitch;
+    
+    ESP_LOGI(QMI8658C_TAG,
              "Roll: %.2f deg, Pitch: %.2f deg",
-             out.roll, out.pitch);*/
+             out.roll, out.pitch);
 
     return true;
 }

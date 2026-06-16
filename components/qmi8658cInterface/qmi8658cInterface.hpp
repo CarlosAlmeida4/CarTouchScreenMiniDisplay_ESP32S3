@@ -28,7 +28,14 @@ struct qmi8652Pins
 class qmi8658cInterface {
 public:
 
-    explicit qmi8658cInterface(QueueHandle_t q): Queue_(q) {}
+    explicit qmi8658cInterface(QueueHandle_t q): Queue_(q) 
+    {
+        RPOffset =  {
+        .roll = 0,
+        .pitch = 0,
+        .temperature = 0
+        };
+    }
 
     qmi8658cInterface(const qmi8658cInterface&) = delete;
     qmi8658cInterface& operator=(const qmi8658cInterface&) = delete;
@@ -36,7 +43,7 @@ public:
     
     void init();
     static bool getPitchAndRoll(RollPitch& out);
-
+    void setInclinometerOffset();
 
 private:
     QueueHandle_t  Queue_;  
@@ -48,10 +55,10 @@ private:
     static constexpr uint8_t I2C_MASTER_RX_BUF_DISABLE = 0; /*!< I2C master doesn't need buffer */
     static constexpr unsigned int I2C_MASTER_TIMEOUT_MS = 10;
     static constexpr unsigned int QMI_TASK_TIME_MS = 40;
-
+    //TODO! check if static here are needed
     static SensorQMI8658 qmi;
-    static RollPitch RP;    
-
+    static RollPitch RP;   
+    static RollPitch RPOffset;
 
     static constexpr qmi8652Pins  Pins = {
         .pinMasterSDA = GPIO_NUM_15,

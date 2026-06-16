@@ -83,7 +83,7 @@ public:
         display.setInclinometerResetHandler(
             [this]()
             {
-                //TODO!: Add callback to inclinometer offset handler
+                qmiItf.setInclinometerOffset();
             }
         );
 

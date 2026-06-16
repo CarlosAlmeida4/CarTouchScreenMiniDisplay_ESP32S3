@@ -313,10 +313,11 @@ void Display::displayTask()
     while (1)
     {
         // Lock the mutex due to the LVGL APIs are not thread-safe
+        updateUI();
         if (lvgl_lock(-1))
         {   
             task_delay_ms = lv_timer_handler();
-            updateUI();
+            
             // Release the mutex
             lvgl_unlock();
         }

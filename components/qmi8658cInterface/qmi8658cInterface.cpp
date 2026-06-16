@@ -75,6 +75,9 @@ void qmi8658cInterface::setInclinometerOffset()
 {
     //Get current Roll and pitch
     RollPitch rp{};
+    //Reset RP offset to get real angle from getPitchAndRoll, if this isnt done it will increment the error
+    RPOffset.roll = 0;
+    RPOffset.pitch= 0;
     if (qmi.getDataReady()) {
             RollPitch rp{};
             if (getPitchAndRoll(rp)) 

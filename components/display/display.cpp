@@ -312,6 +312,7 @@ void Display::displayTask()
     uint32_t task_delay_ms = LVGL_TASK_MAX_DELAY_MS;
     while (1)
     {
+        int64_t start = esp_timer_get_time();
         // Lock the mutex due to the LVGL APIs are not thread-safe
         updateUI();
         if (lvgl_lock(-1))
@@ -328,6 +329,12 @@ void Display::displayTask()
         else if (task_delay_ms < LVGL_TASK_MIN_DELAY_MS)
         {
             task_delay_ms = LVGL_TASK_MIN_DELAY_MS;
+        }
+        int64_t elapsed = esp_timer_get_time() - start;
+        if(elapsed > 100000) {
+            ESP_LOGW(DISPLAY_TAG,
+                     "lv_timer_handler took %lld ms",
+                     elapsed / 1000);
         }
         vTaskDelay(pdMS_TO_TICKS(task_delay_ms));
     }

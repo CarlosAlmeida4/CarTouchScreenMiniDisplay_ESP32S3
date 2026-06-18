@@ -119,9 +119,9 @@ bool qmi8658cInterface::getPitchAndRoll(RollPitch& out)
     out.roll  -= RPOffset.roll;
     out.pitch -= RPOffset.pitch;
     
-    ESP_LOGI(QMI8658C_TAG,
+    /*ESP_LOGI(QMI8658C_TAG,
              "Roll: %.2f deg, Pitch: %.2f deg",
-             out.roll, out.pitch);
+             out.roll, out.pitch);*/
 
     return true;
 }

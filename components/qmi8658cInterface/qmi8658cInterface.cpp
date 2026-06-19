@@ -46,6 +46,8 @@ void qmi8658cInterface::setup_sensor()
         true
     );*/
 
+    RPOffset = getStoredOffset().value_or(RollPitch{0,0,0});
+
     // Enable gyroscope and accelerometer
     //qmi.enableGyroscope();
     qmi.enableAccelerometer();
@@ -73,8 +75,7 @@ void qmi8658cInterface::read_sensor_data() {
 
 void qmi8658cInterface::setInclinometerOffset()
 {
-    //Get current Roll and pitch
-    RollPitch rp{};
+    
     //Reset RP offset to get real angle from getPitchAndRoll, if this isnt done it will increment the error
     RPOffset.roll = 0;
     RPOffset.pitch= 0;
@@ -91,6 +92,61 @@ void qmi8658cInterface::setInclinometerOffset()
             }
     }
 }
+
+std::optional<RollPitch> qmi8658cInterface::getStoredOffset() const
+{
+    RollPitch storedOffset;
+    esp_err_t nvs_err;
+
+    nvs_handle_t nvsHandle;
+
+    nvs_err = nvs_open("QMIOffset",NVS_READONLY,&nvsHandle);
+    if (nvs_err != ESP_OK) {
+        ESP_LOGE(QMI8658C_TAG, "Error (%s) opening NVS handle!", esp_err_to_name(nvs_err));
+        return std::nullopt;
+    }
+
+    ESP_LOGI(QMI8658C_TAG,"Reading Roll");
+    int32_t lRoll;
+    nvs_err = nvs_get_i32(nvsHandle,"QMIOffsetRoll",&lRoll);
+    switch (nvs_err) {
+        case ESP_OK:
+            ESP_LOGI(QMI8658C_TAG, "Read Roll = %" PRIu32, lRoll);
+            break;
+        case ESP_ERR_NVS_NOT_FOUND:
+            ESP_LOGW(QMI8658C_TAG, "The value is not initialized yet!");
+            break;
+        default:
+            ESP_LOGE(QMI8658C_TAG, "Error (%s) reading!", esp_err_to_name(nvs_err));
+    }
+
+    ESP_LOGI(QMI8658C_TAG,"Reading Pitch");
+    int32_t lPitch;
+    nvs_err = nvs_get_i32(nvsHandle,"QMIOffsetPitch",&lPitch);
+    switch (nvs_err) {
+        case ESP_OK:
+            ESP_LOGI(QMI8658C_TAG, "Read Pitch = %" PRIu32, lPitch);
+            break;
+        case ESP_ERR_NVS_NOT_FOUND:
+            ESP_LOGW(QMI8658C_TAG, "The value is not initialized yet!");
+            break;
+        default:
+            ESP_LOGE(QMI8658C_TAG, "Error (%s) reading!", esp_err_to_name(nvs_err));
+    }
+
+    if(nvs_err!=ESP_OK)
+    {
+        return std::nullopt;
+    }
+    else
+    {
+        storedOffset.pitch = static_cast<float>(lPitch);
+        storedOffset.roll = static_cast<float>(lRoll);
+        return std::optional<RollPitch>(storedOffset);
+    }
+
+}
+
 bool qmi8658cInterface::getPitchAndRoll(RollPitch& out)
 {
     IMUdata acc{};

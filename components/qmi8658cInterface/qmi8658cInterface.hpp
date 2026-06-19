@@ -4,6 +4,7 @@
 
 #include <stdio.h>
 #include <cstring>
+#include <optional>
 #include "driver/gpio.h"
 #include "driver/i2c.h"
 #include "driver/spi_master.h"
@@ -15,6 +16,8 @@
 #include "SensorLib.h"
 #include "SensorQMI8658.hpp"
 #include "PipelineTypes.hpp"
+#include "nvs_flash.h"
+#include "nvs.h"
 
 
 struct qmi8652Pins 
@@ -60,6 +63,8 @@ private:
     static RollPitch RP;   
     static RollPitch RPOffset;
 
+    std::mutex RPOffsetMutex;
+
     static constexpr qmi8652Pins  Pins = {
         .pinMasterSDA = GPIO_NUM_15,
         .pinMasterSCL = GPIO_NUM_14
@@ -68,6 +73,7 @@ private:
     void setup_sensor();
     static void task_entry(void* arg);
     void read_sensor_data();
+    std::optional<RollPitch> getStoredOffset() const;
 
 };
 

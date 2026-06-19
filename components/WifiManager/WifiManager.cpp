@@ -1,7 +1,8 @@
 #include "WifiManager.hpp"
 
 inline void WifiManager::changeStatus(WifiManagerStatus status)
-{
+{   
+    std::lock_guard<std::mutex> lock(WifiStatusMutex_);
     if(status)
     {connectionStatus_ = status;}
 }
@@ -99,9 +100,13 @@ void WifiManager::WifiManagerTask()
                     }
                     }
                 break;
+            case WifiManagerStatus::DISCONNECTED:
+                {
+                    changeStatus(WifiManagerStatus::SCANNING_READY);
+                }
+                break;
             case INIT:
             case READY_TO_CONNECT:
-            case DISCONNECTED:
             case CONNECTING:
             case SCANNING:
             case CONNECTION_FAILED:

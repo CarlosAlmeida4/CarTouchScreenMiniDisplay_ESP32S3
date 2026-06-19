@@ -45,8 +45,10 @@ void qmi8658cInterface::setup_sensor()
         SensorQMI8658::LPF_MODE_3,
         true
     );*/
-
-    RPOffset = getStoredOffset().value_or(RollPitch{0,0,0});
+    {
+        std::lock_guard<std::mutex> lock(RPOffsetMutex);
+        RPOffset = getStoredOffset().value_or(RollPitch{0,0,0});
+    }
 
     // Enable gyroscope and accelerometer
     //qmi.enableGyroscope();
@@ -67,7 +69,7 @@ void qmi8658cInterface::read_sensor_data() {
                 xQueueOverwrite(Queue_, &rp);
             }
         } else {
-            ESP_LOGW(QMI8658C_TAG, "Data not ready yet");
+            //ESP_LOGW(QMI8658C_TAG, "Data not ready yet");
         }
         vTaskDelay(QMI_TASK_TIME_MS / portTICK_PERIOD_MS);
     }
@@ -83,6 +85,7 @@ void qmi8658cInterface::setInclinometerOffset()
             RollPitch rp{};
             if (getPitchAndRoll(rp)) 
             {
+                std::lock_guard<std::mutex> lock(RPOffsetMutex);
                 RPOffset = rp;//use current position as offset, it will zero out
                 ESP_LOGI(QMI8658C_TAG, "Current Offset \n roll: %f \n pitch: %f",RPOffset.roll);
                 //Store in flash

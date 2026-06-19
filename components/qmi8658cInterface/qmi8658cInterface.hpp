@@ -31,14 +31,7 @@ struct qmi8652Pins
 class qmi8658cInterface {
 public:
 
-    explicit qmi8658cInterface(QueueHandle_t q): Queue_(q) 
-    {
-        RPOffset =  {
-        .roll = 0,
-        .pitch = 0,
-        .temperature = 0
-        };
-    }
+    explicit qmi8658cInterface(QueueHandle_t q): Queue_(q) {}
 
     qmi8658cInterface(const qmi8658cInterface&) = delete;
     qmi8658cInterface& operator=(const qmi8658cInterface&) = delete;
@@ -64,6 +57,7 @@ private:
     static RollPitch RPOffset;
 
     std::mutex RPOffsetMutex;
+    std::mutex PitchnRollMutex;
 
     static constexpr qmi8652Pins  Pins = {
         .pinMasterSDA = GPIO_NUM_15,

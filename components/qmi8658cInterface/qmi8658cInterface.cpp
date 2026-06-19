@@ -64,6 +64,7 @@ void qmi8658cInterface::read_sensor_data() {
     while (1) {
         if (qmi.getDataReady()) {
             RollPitch rp{};
+            std::lock_guard<std::mutex> lock(PitchnRollMutex);
             if (getPitchAndRoll(rp)) 
             {
                 xQueueOverwrite(Queue_, &rp);
@@ -77,15 +78,15 @@ void qmi8658cInterface::read_sensor_data() {
 
 void qmi8658cInterface::setInclinometerOffset()
 {
-    
+    std::lock_guard<std::mutex> lock(RPOffsetMutex);
     //Reset RP offset to get real angle from getPitchAndRoll, if this isnt done it will increment the error
     RPOffset.roll = 0;
     RPOffset.pitch= 0;
     if (qmi.getDataReady()) {
             RollPitch rp{};
+            std::lock_guard<std::mutex> lock(PitchnRollMutex);
             if (getPitchAndRoll(rp)) 
             {
-                std::lock_guard<std::mutex> lock(RPOffsetMutex);
                 RPOffset = rp;//use current position as offset, it will zero out
                 ESP_LOGI(QMI8658C_TAG, "Current Offset \n roll: %f \n pitch: %f",RPOffset.roll);
                 //Store in flash
@@ -111,12 +112,11 @@ esp_err_t qmi8658cInterface::setStoredOffset(RollPitch &rp) const
         return nvs_err;
     }
 
-    ESP_LOGI(QMI8658C_TAG,"Reading Roll");
     int32_t lRoll = static_cast<int32_t>(rp.roll);
     nvs_err = nvs_set_i32(nvsHandle,"QMIOffsetRoll",lRoll);
     switch (nvs_err) {
         case ESP_OK:
-            ESP_LOGI(QMI8658C_TAG, "Read Roll = %" PRIu32, lRoll);
+            ESP_LOGI(QMI8658C_TAG, "Write Roll = %" PRIu32, lRoll);
             break;
         case ESP_ERR_NVS_NOT_FOUND:
             ESP_LOGW(QMI8658C_TAG, "The value is not initialized yet!");
@@ -125,12 +125,11 @@ esp_err_t qmi8658cInterface::setStoredOffset(RollPitch &rp) const
             ESP_LOGE(QMI8658C_TAG, "Error (%s) reading!", esp_err_to_name(nvs_err));
     }
 
-    ESP_LOGI(QMI8658C_TAG,"Reading Pitch");
     int32_t lPitch = static_cast<int32_t>(rp.pitch);;
     nvs_err = nvs_set_i32(nvsHandle,"QMIOffsetPitch",lPitch);
     switch (nvs_err) {
         case ESP_OK:
-            ESP_LOGI(QMI8658C_TAG, "Read Pitch = %" PRIu32, lPitch);
+            ESP_LOGI(QMI8658C_TAG, "Write Pitch = %" PRIu32, lPitch);
             break;
         case ESP_ERR_NVS_NOT_FOUND:
             ESP_LOGW(QMI8658C_TAG, "The value is not initialized yet!");

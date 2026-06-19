@@ -105,7 +105,7 @@ uint8_t TouchDrvCST92xx::getPoint(int16_t *x_array, int16_t *y_array, uint8_t ge
     write_buffer[1] = lowByte(CST92XX_READ_COMMAND);
     res = writeThenRead(write_buffer, 2, read_buffer, sizeof(read_buffer));
     if (res != DEV_WIRE_NONE) {
-        log_e("Write read command error");
+        //log_e("Write read command error");
         return 0;
     }
     // Write read ack
@@ -114,7 +114,7 @@ uint8_t TouchDrvCST92xx::getPoint(int16_t *x_array, int16_t *y_array, uint8_t ge
     write_buffer[2] = CST92XX_ACK;
     res = writeBuffer(write_buffer, 3);
     if (res != DEV_WIRE_NONE) {
-        log_e("Write read ack error");
+        //log_e("Write read ack error");
         return 0;
     }
 
@@ -159,7 +159,7 @@ uint8_t TouchDrvCST92xx::getPoint(int16_t *x_array, int16_t *y_array, uint8_t ge
         parseFingerData(data, &point_info[i]);
         x_array[i] = point_info[i].x;
         y_array[i] = point_info[i].y;
-        log_d("Finger %d: x %d, y %d, id %d, event 0x%x.", i, point_info[i].x, point_info[i].y, point_info[i].finger_id, point_info[i].evt);
+        //log_d("Finger %d: x %d, y %d, id %d, event 0x%x.", i, point_info[i].x, point_info[i].y, point_info[i].finger_id, point_info[i].evt);
     }
 
     if (point_info[0].evt == 0x00) {

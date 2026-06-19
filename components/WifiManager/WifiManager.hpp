@@ -38,6 +38,7 @@ class WifiManager
     private:
     
     std::mutex networkListMutex_;
+    std::mutex WifiStatusMutex_;
     static constexpr std::size_t DEFAULT_SCAN_LIST_SIZE = 5;
     static constexpr auto *TAG = "WifiManager";
     esp_netif_ip_info_t ip;

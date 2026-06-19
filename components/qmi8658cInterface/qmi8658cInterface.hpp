@@ -4,6 +4,7 @@
 
 #include <stdio.h>
 #include <cstring>
+#include <optional>
 #include "driver/gpio.h"
 #include "driver/i2c.h"
 #include "driver/spi_master.h"
@@ -15,6 +16,8 @@
 #include "SensorLib.h"
 #include "SensorQMI8658.hpp"
 #include "PipelineTypes.hpp"
+#include "nvs_flash.h"
+#include "nvs.h"
 
 
 struct qmi8652Pins 
@@ -36,7 +39,7 @@ public:
     
     void init();
     static bool getPitchAndRoll(RollPitch& out);
-
+    void setInclinometerOffset();
 
 private:
     QueueHandle_t  Queue_;  
@@ -48,10 +51,13 @@ private:
     static constexpr uint8_t I2C_MASTER_RX_BUF_DISABLE = 0; /*!< I2C master doesn't need buffer */
     static constexpr unsigned int I2C_MASTER_TIMEOUT_MS = 10;
     static constexpr unsigned int QMI_TASK_TIME_MS = 40;
-
+    //TODO! check if static here are needed
     static SensorQMI8658 qmi;
-    static RollPitch RP;    
+    static RollPitch RP;   
+    static RollPitch RPOffset;
 
+    std::mutex RPOffsetMutex;
+    std::mutex PitchnRollMutex;
 
     static constexpr qmi8652Pins  Pins = {
         .pinMasterSDA = GPIO_NUM_15,
@@ -61,6 +67,8 @@ private:
     void setup_sensor();
     static void task_entry(void* arg);
     void read_sensor_data();
+    std::optional<RollPitch> getStoredOffset() const;
+    esp_err_t setStoredOffset(RollPitch &rp) const;
 
 };
 

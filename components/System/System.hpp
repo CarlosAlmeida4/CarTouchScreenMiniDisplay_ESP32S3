@@ -33,6 +33,19 @@ public:
     
     void start()
     {
+        //General inits needed by multiple components
+        
+        // Initialize NVS
+        esp_err_t nvs_err = nvs_flash_init();
+        if (nvs_err == ESP_ERR_NVS_NO_FREE_PAGES || nvs_err == ESP_ERR_NVS_NEW_VERSION_FOUND) 
+        {
+            // NVS partition was truncated and needs to be erased
+            // Retry nvs_flash_init
+            ESP_ERROR_CHECK(nvs_flash_erase());
+            nvs_err = nvs_flash_init();
+        }
+        
+        //Compoents Init
         diagnostics.init(500, 220);
         diagnostics.installLogSink();
 
@@ -83,7 +96,7 @@ public:
         display.setInclinometerResetHandler(
             [this]()
             {
-                //TODO!: Add callback to inclinometer offset handler
+                qmiItf.setInclinometerOffset();
             }
         );
 

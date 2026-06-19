@@ -74,6 +74,7 @@ private:
     static void task_entry(void* arg);
     void read_sensor_data();
     std::optional<RollPitch> getStoredOffset() const;
+    esp_err_t setStoredOffset(RollPitch &rp) const;
 
 };
 

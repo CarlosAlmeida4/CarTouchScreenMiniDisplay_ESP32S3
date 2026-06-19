@@ -85,12 +85,59 @@ void qmi8658cInterface::setInclinometerOffset()
             {
                 RPOffset = rp;//use current position as offset, it will zero out
                 ESP_LOGI(QMI8658C_TAG, "Current Offset \n roll: %f \n pitch: %f",RPOffset.roll);
+                //Store in flash
+                (void)setStoredOffset(rp);
             }
             else
             {
                 ESP_LOGE(QMI8658C_TAG, "Failed to get offset from data");
             }
     }
+}
+
+esp_err_t qmi8658cInterface::setStoredOffset(RollPitch &rp) const
+{
+    esp_err_t nvs_err;
+
+    nvs_handle_t nvsHandle;
+
+    nvs_err = nvs_open("QMIOffset",NVS_READWRITE,&nvsHandle);
+    if (nvs_err != ESP_OK) {
+        ESP_LOGE(QMI8658C_TAG, "Error (%s) opening NVS handle!", esp_err_to_name(nvs_err));
+        nvs_close(nvsHandle);
+        return nvs_err;
+    }
+
+    ESP_LOGI(QMI8658C_TAG,"Reading Roll");
+    int32_t lRoll = static_cast<int32_t>(rp.roll);
+    nvs_err = nvs_set_i32(nvsHandle,"QMIOffsetRoll",lRoll);
+    switch (nvs_err) {
+        case ESP_OK:
+            ESP_LOGI(QMI8658C_TAG, "Read Roll = %" PRIu32, lRoll);
+            break;
+        case ESP_ERR_NVS_NOT_FOUND:
+            ESP_LOGW(QMI8658C_TAG, "The value is not initialized yet!");
+            break;
+        default:
+            ESP_LOGE(QMI8658C_TAG, "Error (%s) reading!", esp_err_to_name(nvs_err));
+    }
+
+    ESP_LOGI(QMI8658C_TAG,"Reading Pitch");
+    int32_t lPitch = static_cast<int32_t>(rp.pitch);;
+    nvs_err = nvs_set_i32(nvsHandle,"QMIOffsetPitch",lPitch);
+    switch (nvs_err) {
+        case ESP_OK:
+            ESP_LOGI(QMI8658C_TAG, "Read Pitch = %" PRIu32, lPitch);
+            break;
+        case ESP_ERR_NVS_NOT_FOUND:
+            ESP_LOGW(QMI8658C_TAG, "The value is not initialized yet!");
+            break;
+        default:
+            ESP_LOGE(QMI8658C_TAG, "Error (%s) reading!", esp_err_to_name(nvs_err));
+    }
+    nvs_close(nvsHandle);
+    return nvs_err;
+
 }
 
 std::optional<RollPitch> qmi8658cInterface::getStoredOffset() const
@@ -103,6 +150,7 @@ std::optional<RollPitch> qmi8658cInterface::getStoredOffset() const
     nvs_err = nvs_open("QMIOffset",NVS_READONLY,&nvsHandle);
     if (nvs_err != ESP_OK) {
         ESP_LOGE(QMI8658C_TAG, "Error (%s) opening NVS handle!", esp_err_to_name(nvs_err));
+        nvs_close(nvsHandle);
         return std::nullopt;
     }
 
@@ -136,12 +184,14 @@ std::optional<RollPitch> qmi8658cInterface::getStoredOffset() const
 
     if(nvs_err!=ESP_OK)
     {
+        nvs_close(nvsHandle);
         return std::nullopt;
     }
     else
     {
         storedOffset.pitch = static_cast<float>(lPitch);
         storedOffset.roll = static_cast<float>(lRoll);
+        nvs_close(nvsHandle);
         return std::optional<RollPitch>(storedOffset);
     }
 

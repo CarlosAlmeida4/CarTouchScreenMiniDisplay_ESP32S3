@@ -15,6 +15,9 @@
 #include "esp_err.h"
 #include "esp_log.h"
 #include "esp_netif.h"
+#include "nvs_flash.h"
+#include "nvs.h"
+#include "esp_lcd_panel_commands.h"
 
 #include "sdkconfig.h"
 #include "freertos/queue.h"
@@ -23,6 +26,7 @@
 #include "esp_lcd_sh8601.h"
 #include "PipelineTypes.hpp"
 #include <bits/stdc++.h>
+#include <optional>
 
 struct DisplayPins {
     gpio_num_t pinNumLcdCs;
@@ -53,23 +57,33 @@ class Display {
     void setWifiConnectionHandler(std::function<void(const std::string&,const std::string&)>callback);
     void setInclinometerResetHandler(std::function<void(void)>);
     
+    void setBrightnessHandler(lv_event_t* e); //Needs to be public because its called from a external C function
+    
     void invokeSWUpdate(lv_event_t* e); //Needs to be public because its called from a external C function
     void invokeWifiConnection(const std::string& ssid,const std::string& passwrd);
     void invokeInclinometerReset(void);//Informs the Inclinometer that it needs to use the current values as zero
+    
     void SWUpdateFeedback(const std::string& Feedback); //Updates the feedback message comming from OTA 
     void WifiConnectionFeedback(const std::string& Feedback);//Updates the feedback message comming from WifiManager
+
+    esp_err_t setStoredBright() const;
+    
     static Display* m_activeInstance;
     
 private:
         
     QueueHandle_t RollPitchQueue_;
     QueueHandle_t WifiQueue_;
-    
+
+    esp_lcd_panel_io_handle_t m_IOhandle = NULL;
+    int32_t brightSlideVal;
+
     static TouchDrvCST92xx touch;
     
     static lv_disp_draw_buf_t disp_buf;
     static lv_disp_drv_t disp_drv;
     static SemaphoreHandle_t lvgl_mux;
+
     
     //----------Constants-------------//
     
@@ -117,6 +131,8 @@ private:
     static bool lvgl_lock(int timeout_ms);
     static void task_entry(void *arg);
     static bool notifyLvglFlushReady(esp_lcd_panel_io_handle_t panel_io, esp_lcd_panel_io_event_data_t *edata, void *user_ctx);
+
+    esp_err_t sendBrightnesstoScreen(int32_t &brightness_percent) const;
     
     void updateUI();
     void displayTask();
@@ -125,7 +141,7 @@ private:
     void InclinometerNewUI();
     void WifiUI();
 
-
+    std::optional<int32_t> getStoredBright() const;
 
     std::function<void(lv_event_t* )> m_SoftwareUpdateHandler;
     std::function<void(const std::string& ,const std::string& )> m_WifiConnectionHandler;

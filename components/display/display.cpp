@@ -564,11 +564,32 @@ extern "C" void UI_ConnectWifiCallback(lv_event_t * e)
     }
 }
 
-// TODO: Implement callback to QMI interface class, there the class shall store the offset in flash values and apply them to the roll and pitch variables
+
 extern "C" void UI_ZeroOutInclinometer(lv_event_t * e)
 {
     if(Display::m_activeInstance)
     {
         Display::m_activeInstance->invokeInclinometerReset();
     }
+}
+
+//TODO! Implement these callbacks
+extern "C" void UI_SetScreenRotation(lv_event_t * e)
+{
+
+}
+
+extern "C" void UI_ResetScreenRotation(lv_event_t * e)
+{
+
+}
+
+extern "C" void UI_StoreBrightness(lv_event_t * e)
+{
+
+}
+
+extern "C" void UI_ClearNVS(lv_event_t * e)
+{
+
 }

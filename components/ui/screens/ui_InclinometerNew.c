@@ -23,11 +23,11 @@ void ui_event_InclinometerNew(lv_event_t * e)
 
     if(event_code == LV_EVENT_GESTURE &&  lv_indev_get_gesture_dir(lv_indev_get_act()) == LV_DIR_RIGHT) {
         lv_indev_wait_release(lv_indev_get_act());
-        _ui_screen_change(&ui_Inclinometer, LV_SCR_LOAD_ANIM_MOVE_RIGHT, 50, 0, &ui_Inclinometer_screen_init);
+        _ui_screen_change(&ui_Inclinometer, LV_SCR_LOAD_ANIM_NONE, 50, 0, &ui_Inclinometer_screen_init);
     }
-    if(event_code == LV_EVENT_GESTURE &&  lv_indev_get_gesture_dir(lv_indev_get_act()) == LV_DIR_LEFT) {
+    if(event_code == LV_EVENT_GESTURE &&  lv_indev_get_gesture_dir(lv_indev_get_act()) == LV_DIR_BOTTOM) {
         lv_indev_wait_release(lv_indev_get_act());
-        _ui_screen_change(&ui_Wifi, LV_SCR_LOAD_ANIM_MOVE_LEFT, 500, 0, &ui_Wifi_screen_init);
+        _ui_screen_change(&ui_MainConfigScreen, LV_SCR_LOAD_ANIM_MOVE_BOTTOM, 500, 0, &ui_MainConfigScreen_screen_init);
     }
 }
 

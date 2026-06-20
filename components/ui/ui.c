@@ -38,6 +38,8 @@ void ui_init(void)
     ui_InclinometerGraph_screen_init();
     ui_Inclinometer_screen_init();
     ui_InclinometerNew_screen_init();
+    ui_MainConfigScreen_screen_init();
+    ui_MemoryEraseValidation_screen_init();
     ui_Wifi_screen_init();
     ui_OTAUpdate_screen_init();
     ui____initial_actions0 = lv_obj_create(NULL);
@@ -49,6 +51,8 @@ void ui_destroy(void)
     ui_InclinometerGraph_screen_destroy();
     ui_Inclinometer_screen_destroy();
     ui_InclinometerNew_screen_destroy();
+    ui_MainConfigScreen_screen_destroy();
+    ui_MemoryEraseValidation_screen_destroy();
     ui_Wifi_screen_destroy();
     ui_OTAUpdate_screen_destroy();
 }

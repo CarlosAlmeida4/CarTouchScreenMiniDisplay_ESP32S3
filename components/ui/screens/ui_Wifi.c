@@ -24,11 +24,7 @@ void ui_event_Wifi(lv_event_t * e)
 
     if(event_code == LV_EVENT_GESTURE &&  lv_indev_get_gesture_dir(lv_indev_get_act()) == LV_DIR_RIGHT) {
         lv_indev_wait_release(lv_indev_get_act());
-        _ui_screen_change(&ui_InclinometerNew, LV_SCR_LOAD_ANIM_MOVE_RIGHT, 500, 0, &ui_InclinometerNew_screen_init);
-    }
-    if(event_code == LV_EVENT_GESTURE &&  lv_indev_get_gesture_dir(lv_indev_get_act()) == LV_DIR_LEFT) {
-        lv_indev_wait_release(lv_indev_get_act());
-        _ui_screen_change(&ui_OTAUpdate, LV_SCR_LOAD_ANIM_MOVE_LEFT, 500, 0, &ui_OTAUpdate_screen_init);
+        _ui_screen_change(&ui_MainConfigScreen, LV_SCR_LOAD_ANIM_MOVE_RIGHT, 500, 0, &ui_MainConfigScreen_screen_init);
     }
 }
 

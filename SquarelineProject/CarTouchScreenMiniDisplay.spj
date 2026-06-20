@@ -4761,6 +4761,71 @@
                     "strtype": "SLIDER/Style_knob",
                     "strval": "lv.PART.KNOB, Rectangle, Pad",
                     "InheritedType": 11
+                  },
+                  {
+                    "disabled": false,
+                    "nid": 1001417,
+                    "strtype": "_event/EventHandler",
+                    "strval": "RELEASED",
+                    "childs": [
+                      {
+                        "nid": 1001418,
+                        "strtype": "_event/name",
+                        "strval": "UpdateBrightnessRuntime",
+                        "InheritedType": 10
+                      },
+                      {
+                        "nid": 1001419,
+                        "strtype": "_event/condition_C",
+                        "strval": "",
+                        "InheritedType": 10
+                      },
+                      {
+                        "nid": 1001420,
+                        "strtype": "_event/condition_P",
+                        "strval": "",
+                        "InheritedType": 10
+                      },
+                      {
+                        "nid": 1001421,
+                        "strtype": "_event/action",
+                        "strval": "CALL FUNCTION",
+                        "childs": [
+                          {
+                            "nid": 1001422,
+                            "strtype": "CALL FUNCTION/Name",
+                            "strval": "CALL FUNCTION",
+                            "InheritedType": 10
+                          },
+                          {
+                            "nid": 1001423,
+                            "strtype": "CALL FUNCTION/Call",
+                            "strval": "<{Function_name}>( event_struct )",
+                            "InheritedType": 10
+                          },
+                          {
+                            "nid": 1001424,
+                            "strtype": "CALL FUNCTION/CallC",
+                            "strval": "<{Function_name}>( e );",
+                            "InheritedType": 10
+                          },
+                          {
+                            "nid": 1001425,
+                            "strtype": "CALL FUNCTION/Function_name",
+                            "strval": "UI_UpdateBrightnessRuntime",
+                            "InheritedType": 10
+                          },
+                          {
+                            "nid": 1001426,
+                            "strtype": "CALL FUNCTION/Dont_export_function",
+                            "strval": "True",
+                            "InheritedType": 2
+                          }
+                        ],
+                        "InheritedType": 10
+                      }
+                    ],
+                    "InheritedType": 4
                   }
                 ],
                 "saved_objtypeKey": "SLIDER"
@@ -11161,7 +11226,7 @@
     "separate_screen_save": false,
     "hierarchy_state_save": false,
     "reverse_event_order": false,
-    "backup_cnt": 84,
+    "backup_cnt": 85,
     "autosave_cnt": 0,
     "group_color_cnt": 1,
     "imagebytearrayprefix": "",
@@ -11172,7 +11237,7 @@
     "naming": "Name",
     "naming_force_lowercase": false,
     "naming_add_subcomponent": false,
-    "nidcnt": 1001417,
+    "nidcnt": 1001427,
     "BitDepth": 16,
     "Name": "CarTouchScreenMiniDisplay"
   }

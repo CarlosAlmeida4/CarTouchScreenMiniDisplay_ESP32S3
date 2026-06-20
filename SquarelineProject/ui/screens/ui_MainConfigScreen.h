@@ -15,6 +15,7 @@ extern void ui_MainConfigScreen_screen_init(void);
 extern void ui_MainConfigScreen_screen_destroy(void);
 extern void ui_event_MainConfigScreen(lv_event_t * e);
 extern lv_obj_t * ui_MainConfigScreen;
+extern void ui_event_Brightness(lv_event_t * e);
 extern lv_obj_t * ui_Brightness;
 extern lv_obj_t * ui_BrightnessLabel;
 extern lv_obj_t * ui_Container1;

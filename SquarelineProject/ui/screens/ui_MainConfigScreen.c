@@ -34,6 +34,15 @@ void ui_event_MainConfigScreen(lv_event_t * e)
     }
 }
 
+void ui_event_Brightness(lv_event_t * e)
+{
+    lv_event_code_t event_code = lv_event_get_code(e);
+
+    if(event_code == LV_EVENT_RELEASED) {
+        UI_UpdateBrightnessRuntime(e);
+    }
+}
+
 void ui_event_SetRotation(lv_event_t * e)
 {
     lv_event_code_t event_code = lv_event_get_code(e);
@@ -268,6 +277,7 @@ void ui_MainConfigScreen_screen_init(void)
     lv_obj_set_style_text_align(ui_SoftwareUpdateLabel, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_font(ui_SoftwareUpdateLabel, &ui_font_SmallerEmblemaOne, LV_PART_MAIN | LV_STATE_DEFAULT);
 
+    lv_obj_add_event_cb(ui_Brightness, ui_event_Brightness, LV_EVENT_ALL, NULL);
     lv_obj_add_event_cb(ui_SetRotation, ui_event_SetRotation, LV_EVENT_ALL, NULL);
     lv_obj_add_event_cb(ui_ResetRotation, ui_event_ResetRotation, LV_EVENT_ALL, NULL);
     lv_obj_add_event_cb(ui_StoreBrightness, ui_event_StoreBrightness, LV_EVENT_ALL, NULL);

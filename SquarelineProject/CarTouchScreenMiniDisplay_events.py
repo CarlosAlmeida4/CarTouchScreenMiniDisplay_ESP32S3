@@ -26,3 +26,7 @@ def UI_ResetScreenRotation(event_struct):
 def UI_StoreBrightness(event_struct):
     return
 
+
+def UI_UpdateBrightnessRuntime(event_struct):
+    return
+

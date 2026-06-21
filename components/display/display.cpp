@@ -591,7 +591,6 @@ std::optional<int32_t> Display::getStoredBright() const
     nvs_err = nvs_open("Brightness",NVS_READONLY,&nvsHandle);
     if (nvs_err != ESP_OK) {
         ESP_LOGE(DISPLAY_TAG, "Error (%s) opening NVS handle!", esp_err_to_name(nvs_err));
-        nvs_close(nvsHandle);
         return std::nullopt;
     }
 
@@ -622,7 +621,6 @@ esp_err_t Display::setStoredBright() const
     nvs_err = nvs_open("Brightness",NVS_READWRITE,&nvsHandle);
     if (nvs_err != ESP_OK) {
         ESP_LOGE(DISPLAY_TAG, "Error (%s) opening NVS handle!", esp_err_to_name(nvs_err));
-        nvs_close(nvsHandle);
         return nvs_err;
     }
 
@@ -636,6 +634,16 @@ esp_err_t Display::setStoredBright() const
             break;
         default:
             ESP_LOGE(DISPLAY_TAG, "Error (%s) reading!", esp_err_to_name(nvs_err));
+    }
+
+    // Commit changes
+    // After setting any values, nvs_commit() must be called to ensure changes are written
+    // to flash storage. Implementations may write to storage at other times,
+    // but this is not guaranteed.
+    ESP_LOGI(DISPLAY_TAG, "\nCommitting updates in NVS...");
+    nvs_err = nvs_commit(nvsHandle);
+    if (nvs_err != ESP_OK) {
+        ESP_LOGE(DISPLAY_TAG, "Failed to commit NVS changes!");
     }
 
     nvs_close(nvsHandle);

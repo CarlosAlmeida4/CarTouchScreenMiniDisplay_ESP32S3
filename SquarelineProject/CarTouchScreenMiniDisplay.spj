@@ -7104,6 +7104,82 @@
                       }
                     ],
                     "InheritedType": 4
+                  },
+                  {
+                    "disabled": false,
+                    "nid": 1001427,
+                    "strtype": "_event/EventHandler",
+                    "strval": "RELEASED",
+                    "childs": [
+                      {
+                        "nid": 1001428,
+                        "strtype": "_event/name",
+                        "strval": "ReturnToMainConfigScreen",
+                        "InheritedType": 10
+                      },
+                      {
+                        "nid": 1001429,
+                        "strtype": "_event/condition_C",
+                        "strval": "",
+                        "InheritedType": 10
+                      },
+                      {
+                        "nid": 1001430,
+                        "strtype": "_event/condition_P",
+                        "strval": "",
+                        "InheritedType": 10
+                      },
+                      {
+                        "nid": 1001431,
+                        "strtype": "_event/action",
+                        "strval": "CHANGE SCREEN",
+                        "childs": [
+                          {
+                            "nid": 1001432,
+                            "strtype": "CHANGE SCREEN/Name",
+                            "strval": "CHANGE SCREEN",
+                            "InheritedType": 10
+                          },
+                          {
+                            "nid": 1001433,
+                            "strtype": "CHANGE SCREEN/Call",
+                            "strval": "ChangeScreen( <{Screen_to}>, lv.SCR_LOAD_ANIM.<{Fade_mode}>, <{Speed}>, <{Delay}>)",
+                            "InheritedType": 10
+                          },
+                          {
+                            "nid": 1001434,
+                            "strtype": "CHANGE SCREEN/CallC",
+                            "strval": "_ui_screen_change( &<{Screen_to}>, LV_SCR_LOAD_ANIM_<{Fade_mode}>, <{Speed}>, <{Delay}>, &<{Screen_to}>_screen_init);",
+                            "InheritedType": 10
+                          },
+                          {
+                            "nid": 1001435,
+                            "strtype": "CHANGE SCREEN/Screen_to",
+                            "strval": "GUID47304651-93935S216525170",
+                            "InheritedType": 9
+                          },
+                          {
+                            "nid": 1001436,
+                            "strtype": "CHANGE SCREEN/Fade_mode",
+                            "strval": "FADE_ON",
+                            "InheritedType": 3
+                          },
+                          {
+                            "nid": 1001437,
+                            "strtype": "CHANGE SCREEN/Speed",
+                            "integer": 500,
+                            "InheritedType": 6
+                          },
+                          {
+                            "nid": 1001438,
+                            "strtype": "CHANGE SCREEN/Delay",
+                            "InheritedType": 6
+                          }
+                        ],
+                        "InheritedType": 10
+                      }
+                    ],
+                    "InheritedType": 4
                   }
                 ],
                 "saved_objtypeKey": "BUTTON"
@@ -10132,7 +10208,7 @@
   },
   "animations": [],
   "selected_theme": "Default",
-  "selected_screen": "GUID47304651-93935S216525170",
+  "selected_screen": "GUID19481224-722341S2405171",
   "info": {
     "name": "CarTouchScreenMiniDisplay.spj",
     "depth": 2,
@@ -10161,7 +10237,7 @@
     "separate_screen_save": false,
     "hierarchy_state_save": false,
     "reverse_event_order": false,
-    "backup_cnt": 87,
+    "backup_cnt": 89,
     "autosave_cnt": 0,
     "group_color_cnt": 1,
     "imagebytearrayprefix": "",
@@ -10172,7 +10248,7 @@
     "naming": "Name",
     "naming_force_lowercase": false,
     "naming_add_subcomponent": false,
-    "nidcnt": 1001427,
+    "nidcnt": 1001439,
     "BitDepth": 16,
     "Name": "CarTouchScreenMiniDisplay"
   }

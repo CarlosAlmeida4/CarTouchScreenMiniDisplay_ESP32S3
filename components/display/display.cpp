@@ -180,7 +180,7 @@ void Display::init() {
     assert(lvgl_mux);
 
     ui_init();
-    lv_scr_load(ui_Inclinometer);   // VERY IMPORTANT
+    lv_scr_load(ui_InclinometerNew);   // VERY IMPORTANT
     //Setup brightness
     brightSlideVal = getStoredBright().value_or(100);
     lv_slider_set_value(uic_Brightness,brightSlideVal,LV_ANIM_OFF);

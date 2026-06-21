@@ -19,6 +19,9 @@ void ui_event_ConfirmErase(lv_event_t * e)
     if(event_code == LV_EVENT_CLICKED) {
         UI_ClearNVS(e);
     }
+    if(event_code == LV_EVENT_RELEASED) {
+        _ui_screen_change(&ui_MainConfigScreen, LV_SCR_LOAD_ANIM_FADE_ON, 500, 0, &ui_MainConfigScreen_screen_init);
+    }
 }
 
 void ui_event_DenyErase(lv_event_t * e)

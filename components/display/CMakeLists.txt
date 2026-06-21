@@ -13,4 +13,5 @@ idf_component_register(
         SensorLib
         PipelineTypes
         esp_netif 
+        nvs_flash
 )

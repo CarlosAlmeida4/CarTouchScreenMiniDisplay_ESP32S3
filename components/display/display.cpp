@@ -98,7 +98,7 @@ void Display::init() {
     ESP_ERROR_CHECK(spi_bus_initialize(LCD_HOST, &buscfg, SPI_DMA_CH_AUTO));
 
     ESP_LOGI(DISPLAY_TAG, "Install panel IO");
-    esp_lcd_panel_io_handle_t io_handle = NULL;
+    
     const esp_lcd_panel_io_spi_config_t io_config = SH8601_PANEL_IO_QSPI_CONFIG(Pins.pinNumLcdCs,
                                                                                 notifyLvglFlushReady,
                                                                                 &disp_drv);
@@ -110,7 +110,7 @@ void Display::init() {
         },
     };
     // Attach the LCD to the SPI bus
-    ESP_ERROR_CHECK(esp_lcd_new_panel_io_spi((esp_lcd_spi_bus_handle_t)LCD_HOST, &io_config, &io_handle));
+    ESP_ERROR_CHECK(esp_lcd_new_panel_io_spi((esp_lcd_spi_bus_handle_t)LCD_HOST, &io_config, &m_IOhandle));
 
     esp_lcd_panel_handle_t panel_handle = NULL;
     const esp_lcd_panel_dev_config_t panel_config = {
@@ -120,7 +120,7 @@ void Display::init() {
         .vendor_config = &vendor_config,
     };
     ESP_LOGI(DISPLAY_TAG, "Install SH8601 panel driver");
-    ESP_ERROR_CHECK(esp_lcd_new_panel_sh8601(io_handle, &panel_config, &panel_handle));
+    ESP_ERROR_CHECK(esp_lcd_new_panel_sh8601(m_IOhandle, &panel_config, &panel_handle));
     ESP_ERROR_CHECK(esp_lcd_panel_reset(panel_handle));
     ESP_ERROR_CHECK(esp_lcd_panel_init(panel_handle));
     // user can flush pre-defined pattern to the screen before we turn on the screen or backlight
@@ -180,7 +180,15 @@ void Display::init() {
     assert(lvgl_mux);
 
     ui_init();
-    lv_scr_load(ui_Inclinometer);   // VERY IMPORTANT
+    lv_scr_load(ui_InclinometerNew);   // VERY IMPORTANT
+    //Setup brightness
+    brightSlideVal = getStoredBright().value_or(100);
+    lv_slider_set_value(uic_Brightness,brightSlideVal,LV_ANIM_OFF);
+    esp_err_t i2c_err = sendBrightnesstoScreen(brightSlideVal);
+    if(i2c_err != ESP_OK)
+    {
+        ESP_LOGE(DISPLAY_TAG, "Error (%s) opening setting brightness!", esp_err_to_name(i2c_err));
+    }
     ui_ready.store(true, std::memory_order_release);
     
     xTaskCreate(task_entry, "LVGL", LVGL_TASK_STACK_SIZE, this, LVGL_TASK_PRIORITY, NULL);
@@ -469,6 +477,39 @@ void Display::setInclinometerResetHandler(std::function<void(void)>callback)
     m_ResetInclinometerHandler = std::move(callback);
 }
 
+void Display::setBrightnessHandler(lv_event_t* e)
+{
+    //Get Brightness level from variable
+    brightSlideVal = lv_slider_get_value(uic_Brightness);
+    ESP_LOGI(DISPLAY_TAG,"Brightness Slide Level: %d ",brightSlideVal);
+
+    //Send it via i2c
+    esp_err_t I2Cresult = sendBrightnesstoScreen(brightSlideVal);
+    if(I2Cresult!= ESP_OK)
+    {
+        ESP_LOGE(DISPLAY_TAG,"Error in sending command: %s", esp_err_to_name(I2Cresult));
+    }
+ 
+}
+
+esp_err_t Display::sendBrightnesstoScreen(const int32_t &brightness_percent) const
+{
+    if (brightness_percent < 0 || brightness_percent > 100)
+    {
+        ESP_LOGE(DISPLAY_TAG, "Invalid brightness percentage. Should be between 0 and 100.");
+        return ESP_ERR_INVALID_ARG;
+    }
+
+    uint8_t brightness = static_cast<uint8_t>((brightness_percent * 255 / 100));
+    uint32_t lcd_cmd = LCD_CMD_WRDISBV;
+    lcd_cmd &= 0xff;
+    lcd_cmd <<= 8;
+    lcd_cmd |= 0x02 << 24;
+    uint8_t param = brightness;
+
+    return esp_lcd_panel_io_tx_param(m_IOhandle,lcd_cmd,&param,1);
+}
+
 /*
     Label properties settings
 */
@@ -537,6 +578,80 @@ void Display::WifiConnectionFeedback(const std::string& Feedback)
 }
 
 /*
+    NVS operations
+*/
+
+std::optional<int32_t> Display::getStoredBright() const
+{
+    
+    esp_err_t nvs_err;
+
+    nvs_handle_t nvsHandle;
+
+    nvs_err = nvs_open("Brightness",NVS_READONLY,&nvsHandle);
+    if (nvs_err != ESP_OK) {
+        ESP_LOGE(DISPLAY_TAG, "Error (%s) opening NVS handle!", esp_err_to_name(nvs_err));
+        return std::nullopt;
+    }
+
+    ESP_LOGI(DISPLAY_TAG,"Reading Brightness");
+    int32_t BrigthnessLocal;
+    nvs_err = nvs_get_i32(nvsHandle,"Brightness",&BrigthnessLocal);
+    switch (nvs_err) {
+        case ESP_OK:
+            ESP_LOGI(DISPLAY_TAG, "Read Brightness = %" PRIu32, BrigthnessLocal);
+            break;
+        case ESP_ERR_NVS_NOT_FOUND:
+            ESP_LOGW(DISPLAY_TAG, "The value is not initialized yet!");
+            break;
+        default:
+            ESP_LOGE(DISPLAY_TAG, "Error (%s) reading!", esp_err_to_name(nvs_err));
+    }
+
+    nvs_close(nvsHandle);
+    return nvs_err == ESP_OK ? std::optional<int32_t>(BrigthnessLocal) : std::nullopt;
+}
+
+esp_err_t Display::setStoredBright() const
+{
+    esp_err_t nvs_err;
+
+    nvs_handle_t nvsHandle;
+
+    nvs_err = nvs_open("Brightness",NVS_READWRITE,&nvsHandle);
+    if (nvs_err != ESP_OK) {
+        ESP_LOGE(DISPLAY_TAG, "Error (%s) opening NVS handle!", esp_err_to_name(nvs_err));
+        return nvs_err;
+    }
+
+    nvs_err = nvs_set_i32(nvsHandle,"Brightness",brightSlideVal);
+    switch (nvs_err) {
+        case ESP_OK:
+            ESP_LOGI(DISPLAY_TAG, "Write Brightness = %" PRIu32, brightSlideVal);
+            break;
+        case ESP_ERR_NVS_NOT_FOUND:
+            ESP_LOGW(DISPLAY_TAG, "The value is not initialized yet!");
+            break;
+        default:
+            ESP_LOGE(DISPLAY_TAG, "Error (%s) reading!", esp_err_to_name(nvs_err));
+    }
+
+    // Commit changes
+    // After setting any values, nvs_commit() must be called to ensure changes are written
+    // to flash storage. Implementations may write to storage at other times,
+    // but this is not guaranteed.
+    ESP_LOGI(DISPLAY_TAG, "\nCommitting updates in NVS...");
+    nvs_err = nvs_commit(nvsHandle);
+    if (nvs_err != ESP_OK) {
+        ESP_LOGE(DISPLAY_TAG, "Failed to commit NVS changes!");
+    }
+
+    nvs_close(nvsHandle);
+    return nvs_err;
+}
+    
+
+/*
     C Callbacks
 */
 
@@ -548,7 +663,6 @@ extern "C" void UI_RequestSWUpdate(lv_event_t * e)
     }
 }
 
-// TODO: Implement callback
 extern "C" void UI_ConnectWifiCallback(lv_event_t * e)
 {
     char ssidbuf[33] = {};
@@ -564,11 +678,36 @@ extern "C" void UI_ConnectWifiCallback(lv_event_t * e)
     }
 }
 
-// TODO: Implement callback to QMI interface class, there the class shall store the offset in flash values and apply them to the roll and pitch variables
 extern "C" void UI_ZeroOutInclinometer(lv_event_t * e)
 {
     if(Display::m_activeInstance)
     {
         Display::m_activeInstance->invokeInclinometerReset();
+    }
+}
+
+extern "C" void UI_StoreBrightness(lv_event_t * e)
+{
+    if(Display::m_activeInstance)
+    {
+        esp_err_t nvs_err = Display::m_activeInstance->setStoredBright();
+        if(nvs_err!=ESP_OK)
+        {
+            ESP_LOGE("Display","Error writing into flash: %s",esp_err_to_name(nvs_err));
+        }
+    }
+}
+
+extern "C" void UI_ClearNVS(lv_event_t * e)
+{
+    ESP_LOGI("Display","Clear NVS request");
+    ESP_ERROR_CHECK(nvs_flash_erase());
+}
+
+extern "C" void UI_UpdateBrightnessRuntime(lv_event_t * e)
+{   
+    if(Display::m_activeInstance)
+    {
+        Display::m_activeInstance->setBrightnessHandler(e);
     }
 }

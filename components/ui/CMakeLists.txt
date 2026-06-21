@@ -8,6 +8,8 @@ idf_component_register(
         "screens/ui_InclinometerGraph.c"
 		"screens/ui_Inclinometer.c"
 		"screens/ui_InclinometerNew.c"
+		"screens/ui_MainConfigScreen.c"
+		"screens/ui_MemoryEraseValidation.c"
 		"screens/ui_Wifi.c"
 		"screens/ui_OTAUpdate.c"
 		"images/ui_img_rollpajero2_reduced_png.c"

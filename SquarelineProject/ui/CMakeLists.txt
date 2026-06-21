@@ -3,6 +3,8 @@ SET(SOURCES components/ui_comp_softwarupdate.c
     screens/ui_InclinometerGraph.c
     screens/ui_Inclinometer.c
     screens/ui_InclinometerNew.c
+    screens/ui_MainConfigScreen.c
+    screens/ui_MemoryEraseValidation.c
     screens/ui_Wifi.c
     screens/ui_OTAUpdate.c
     ui.c

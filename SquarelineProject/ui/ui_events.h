@@ -12,8 +12,6 @@ extern "C" {
 
 void UI_ZeroOutInclinometer(lv_event_t * e);
 void UI_UpdateBrightnessRuntime(lv_event_t * e);
-void UI_SetScreenRotation(lv_event_t * e);
-void UI_ResetScreenRotation(lv_event_t * e);
 void UI_StoreBrightness(lv_event_t * e);
 void UI_ClearNVS(lv_event_t * e);
 void UI_ConnectWifiCallback(lv_event_t * e);

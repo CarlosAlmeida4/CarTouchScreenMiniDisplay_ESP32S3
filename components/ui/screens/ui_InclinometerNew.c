@@ -62,7 +62,7 @@ void ui_InclinometerNew_screen_init(void)
     lv_obj_set_align(ui_PajeroPitch, LV_ALIGN_BOTTOM_MID);
     lv_obj_add_flag(ui_PajeroPitch, LV_OBJ_FLAG_ADV_HITTEST);     /// Flags
     lv_obj_clear_flag(ui_PajeroPitch, LV_OBJ_FLAG_SCROLLABLE);      /// Flags
-    lv_img_set_zoom(ui_PajeroPitch, 250);
+    lv_img_set_zoom(ui_PajeroPitch, 220);
 
     ui_PajeroRoll = lv_img_create(ui_InclinometerNew);
     lv_img_set_src(ui_PajeroRoll, &ui_img_rollreduced_png);
@@ -74,7 +74,7 @@ void ui_InclinometerNew_screen_init(void)
     lv_obj_add_flag(ui_PajeroRoll, LV_OBJ_FLAG_ADV_HITTEST);     /// Flags
     lv_obj_clear_flag(ui_PajeroRoll, LV_OBJ_FLAG_SCROLLABLE);      /// Flags
     lv_img_set_angle(ui_PajeroRoll, -450);
-    lv_img_set_zoom(ui_PajeroRoll, 250);
+    lv_img_set_zoom(ui_PajeroRoll, 220);
 
     ui_ResetInclinometer = lv_btn_create(ui_InclinometerNew);
     lv_obj_set_width(ui_ResetInclinometer, 80);

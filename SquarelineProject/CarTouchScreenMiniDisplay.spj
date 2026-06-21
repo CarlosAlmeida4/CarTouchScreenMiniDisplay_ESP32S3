@@ -3393,7 +3393,7 @@
               {
                 "nid": 1050,
                 "strtype": "IMAGE/Scale",
-                "integer": 250,
+                "integer": 220,
                 "InheritedType": 6
               },
               {
@@ -3568,7 +3568,7 @@
               {
                 "nid": 1050,
                 "strtype": "IMAGE/Scale",
-                "integer": 250,
+                "integer": 220,
                 "InheritedType": 6
               },
               {
@@ -10208,7 +10208,7 @@
   },
   "animations": [],
   "selected_theme": "Default",
-  "selected_screen": "GUID19481224-722341S2405171",
+  "selected_screen": "GUID39790559-923514S6625164",
   "info": {
     "name": "CarTouchScreenMiniDisplay.spj",
     "depth": 2,
@@ -10237,7 +10237,7 @@
     "separate_screen_save": false,
     "hierarchy_state_save": false,
     "reverse_event_order": false,
-    "backup_cnt": 89,
+    "backup_cnt": 90,
     "autosave_cnt": 0,
     "group_color_cnt": 1,
     "imagebytearrayprefix": "",

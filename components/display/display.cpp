@@ -655,7 +655,6 @@ extern "C" void UI_RequestSWUpdate(lv_event_t * e)
     }
 }
 
-// TODO: Implement callback
 extern "C" void UI_ConnectWifiCallback(lv_event_t * e)
 {
     char ssidbuf[33] = {};
@@ -671,24 +670,12 @@ extern "C" void UI_ConnectWifiCallback(lv_event_t * e)
     }
 }
 
-
 extern "C" void UI_ZeroOutInclinometer(lv_event_t * e)
 {
     if(Display::m_activeInstance)
     {
         Display::m_activeInstance->invokeInclinometerReset();
     }
-}
-
-//TODO! Implement these callbacks
-extern "C" void UI_SetScreenRotation(lv_event_t * e)
-{
-
-}
-
-extern "C" void UI_ResetScreenRotation(lv_event_t * e)
-{
-
 }
 
 extern "C" void UI_StoreBrightness(lv_event_t * e)

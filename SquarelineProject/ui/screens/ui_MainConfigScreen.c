@@ -9,6 +9,12 @@ lv_obj_t * uic_Brightness;
 lv_obj_t * ui_MainConfigScreen = NULL;
 lv_obj_t * ui_Brightness = NULL;
 lv_obj_t * ui_BrightnessLabel = NULL;
+lv_obj_t * ui_Container1 = NULL;
+lv_obj_t * ui_SetRotation = NULL;
+lv_obj_t * ui_ScreenRotation = NULL;
+lv_obj_t * ui_SetLabel = NULL;
+lv_obj_t * ui_ResetRotation = NULL;
+lv_obj_t * ui_ResetLabel = NULL;
 lv_obj_t * ui_StoreBrightness = NULL;
 lv_obj_t * ui_SaveBrightness = NULL;
 lv_obj_t * ui_EraseMemory = NULL;
@@ -34,6 +40,24 @@ void ui_event_Brightness(lv_event_t * e)
 
     if(event_code == LV_EVENT_RELEASED) {
         UI_UpdateBrightnessRuntime(e);
+    }
+}
+
+void ui_event_SetRotation(lv_event_t * e)
+{
+    lv_event_code_t event_code = lv_event_get_code(e);
+
+    if(event_code == LV_EVENT_CLICKED) {
+        UI_SetScreenRotation(e);
+    }
+}
+
+void ui_event_ResetRotation(lv_event_t * e)
+{
+    lv_event_code_t event_code = lv_event_get_code(e);
+
+    if(event_code == LV_EVENT_CLICKED) {
+        UI_ResetScreenRotation(e);
     }
 }
 
@@ -83,10 +107,10 @@ void ui_MainConfigScreen_screen_init(void)
     ui_Brightness = lv_slider_create(ui_MainConfigScreen);
     lv_slider_set_value(ui_Brightness, 0, LV_ANIM_OFF);
     if(lv_slider_get_mode(ui_Brightness) == LV_SLIDER_MODE_RANGE) lv_slider_set_left_value(ui_Brightness, 0, LV_ANIM_OFF);
-    lv_obj_set_width(ui_Brightness, 280);
+    lv_obj_set_width(ui_Brightness, 172);
     lv_obj_set_height(ui_Brightness, 33);
-    lv_obj_set_x(ui_Brightness, 3);
-    lv_obj_set_y(ui_Brightness, 108);
+    lv_obj_set_x(ui_Brightness, -74);
+    lv_obj_set_y(ui_Brightness, 96);
     lv_obj_set_align(ui_Brightness, LV_ALIGN_TOP_MID);
     lv_obj_set_style_bg_color(ui_Brightness, lv_color_hex(0x868686), LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_bg_opa(ui_Brightness, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
@@ -111,11 +135,71 @@ void ui_MainConfigScreen_screen_init(void)
     lv_label_set_text(ui_BrightnessLabel, "Brightness");
     lv_obj_set_style_text_font(ui_BrightnessLabel, &ui_font_HeadingDegree, LV_PART_MAIN | LV_STATE_DEFAULT);
 
+    ui_Container1 = lv_obj_create(ui_MainConfigScreen);
+    lv_obj_remove_style_all(ui_Container1);
+    lv_obj_set_width(ui_Container1, 211);
+    lv_obj_set_height(ui_Container1, 95);
+    lv_obj_set_x(ui_Container1, -109);
+    lv_obj_set_y(ui_Container1, -13);
+    lv_obj_set_align(ui_Container1, LV_ALIGN_CENTER);
+    lv_obj_clear_flag(ui_Container1, LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_SCROLLABLE);      /// Flags
+
+    ui_SetRotation = lv_btn_create(ui_Container1);
+    lv_obj_set_width(ui_SetRotation, 72);
+    lv_obj_set_height(ui_SetRotation, 50);
+    lv_obj_set_x(ui_SetRotation, -57);
+    lv_obj_set_y(ui_SetRotation, 21);
+    lv_obj_set_align(ui_SetRotation, LV_ALIGN_CENTER);
+    lv_obj_add_flag(ui_SetRotation, LV_OBJ_FLAG_SCROLL_ON_FOCUS);     /// Flags
+    lv_obj_clear_flag(ui_SetRotation, LV_OBJ_FLAG_SCROLLABLE);      /// Flags
+    lv_obj_set_style_bg_color(ui_SetRotation, lv_color_hex(0xE09514), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_opa(ui_SetRotation, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_font(ui_SetRotation, &ui_font_SmallerEmblemaOne, LV_PART_MAIN | LV_STATE_DEFAULT);
+
+    ui_ScreenRotation = lv_label_create(ui_Container1);
+    lv_obj_set_width(ui_ScreenRotation, LV_SIZE_CONTENT);   /// 1
+    lv_obj_set_height(ui_ScreenRotation, LV_SIZE_CONTENT);    /// 1
+    lv_obj_set_x(ui_ScreenRotation, 2);
+    lv_obj_set_y(ui_ScreenRotation, -27);
+    lv_obj_set_align(ui_ScreenRotation, LV_ALIGN_CENTER);
+    lv_label_set_text(ui_ScreenRotation, "Screen Rotation");
+    lv_obj_set_style_text_font(ui_ScreenRotation, &ui_font_SmallerEmblemaOne, LV_PART_MAIN | LV_STATE_DEFAULT);
+
+    ui_SetLabel = lv_label_create(ui_Container1);
+    lv_obj_set_width(ui_SetLabel, LV_SIZE_CONTENT);   /// 1
+    lv_obj_set_height(ui_SetLabel, LV_SIZE_CONTENT);    /// 1
+    lv_obj_set_x(ui_SetLabel, -58);
+    lv_obj_set_y(ui_SetLabel, 20);
+    lv_obj_set_align(ui_SetLabel, LV_ALIGN_CENTER);
+    lv_label_set_text(ui_SetLabel, "Set");
+    lv_obj_set_style_text_font(ui_SetLabel, &ui_font_SmallerEmblemaOne, LV_PART_MAIN | LV_STATE_DEFAULT);
+
+    ui_ResetRotation = lv_btn_create(ui_Container1);
+    lv_obj_set_width(ui_ResetRotation, 73);
+    lv_obj_set_height(ui_ResetRotation, 50);
+    lv_obj_set_x(ui_ResetRotation, 55);
+    lv_obj_set_y(ui_ResetRotation, 20);
+    lv_obj_set_align(ui_ResetRotation, LV_ALIGN_CENTER);
+    lv_obj_add_flag(ui_ResetRotation, LV_OBJ_FLAG_SCROLL_ON_FOCUS);     /// Flags
+    lv_obj_clear_flag(ui_ResetRotation, LV_OBJ_FLAG_SCROLLABLE);      /// Flags
+    lv_obj_set_style_bg_color(ui_ResetRotation, lv_color_hex(0xE09514), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_opa(ui_ResetRotation, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_font(ui_ResetRotation, &ui_font_SmallerEmblemaOne, LV_PART_MAIN | LV_STATE_DEFAULT);
+
+    ui_ResetLabel = lv_label_create(ui_Container1);
+    lv_obj_set_width(ui_ResetLabel, LV_SIZE_CONTENT);   /// 1
+    lv_obj_set_height(ui_ResetLabel, LV_SIZE_CONTENT);    /// 1
+    lv_obj_set_x(ui_ResetLabel, 57);
+    lv_obj_set_y(ui_ResetLabel, 19);
+    lv_obj_set_align(ui_ResetLabel, LV_ALIGN_CENTER);
+    lv_label_set_text(ui_ResetLabel, "Reset");
+    lv_obj_set_style_text_font(ui_ResetLabel, &ui_font_SmallerEmblemaOne, LV_PART_MAIN | LV_STATE_DEFAULT);
+
     ui_StoreBrightness = lv_btn_create(ui_MainConfigScreen);
     lv_obj_set_width(ui_StoreBrightness, 149);
     lv_obj_set_height(ui_StoreBrightness, 59);
-    lv_obj_set_x(ui_StoreBrightness, -95);
-    lv_obj_set_y(ui_StoreBrightness, -4);
+    lv_obj_set_x(ui_StoreBrightness, 105);
+    lv_obj_set_y(ui_StoreBrightness, -117);
     lv_obj_set_align(ui_StoreBrightness, LV_ALIGN_CENTER);
     lv_obj_add_flag(ui_StoreBrightness, LV_OBJ_FLAG_SCROLL_ON_FOCUS);     /// Flags
     lv_obj_clear_flag(ui_StoreBrightness, LV_OBJ_FLAG_SCROLLABLE);      /// Flags
@@ -125,8 +209,8 @@ void ui_MainConfigScreen_screen_init(void)
     ui_SaveBrightness = lv_label_create(ui_MainConfigScreen);
     lv_obj_set_width(ui_SaveBrightness, LV_SIZE_CONTENT);   /// 1
     lv_obj_set_height(ui_SaveBrightness, LV_SIZE_CONTENT);    /// 1
-    lv_obj_set_x(ui_SaveBrightness, -94);
-    lv_obj_set_y(ui_SaveBrightness, -3);
+    lv_obj_set_x(ui_SaveBrightness, 107);
+    lv_obj_set_y(ui_SaveBrightness, -117);
     lv_obj_set_align(ui_SaveBrightness, LV_ALIGN_CENTER);
     lv_label_set_text(ui_SaveBrightness, "     Save \nBrightness");
     lv_obj_set_style_text_font(ui_SaveBrightness, &ui_font_SmallerEmblemaOne, LV_PART_MAIN | LV_STATE_DEFAULT);
@@ -194,6 +278,8 @@ void ui_MainConfigScreen_screen_init(void)
     lv_obj_set_style_text_font(ui_SoftwareUpdateLabel, &ui_font_SmallerEmblemaOne, LV_PART_MAIN | LV_STATE_DEFAULT);
 
     lv_obj_add_event_cb(ui_Brightness, ui_event_Brightness, LV_EVENT_ALL, NULL);
+    lv_obj_add_event_cb(ui_SetRotation, ui_event_SetRotation, LV_EVENT_ALL, NULL);
+    lv_obj_add_event_cb(ui_ResetRotation, ui_event_ResetRotation, LV_EVENT_ALL, NULL);
     lv_obj_add_event_cb(ui_StoreBrightness, ui_event_StoreBrightness, LV_EVENT_ALL, NULL);
     lv_obj_add_event_cb(ui_EraseMemory, ui_event_EraseMemory, LV_EVENT_ALL, NULL);
     lv_obj_add_event_cb(ui_WifiConfig, ui_event_WifiConfig, LV_EVENT_ALL, NULL);
@@ -212,6 +298,12 @@ void ui_MainConfigScreen_screen_destroy(void)
     uic_Brightness = NULL;
     ui_Brightness = NULL;
     ui_BrightnessLabel = NULL;
+    ui_Container1 = NULL;
+    ui_SetRotation = NULL;
+    ui_ScreenRotation = NULL;
+    ui_SetLabel = NULL;
+    ui_ResetRotation = NULL;
+    ui_ResetLabel = NULL;
     ui_StoreBrightness = NULL;
     ui_SaveBrightness = NULL;
     ui_EraseMemory = NULL;

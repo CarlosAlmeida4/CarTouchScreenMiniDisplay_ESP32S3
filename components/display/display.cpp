@@ -98,7 +98,7 @@ void Display::init() {
     ESP_ERROR_CHECK(spi_bus_initialize(LCD_HOST, &buscfg, SPI_DMA_CH_AUTO));
 
     ESP_LOGI(DISPLAY_TAG, "Install panel IO");
-    esp_lcd_panel_io_handle_t io_handle = NULL;
+    
     const esp_lcd_panel_io_spi_config_t io_config = SH8601_PANEL_IO_QSPI_CONFIG(Pins.pinNumLcdCs,
                                                                                 notifyLvglFlushReady,
                                                                                 &disp_drv);
@@ -492,7 +492,7 @@ void Display::setBrightnessHandler(lv_event_t* e)
  
 }
 
-esp_err_t Display::sendBrightnesstoScreen(int32_t &brightness_percent) const
+esp_err_t Display::sendBrightnesstoScreen(const int32_t &brightness_percent) const
 {
     if (brightness_percent < 0 || brightness_percent > 100)
     {
@@ -599,7 +599,7 @@ std::optional<int32_t> Display::getStoredBright() const
     nvs_err = nvs_get_i32(nvsHandle,"Brightness",&BrigthnessLocal);
     switch (nvs_err) {
         case ESP_OK:
-            ESP_LOGI(DISPLAY_TAG, "Read Roll = %" PRIu32, BrigthnessLocal);
+            ESP_LOGI(DISPLAY_TAG, "Read Brightness = %" PRIu32, BrigthnessLocal);
             break;
         case ESP_ERR_NVS_NOT_FOUND:
             ESP_LOGW(DISPLAY_TAG, "The value is not initialized yet!");

@@ -132,7 +132,7 @@ private:
     static void task_entry(void *arg);
     static bool notifyLvglFlushReady(esp_lcd_panel_io_handle_t panel_io, esp_lcd_panel_io_event_data_t *edata, void *user_ctx);
 
-    esp_err_t sendBrightnesstoScreen(int32_t &brightness_percent) const;
+    esp_err_t sendBrightnesstoScreen(const int32_t &brightness_percent) const;
     
     void updateUI();
     void displayTask();

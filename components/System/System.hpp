@@ -17,9 +17,15 @@
 #include "WifiManager.hpp"
 #include "Diagnostics.hpp"
 
+#include <string.h>
+
 
 class System {
 public:
+
+
+    const std::string ReleaseTAG = "CarTSmD-v1.1.2";
+    
 
     System(): RollPitchQueue(xQueueCreate(1,sizeof(RollPitch))),
     WifiMgrQueue(xQueueCreate(1,sizeof(WifiManagerPipeline))),

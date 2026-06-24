@@ -83,3 +83,4 @@ components/WifiManager/Secrets.hpp
 components/WifiManager/Secrets.cpp
 components/esp_lcd_sh8601/test_apps/sdkconfig
 test_apps/component_unit_tests/sdkconfig
+components/OTAUpdater/OTAserver.hpp

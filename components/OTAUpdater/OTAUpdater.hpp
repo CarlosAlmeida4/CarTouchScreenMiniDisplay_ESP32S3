@@ -9,6 +9,8 @@
 #include "esp_log.h"
 #include "esp_system.h"
 #include <bits/stdc++.h>
+#include "esp_crt_bundle.h"
+#include "OTAserver.hpp"
 
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"

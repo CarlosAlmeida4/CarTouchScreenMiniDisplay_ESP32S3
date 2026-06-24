@@ -1,5 +1,4 @@
 #include "OTAUpdater.hpp"
-#define OTA_URL "http://192.168.1.72:8000/CarTouchScreenMiniDisplay_ESP32S3.bin"
 
 void OTAUpdater::triggerUpdate()
 {
@@ -40,9 +39,10 @@ void OTAUpdater::OTAUpdaterTask()
 
     esp_http_client_config_t config = {
         .url = OTA_URL,
-        .timeout_ms = 10000,
+        .timeout_ms = 60000,
         .transport_type = HTTP_TRANSPORT_OVER_TCP,
         .skip_cert_common_name_check = true,
+        .crt_bundle_attach = esp_crt_bundle_attach
     };
 
     esp_https_ota_config_t otaConfig = {

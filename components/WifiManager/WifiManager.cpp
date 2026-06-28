@@ -26,7 +26,7 @@ void WifiManager::WifiManagerTask()
             m_ConnectionStateCallback(pendingState == 1);
         }
 
-        //ESP_LOGI(TAG, "Wifi Status %d", connectionStatus_);
+        /*ESP_LOGI(TAG, "Wifi Status %d", connectionStatus_);*/
         switch (connectionStatus_)
         {
             case WifiManagerStatus::CONNECTED:
@@ -92,7 +92,7 @@ void WifiManager::WifiManagerTask()
                     {
                         // If auto-connect is already in progress, do not abort.
                         ESP_LOGW(TAG, "Initial scan skipped: STA is connecting");
-                        changeStatus(WifiManagerStatus::SCANNING_READY);
+                        //changeStatus(WifiManagerStatus::CONNECTING);
                     }
                     else
                     {
@@ -170,21 +170,27 @@ void WifiManager::storeAPPoints()
     
     ESP_ERROR_CHECK(esp_wifi_scan_get_ap_num(&ap_count));
     number = ap_count;
-    
     std::vector<wifi_ap_record_t> ap_info(ap_count);
     
-    ESP_ERROR_CHECK(esp_wifi_scan_get_ap_records(&number, ap_info.data()));
-    
-    std::lock_guard<std::mutex> lock(networkListMutex_);
-    availableNetworks_.clear();
-    
-    // NO LOGGING IN EVENT HANDLER CONTEXT - causes stack overflow in sys_evt task
-    // Log from main WiFi task instead
-    
-    for (auto it = ap_info.begin();it!=ap_info.end();++it) {
-        const char* CurrSSID = reinterpret_cast<const char*>(it->ssid);
-        availableNetworks_.emplace_back(CurrSSID);
+    if(ap_count <= 0) //Do not try to get the wifi if theres no APs
+    {
+        ap_info.resize(2);
     }
+
+        ESP_ERROR_CHECK(esp_wifi_scan_get_ap_records(&number, ap_info.data()));
+    
+        std::lock_guard<std::mutex> lock(networkListMutex_);
+        availableNetworks_.clear();
+    
+        // NO LOGGING IN EVENT HANDLER CONTEXT - causes stack overflow in sys_evt task
+        // Log from main WiFi task instead
+    
+        for (auto it = ap_info.begin();it!=ap_info.end();++it) {
+            const char* CurrSSID = reinterpret_cast<const char*>(it->ssid);
+            availableNetworks_.emplace_back(CurrSSID);
+        }
+
+    
     
     changeStatus(WifiManagerStatus::SCANNING_FINISHED);
 }
@@ -210,6 +216,7 @@ void WifiManager::WifiConnectRequest(std::string ssid, std::string passwrd)
 
 void WifiManager::WifiConnect(const std::string ssid,const std::string pwd)
 {
+    changeStatus(WifiManagerStatus::CONNECTING);
     memset(&wifi_config,0,sizeof(wifi_config));
 
     size_t ssid_len = std::min(ssid.size(), sizeof(wifi_config.sta.ssid) - 1);
@@ -220,7 +227,6 @@ void WifiManager::WifiConnect(const std::string ssid,const std::string pwd)
     
     ESP_ERROR_CHECK(esp_wifi_set_config(WIFI_IF_STA, &wifi_config));
     esp_wifi_connect();
-    changeStatus(WifiManagerStatus::CONNECTING);
 }
 
 void WifiManager::wifiEventHandlerEntry(
@@ -276,7 +282,6 @@ void WifiManager::wifiEventHandler(
             changeStatus(WifiManagerStatus::DISCONNECTED);
             if(m_WifiConnectionCallback)m_WifiConnectionCallback("Disconnected");
             setPendingConnectionState(false);
-            esp_wifi_connect();
             break;
 
         case WIFI_EVENT_SCAN_DONE:

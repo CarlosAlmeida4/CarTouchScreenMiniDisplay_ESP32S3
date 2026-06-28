@@ -344,7 +344,7 @@ void Display::displayTask()
             task_delay_ms = LVGL_TASK_MIN_DELAY_MS;
         }
         int64_t elapsed = esp_timer_get_time() - start;
-        if(elapsed > 100000) {
+        if(elapsed > 200000) {
             ESP_LOGW(DISPLAY_TAG,
                      "lv_timer_handler took %lld ms",
                      elapsed / 1000);

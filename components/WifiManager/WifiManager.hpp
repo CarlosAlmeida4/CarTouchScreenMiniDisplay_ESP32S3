@@ -16,6 +16,8 @@
 #include <cstddef>
 #include <atomic>
 
+#include "network_provisioning\scheme_softap.h"
+
 #include "PipelineTypes.hpp"
 
 class WifiManager

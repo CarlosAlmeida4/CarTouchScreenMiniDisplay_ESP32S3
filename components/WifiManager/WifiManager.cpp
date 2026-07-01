@@ -127,10 +127,27 @@ void WifiManager::initWifi()
 
     esp_netif_create_default_wifi_sta();
 
+    //Initialize Wifi AP
+    esp_netif_create_default_wifi_ap();
+
     wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
     ESP_ERROR_CHECK(esp_wifi_init(&cfg));
 
     // Register events BEFORE starting WiFi
+    ESP_ERROR_CHECK(esp_event_handler_instance_register(
+        NETWORK_PROV_EVENT,
+        ESP_EVENT_ANY_ID,
+        &wifiEventHandlerEntry,
+        this,
+        NULL));
+
+    ESP_ERROR_CHECK(esp_event_handler_instance_register(
+        PROTOCOMM_SECURITY_SESSION_EVENT,
+        ESP_EVENT_ANY_ID,
+        &wifiEventHandlerEntry,
+        this,
+        NULL));
+
 
     ESP_ERROR_CHECK(esp_event_handler_instance_register(
         WIFI_EVENT,
@@ -146,9 +163,15 @@ void WifiManager::initWifi()
         this,
         NULL));
 
+    network_prov_mgr_config_t NetProvMgr = 
+    {
+        .scheme = network_prov_scheme_softap,
+    }
+ 
     esp_netif_get_ip_info(
     esp_netif_get_handle_from_ifkey("WIFI_STA_DEF"),&ip);
 
+    
     ESP_LOGI("NET", "IP: " IPSTR, IP2STR(&ip.ip));
 
     ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_STA));

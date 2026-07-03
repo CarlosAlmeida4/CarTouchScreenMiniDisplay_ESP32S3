@@ -119,6 +119,38 @@ void WifiManager::WifiManagerTask()
 
 }
 
+static void get_device_service_name(char *service_name, size_t max)
+{
+    uint8_t eth_mac[6];
+    const char *ssid_prefix = "PROV_";
+    esp_wifi_get_mac(WIFI_IF_STA, eth_mac);
+    snprintf(service_name, max, "%s%02X%02X%02X",
+             ssid_prefix, eth_mac[3], eth_mac[4], eth_mac[5]);
+}
+
+/* Handler for the optional provisioning endpoint registered by the application.
+ * The data format can be chosen by applications. Here, we are using plain ascii text.
+ * Applications can choose to use other formats like protobuf, JSON, XML, etc.
+ * Note that memory for the response buffer must be allocated using heap as this buffer
+ * gets freed by the protocomm layer once it has been sent by the transport layer.
+ */
+ esp_err_t  WifiManager::custom_prov_data_handler(uint32_t session_id, const uint8_t *inbuf, ssize_t inlen,
+                                   uint8_t **outbuf, ssize_t *outlen, void *priv_data)
+{
+    if (inbuf) {
+        ESP_LOGI(TAG, "Received data: %.*s", inlen, (char *)inbuf);
+    }
+    char response[] = "SUCCESS";
+    *outbuf = (uint8_t *)strdup(response);
+    if (*outbuf == NULL) {
+        ESP_LOGE(TAG, "System out of memory");
+        return ESP_ERR_NO_MEM;
+    }
+    *outlen = strlen(response) + 1; /* +1 for NULL terminating byte */
+
+    return ESP_OK;
+}
+
 void WifiManager::initWifi()
 {
     changeStatus(WifiManagerStatus::INIT);
@@ -166,16 +198,94 @@ void WifiManager::initWifi()
     network_prov_mgr_config_t NetProvMgr = 
     {
         .scheme = network_prov_scheme_softap,
+        .scheme_event_handler = NETWORK_PROV_EVENT_HANDLER_NONE
+    };
+
+    ESP_ERROR_CHECK(network_prov_mgr_init(NetProvMgr));
+
+    bool provisioned = false;
+
+    /* Let's find out if the device is provisioned */
+    ESP_ERROR_CHECK(network_prov_mgr_is_wifi_provisioned(&provisioned)); 
+
+        /* If device is not yet provisioned start provisioning service */
+    if (!provisioned) {
+        ESP_LOGI(TAG, "Starting provisioning");
+
+        /* What is the Device Service Name that we want
+         * This translates to :
+         *     - Wi-Fi SSID when scheme is network_prov_scheme_softap
+         *     - device name when scheme is network_prov_scheme_ble
+         */
+        char service_name[12];
+        get_device_service_name(service_name, sizeof(service_name));
+
+
+        /* What is the security level that we want (0, 1, 2):
+         *      - NETWORK_PROV_SECURITY_0 is simply plain text communication.
+         *      - NETWORK_PROV_SECURITY_1 is secure communication which consists of secure handshake
+         *          using X25519 key exchange and proof of possession (pop) and AES-CTR
+         *          for encryption/decryption of messages.
+         *      - NETWORK_PROV_SECURITY_2 SRP6a based authentication and key exchange
+         *        + AES-GCM encryption/decryption of messages
+         */
+        network_prov_security_t security = NETWORK_PROV_SECURITY_0;
+
+
+        /* What is the service key (could be NULL)
+         * This translates to :
+         *     - Wi-Fi password when scheme is network_prov_scheme_softap
+         *          (Minimum expected length: 8, maximum 64 for WPA2-PSK)
+         *     - simply ignored when scheme is network_prov_scheme_ble
+         */
+        const char *service_key = NULL;
+
+        /* An optional endpoint that applications can create if they expect to
+         * get some additional custom data during provisioning workflow.
+         * The endpoint name can be anything of your choice.
+         * This call must be made before starting the provisioning.
+         */
+        network_prov_mgr_endpoint_create("custom-data");
+
+        /* Start provisioning service */
+        ESP_ERROR_CHECK(network_prov_mgr_start_provisioning(security, (const void *) NULL, service_name, service_key));
+
+        /* The handler for the optional endpoint created above.
+         * This call must be made after starting the provisioning, and only if the endpoint
+         * has already been created above.
+         */
+        network_prov_mgr_endpoint_register("custom-data", custom_prov_data_handler, NULL);
+        // TODO! - you letf here, check example implementation
+
+        /* Uncomment the following to wait for the provisioning to finish and then release
+         * the resources of the manager. Since in this case de-initialization is triggered
+         * by the default event loop handler, we don't need to call the following */
+        // network_prov_mgr_wait();
+        // network_prov_mgr_deinit();
+        /* Print QR code for provisioning */
+        //wifi_prov_print_qr(service_name, username, pop, PROV_TRANSPORT_SOFTAP);
+
+    } 
+    else {
+        ESP_LOGI(TAG, "Already provisioned, starting Wi-Fi STA");
+
+        /* We don't need the manager as device is already provisioned,
+         * so let's release it's resources */
+        ESP_ERROR_CHECK(network_prov_mgr_deinit());
+
+        ESP_ERROR_CHECK(esp_event_handler_register(WIFI_EVENT, ESP_EVENT_ANY_ID, &wifiEventHandlerEntry, NULL));
+        /* Start Wi-Fi station */
+        ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_STA));
+        ESP_ERROR_CHECK(esp_wifi_start());
     }
- 
+
     esp_netif_get_ip_info(
     esp_netif_get_handle_from_ifkey("WIFI_STA_DEF"),&ip);
 
     
     ESP_LOGI("NET", "IP: " IPSTR, IP2STR(&ip.ip));
 
-    ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_STA));
-    ESP_ERROR_CHECK(esp_wifi_start());
+    
     
     //Do initial wifi networks scan
     changeStatus(WifiManagerStatus::SCANNING);

@@ -74,6 +74,9 @@ class WifiManager
     void WifiConnect(const std::string ssid,const std::string pwd);
     void setPendingConnectionState(bool connected);
     static void task_entry(void* arg);
+    static esp_err_t  custom_prov_data_handler(uint32_t session_id, const uint8_t *inbuf, ssize_t inlen,
+                                   uint8_t **outbuf, ssize_t *outlen, void *priv_data);
+
 
     std::function<void(const std::string&)> m_WifiConnectionCallback;
     std::function<void(bool)> m_ConnectionStateCallback;

@@ -205,6 +205,11 @@ void WifiManager::initWifi()
 
     bool provisioned = false;
 
+    /* FIXME: Currently it doenst store the connection between connecitons, but if this is removed
+    *   This will for some reason assume the device is already provisioned
+    */ 
+    network_prov_mgr_reset_wifi_provisioning();
+
     /* Let's find out if the device is provisioned */
     ESP_ERROR_CHECK(network_prov_mgr_is_wifi_provisioned(&provisioned)); 
 

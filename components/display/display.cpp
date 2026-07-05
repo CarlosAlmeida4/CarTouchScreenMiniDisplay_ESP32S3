@@ -22,10 +22,10 @@ inline float normalize(float input)
     return ((10/9)*input + 50);
 }
 
-inline std::string turnFloat2Char(float input)
+// Note: Caller must provide buffer of at least 16 bytes
+inline void turnFloat2Char(float input, char* buffer, size_t size)
 {
-    return std::format("{:.1f}", input);
-    
+    snprintf(buffer, size, "%.1f", input);
 }
 
 static const sh8601_lcd_init_cmd_t lcd_init_cmds[] = {
@@ -263,17 +263,14 @@ void Display::InclinometerUI()
         return;
     }
 
+    char rollStr[16], pitchStr[16], tempStr[16];
+    turnFloat2Char(RP.roll, rollStr, sizeof(rollStr));
+    turnFloat2Char(RP.pitch, pitchStr, sizeof(pitchStr));
+    turnFloat2Char(RP.temperature, tempStr, sizeof(tempStr));
 
-
-
-    std::string rollStr  = turnFloat2Char(RP.roll);
-    std::string pitchStr = turnFloat2Char(RP.pitch);
-    std::string TemperatureString = turnFloat2Char(RP.temperature);
-
-    
-    _ui_label_set_property(uic_RollText,_UI_LABEL_PROPERTY_TEXT,rollStr.c_str());
-    _ui_label_set_property(uic_PitchText,_UI_LABEL_PROPERTY_TEXT,pitchStr.c_str());
-    _ui_label_set_property(uic_TemperatureReading,_UI_LABEL_PROPERTY_TEXT,TemperatureString.c_str());
+    _ui_label_set_property(uic_RollText,_UI_LABEL_PROPERTY_TEXT,rollStr);
+    _ui_label_set_property(uic_PitchText,_UI_LABEL_PROPERTY_TEXT,pitchStr);
+    _ui_label_set_property(uic_TemperatureReading,_UI_LABEL_PROPERTY_TEXT,tempStr);
 
     lv_slider_set_value(uic_RollA,(int32_t)(100-normalize(-RP.roll)), LV_ANIM_ON);
     lv_slider_set_value(uic_RollB,(int32_t)(100-normalize(RP.roll)), LV_ANIM_ON);
@@ -294,11 +291,12 @@ void Display::InclinometerNewUI()
         return;
     }
 
-    std::string rollStr  = turnFloat2Char(RP.roll);
-    std::string pitchStr = turnFloat2Char(RP.pitch);
+    char rollStr[16], pitchStr[16];
+    turnFloat2Char(RP.roll, rollStr, sizeof(rollStr));
+    turnFloat2Char(RP.pitch, pitchStr, sizeof(pitchStr));
 
-    _ui_label_set_property(uic_RollTextNew,_UI_LABEL_PROPERTY_TEXT,rollStr.c_str());
-    _ui_label_set_property(uic_PitchTextNew,_UI_LABEL_PROPERTY_TEXT,pitchStr.c_str());
+    _ui_label_set_property(uic_RollTextNew,_UI_LABEL_PROPERTY_TEXT,rollStr);
+    _ui_label_set_property(uic_PitchTextNew,_UI_LABEL_PROPERTY_TEXT,pitchStr);
 
     lv_img_set_angle(uic_PajeroPitch,static_cast<int32_t>((RP.pitch)*10));
     lv_img_set_angle(uic_PajeroRoll, static_cast<int32_t>((RP.roll)*10));
@@ -327,9 +325,9 @@ void Display::displayTask()
     {
         int64_t start = esp_timer_get_time();
         // Lock the mutex due to the LVGL APIs are not thread-safe
-        updateUI();
         if (lvgl_lock(-1))
-        {   
+        {
+            updateUI();
             task_delay_ms = lv_timer_handler();
             
             // Release the mutex

@@ -105,10 +105,16 @@ void WifiManager::WifiManagerTask()
                     changeStatus(WifiManagerStatus::SCANNING_READY);
                 }
                 break;
+            case SCANNING:
+                if(pendingScanResults_.load())
+                {
+                    storeAPPoints();
+                    changeStatus(WifiManagerStatus::SCANNING_FINISHED);
+                }
+                break;
             case INIT:
             case READY_TO_CONNECT:
             case CONNECTING:
-            case SCANNING:
             case CONNECTION_FAILED:
             default:
                 break;
@@ -326,11 +332,7 @@ void WifiManager::storeAPPoints()
         for (auto it = ap_info.begin();it!=ap_info.end();++it) {
             const char* CurrSSID = reinterpret_cast<const char*>(it->ssid);
             availableNetworks_.emplace_back(CurrSSID);
-        }
-
-    
-    
-    changeStatus(WifiManagerStatus::SCANNING_FINISHED);
+        }       
 }
 
 void WifiManager::WifiConnectRequest(std::string ssid, std::string passwrd)
@@ -425,7 +427,7 @@ void WifiManager::wifiEventHandler(
         case WIFI_EVENT_SCAN_DONE:
             // Minimal logging before potentially heavy operation
             if(m_WifiConnectionCallback)m_WifiConnectionCallback("Scanning");
-            if(connectionStatus_==WifiManagerStatus::SCANNING){storeAPPoints();};
+            if(connectionStatus_==WifiManagerStatus::SCANNING){pendingScanResults_.store(true);};
             break;
         default:
             break;

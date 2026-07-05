@@ -81,6 +81,7 @@ class WifiManager
     std::function<void(const std::string&)> m_WifiConnectionCallback;
     std::function<void(bool)> m_ConnectionStateCallback;
     std::atomic<int> pendingConnectionState_ {-1};
+    std::atomic<bool> pendingScanResults_{false};
 };
 
 

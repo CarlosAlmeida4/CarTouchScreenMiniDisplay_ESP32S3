@@ -67,7 +67,8 @@ class WifiManager
         esp_event_base_t event_base,
         int32_t event_id,
         void* event_data);
-            
+
+    void registerWifiEvents();
     void WifiManagerTask();
     void storeAPPoints();
     void changeStatus(WifiManagerStatus status);

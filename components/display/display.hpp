@@ -146,6 +146,15 @@ private:
     std::function<void(lv_event_t* )> m_SoftwareUpdateHandler;
     std::function<void(const std::string& ,const std::string& )> m_WifiConnectionHandler;
     std::function<void(void)> m_ResetInclinometerHandler;
+
+    // Pending feedback from non-LVGL tasks — written by any task, consumed by updateUI() under lvgl_mux
+    std::mutex m_wifiFeedbackMutex;
+    char       m_wifiFeedbackBuf[64]{};
+    bool       m_wifiFeedbackPending{false};
+
+    std::mutex m_swFeedbackMutex;
+    char       m_swFeedbackBuf[64]{};
+    bool       m_swFeedbackPending{false};
 };
 
 #endif // DISPLAY_HPP

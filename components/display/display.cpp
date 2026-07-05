@@ -227,6 +227,26 @@ void Display::updateUI()
         return;
     }
 
+    // Apply feedback posted by non-LVGL tasks (safe here because we hold lvgl_mux)
+    {
+        std::lock_guard<std::mutex> lock(m_wifiFeedbackMutex);
+        if (m_wifiFeedbackPending) {
+            m_wifiFeedbackPending = false;
+            if (lv_obj_ready(uic_WifiConnectFeedback)) {
+                _ui_label_set_property(uic_WifiConnectFeedback, _UI_LABEL_PROPERTY_TEXT, m_wifiFeedbackBuf);
+            }
+        }
+    }
+    {
+        std::lock_guard<std::mutex> lock(m_swFeedbackMutex);
+        if (m_swFeedbackPending) {
+            m_swFeedbackPending = false;
+            if (lv_obj_ready(uic_SoftwareUpdateFeedback)) {
+                _ui_label_set_property(uic_SoftwareUpdateFeedback, _UI_LABEL_PROPERTY_TEXT, m_swFeedbackBuf);
+            }
+        }
+    }
+
     //ESP_LOGI("UI", "Current screen: %p", lv_scr_act());
     //Update screen depdending on which is currently loaded
     lv_obj_t* scr_act = lv_scr_act();
@@ -561,23 +581,16 @@ void Display::invokeInclinometerReset()
 
 void Display::SWUpdateFeedback(const std::string& Feedback)
 {
-
-    if (lv_obj_ready(uic_SoftwareUpdateFeedback)) {
-                _ui_label_set_property(uic_SoftwareUpdateFeedback, 
-                    _UI_LABEL_PROPERTY_TEXT, Feedback.c_str());
-    }
-
+    std::lock_guard<std::mutex> lock(m_swFeedbackMutex);
+    snprintf(m_swFeedbackBuf, sizeof(m_swFeedbackBuf), "%s", Feedback.c_str());
+    m_swFeedbackPending = true;
 }
 
 void Display::WifiConnectionFeedback(const std::string& Feedback)
 {
-    
-    if (lv_obj_ready(uic_WifiConnectFeedback)) 
-    {
-        _ui_label_set_property(uic_WifiConnectFeedback, 
-        _UI_LABEL_PROPERTY_TEXT, Feedback.c_str());
-    }
-
+    std::lock_guard<std::mutex> lock(m_wifiFeedbackMutex);
+    snprintf(m_wifiFeedbackBuf, sizeof(m_wifiFeedbackBuf), "%s", Feedback.c_str());
+    m_wifiFeedbackPending = true;
 }
 
 /*

@@ -157,6 +157,27 @@ static void get_device_service_name(char *service_name, size_t max)
     return ESP_OK;
 }
 
+void WifiManager::WifiProvAppCallback( network_prov_cb_event_t event, void *event_data)
+{
+    /**
+     * This is blocking callback, any configurations that needs to be set when a particular
+     * provisioning event is triggered can be set here.
+    */
+    switch (event) {
+    case NETWORK_PROV_SET_WIFI_STA_CONFIG: {
+        /**
+         * Wi-Fi configurations can be set here before the Wi-Fi is enabled in
+         * STA mode.
+        */
+        wifi_config_t *wifi_config = (wifi_config_t *)event_data;
+        (void) wifi_config;
+        break;
+    }
+    default:
+        break;
+    }
+}
+
 /**
  * brief: register all events, to be called at initialization time
  * !Events shall be initialized before wifi
@@ -201,11 +222,14 @@ void WifiManager::initWifi()
     ESP_ERROR_CHECK(esp_netif_init());
     ESP_ERROR_CHECK(esp_event_loop_create_default());
 
+    WifiEventGroup = xEventGroupCreate();
+
     registerWifiEvents();
 
+    /* Initialize Wi-Fi including netif with default config */
     esp_netif_create_default_wifi_sta();
 
-    //Initialize Wifi AP
+    //Initialize Wifi AP so that we can use SoftAP
     esp_netif_create_default_wifi_ap();
 
     wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
@@ -215,8 +239,10 @@ void WifiManager::initWifi()
 
     network_prov_mgr_config_t NetProvMgr = 
     {
+        
         .scheme = network_prov_scheme_softap,
-        .scheme_event_handler = NETWORK_PROV_EVENT_HANDLER_NONE
+        .scheme_event_handler = NETWORK_PROV_EVENT_HANDLER_NONE,
+        .app_event_handler = WifiProvEventHandler
     };
 
     ESP_ERROR_CHECK(network_prov_mgr_init(NetProvMgr));

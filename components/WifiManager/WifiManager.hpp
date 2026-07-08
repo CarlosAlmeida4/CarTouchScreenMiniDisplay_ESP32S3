@@ -17,6 +17,7 @@
 #include <atomic>
 
 #include "network_provisioning\scheme_softap.h"
+#include <network_provisioning/manager.h>
 
 #include "PipelineTypes.hpp"
 
@@ -27,7 +28,22 @@ class WifiManager
     public:
 
 
-    WifiManager(QueueHandle_t q): Queue_(q) {}
+    WifiManager(QueueHandle_t q): Queue_(q) 
+    {
+        // Initialize the event handler with lambda that captures 'this'
+        WifiProvEventHandler = {
+        .event_cb = [](void *user_data, 
+                       network_prov_cb_event_t event, 
+                       void *event_data)
+            {
+                WifiManager* pThis = static_cast<WifiManager*>(user_data);
+                if (pThis) {
+                    pThis->WifiProvAppCallback(event, event_data);    
+                }
+            },
+            .user_data = this,
+        };
+    }
     //WifiManager(const WifiManager&) = delete;
     //WifiManager& operator=(const WifiManager&) = delete;
     ~WifiManager() = default;
@@ -36,6 +52,8 @@ class WifiManager
     void setConnectionStateHandler(std::function<void(bool)> callback);
     
     void WifiConnectRequest(std::string ssid, std::string passwrd);
+
+    void WifiProvAppCallback(network_prov_cb_event_t event, void *event_data);
 
     private:
     
@@ -47,7 +65,9 @@ class WifiManager
     WifiManagerStatus connectionStatus_ = WifiManagerStatus::INIT;
     List availableNetworks_;
     QueueHandle_t Queue_;
+    EventGroupHandle_t WifiEventGroup;
 
+    network_prov_event_handler_t WifiProvEventHandler;
 
     wifi_config_t wifi_config = {
         .sta = {
@@ -56,6 +76,8 @@ class WifiManager
         },
     };
 
+    
+    
     
     static void wifiEventHandlerEntry(
         void* arg,

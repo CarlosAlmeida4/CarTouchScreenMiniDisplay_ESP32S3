@@ -313,7 +313,7 @@ void WifiManager::initWifi()
     /* FIXME: Currently it doenst store the connection between connecitons, but if this is removed
     *   This will for some reason assume the device is already provisioned
     */ 
-    network_prov_mgr_reset_wifi_provisioning();
+    //network_prov_mgr_reset_wifi_provisioning();
 
     /* Let's find out if the device is provisioned */
     ESP_ERROR_CHECK(network_prov_mgr_is_wifi_provisioned(&provisioned)); 
@@ -412,17 +412,17 @@ void WifiManager::initWifi()
     //xEventGroupWaitBits(wifi_event_group, WIFI_CONNECTED_EVENT, true, true, portMAX_DELAY);
 
 
-    esp_netif_get_ip_info(
-    esp_netif_get_handle_from_ifkey("WIFI_STA_DEF"),&ip);
+    //esp_netif_get_ip_info(
+    //esp_netif_get_handle_from_ifkey("WIFI_STA_DEF"),&ip);
 
     
-    ESP_LOGI("NET", "IP: " IPSTR, IP2STR(&ip.ip));
+    //ESP_LOGI("NET", "IP: " IPSTR, IP2STR(&ip.ip));
 
     
     
     //Do initial wifi networks scan
     changeStatus(WifiManagerStatus::SCANNING);
-    ESP_ERROR_CHECK(esp_wifi_scan_start(NULL,true));
+    //ESP_ERROR_CHECK(esp_wifi_scan_start(NULL,true));
 
     //Initialize cyclic wifi task
     xTaskCreate(task_entry,"Wifi Manager",4096,this,2,NULL);
@@ -551,6 +551,12 @@ void WifiManager::wifiEventHandler(
             if(m_WifiConnectionCallback)m_WifiConnectionCallback("Scanning");
             if(connectionStatus_==WifiManagerStatus::SCANNING){pendingScanResults_.store(true);};
             break;
+        case WIFI_EVENT_AP_STACONNECTED:
+            ESP_LOGI(TAG, "SoftAP transport: Connected!");
+            break;
+        case WIFI_EVENT_AP_STADISCONNECTED:
+            ESP_LOGI(TAG, "SoftAP transport: Disconnected!");
+            break;
         default:
             break;
         }
@@ -566,5 +572,68 @@ void WifiManager::wifiEventHandler(
 
         changeStatus(WifiManagerStatus::CONNECTED);
         setPendingConnectionState(true);
+    }
+
+    if(event_base == NETWORK_PROV_EVENT)
+    {
+        switch (event_id){
+
+        case NETWORK_PROV_START:
+            ESP_LOGI(TAG, "Provisioning started");
+            break;
+        case NETWORK_PROV_WIFI_CRED_RECV: {
+            wifi_sta_config_t *wifi_sta_cfg = (wifi_sta_config_t *)event_data;
+            ESP_LOGI(TAG, "Received Wi-Fi credentials"
+                     "\n\tSSID     : %s\n\tPassword : %s",
+                     (const char *) wifi_sta_cfg->ssid,
+                     (const char *) wifi_sta_cfg->password);
+            break;
+        }
+        case NETWORK_PROV_WIFI_CRED_FAIL: {
+            network_prov_wifi_sta_fail_reason_t *reason = (network_prov_wifi_sta_fail_reason_t *)event_data;
+            ESP_LOGE(TAG, "Provisioning failed!\n\tReason : %s"
+                     "\n\tPlease reset to factory and retry provisioning",
+                     (*reason == NETWORK_PROV_WIFI_STA_AUTH_ERROR) ?
+                     "Wi-Fi station authentication failed" : "Wi-Fi access-point not found");
+                        /* Reset the state machine on provisioning failure.
+             * This is enabled by the CONFIG_EXAMPLE_RESET_PROV_MGR_ON_FAILURE configuration.
+             * It allows the provisioning manager to retry the provisioning process
+             * based on the number of attempts specified in wifi_conn_attempts. After attempting
+             * the maximum number of retries, the provisioning manager will reset the state machine
+             * and the provisioning process will be terminated.
+             */
+            network_prov_mgr_reset_wifi_sm_state_on_failure();
+            break;
+        }
+        case NETWORK_PROV_WIFI_CRED_SUCCESS:
+            ESP_LOGI(TAG, "Provisioning successful");
+            break;
+        case NETWORK_PROV_END:{
+            /* De-initialize manager once provisioning is finished */
+            esp_err_t err = network_prov_mgr_deinit();
+            if (err != ESP_OK) {
+                ESP_LOGE(TAG, "Failed to de-initialize provisioning manager: %s", esp_err_to_name(err));
+            }
+            break;
+        }
+        default:
+            break;
+        }
+    }
+
+    if (event_base == PROTOCOMM_SECURITY_SESSION_EVENT) {
+        switch (event_id) {
+        case PROTOCOMM_SECURITY_SESSION_SETUP_OK:
+            ESP_LOGI(TAG, "Secured session established!");
+            break;
+        case PROTOCOMM_SECURITY_SESSION_INVALID_SECURITY_PARAMS:
+            ESP_LOGE(TAG, "Received invalid security parameters for establishing secure session!");
+            break;
+        case PROTOCOMM_SECURITY_SESSION_CREDENTIALS_MISMATCH:
+            ESP_LOGE(TAG, "Received incorrect username and/or PoP for establishing secure session!");
+            break;
+        default:
+            break;
+        }
     }
 }

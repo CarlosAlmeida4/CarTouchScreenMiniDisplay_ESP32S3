@@ -21,6 +21,10 @@
 
 #include "PipelineTypes.hpp"
 
+#define PROV_DEVMODE
+#define PROV_SEC2_USERNAME          "wifiprov"
+#define PROV_SEC2_PWD               "abcd1234"
+
 class WifiManager
 {
     using List = std::vector<std::string>;

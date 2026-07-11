@@ -727,3 +727,8 @@ extern "C" void UI_UpdateBrightnessRuntime(lv_event_t * e)
         Display::m_activeInstance->setBrightnessHandler(e);
     }
 }
+
+extern "C" void UI_TriggerWifiScan(lv_event_t * e)
+{
+
+}

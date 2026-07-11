@@ -15,19 +15,26 @@ extern void ui_Wifi_screen_init(void);
 extern void ui_Wifi_screen_destroy(void);
 extern void ui_event_Wifi(lv_event_t * e);
 extern lv_obj_t * ui_Wifi;
-extern lv_obj_t * ui_WifiKeyboard;
-extern lv_obj_t * ui_WifiAPList;
-extern lv_obj_t * ui_WifiPassword;
-extern void ui_event_Connect(lv_event_t * e);
-extern lv_obj_t * ui_Connect;
-extern lv_obj_t * ui_WifiConnectFeedback;
+extern lv_obj_t * ui_EnableProvisioning;
+extern lv_obj_t * ui_ProvisioningText;
+extern lv_obj_t * ui_ConnectedWifiSSID;
+extern lv_obj_t * ui_GatewayIP;
+extern lv_obj_t * ui_myIPString;
+extern void ui_event_ManualConnect(lv_event_t * e);
+extern lv_obj_t * ui_ManualConnect;
+extern lv_obj_t * ui_Manual_Connect_Text;
+extern void ui_event_TriggerWifiScan(lv_event_t * e);
+extern lv_obj_t * ui_TriggerWifiScan;
+extern lv_obj_t * ui_TriggerWifiScan1;
 // CUSTOM VARIABLES
 extern lv_obj_t * uic_Wifi;
-extern lv_obj_t * uic_WifiKeyboard;
-extern lv_obj_t * uic_WifiAPList;
-extern lv_obj_t * uic_WifiPassword;
-extern lv_obj_t * uic_Connect;
-extern lv_obj_t * uic_WifiConnectFeedback;
+extern lv_obj_t * uic_EnableProvisioning;
+extern lv_obj_t * uic_ProvisioningText;
+extern lv_obj_t * uic_ConnectedWifiSSID;
+extern lv_obj_t * uic_GatewayIP;
+extern lv_obj_t * uic_myIPString;
+extern lv_obj_t * uic_TriggerWifiScan;
+extern lv_obj_t * uic_TriggerWifiScan1;
 
 #ifdef __cplusplus
 } /*extern "C"*/

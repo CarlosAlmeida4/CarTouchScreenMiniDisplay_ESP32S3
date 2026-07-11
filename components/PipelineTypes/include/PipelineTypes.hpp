@@ -16,7 +16,8 @@ enum WifiManagerStatus {
     SCANNING_FINISHED,
     CONNECTION_FAILED,
     AP_MODE,
-    PROVISIONING
+    PROVISIONING,
+    PROVISIONED
 };
 
 

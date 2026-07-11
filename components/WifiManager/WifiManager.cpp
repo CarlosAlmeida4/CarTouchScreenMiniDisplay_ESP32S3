@@ -173,6 +173,19 @@ void WifiManager::WifiManagerTask()
                     changeStatus(WifiManagerStatus::SCANNING_FINISHED);
                 }
                 break;
+            case PROVISIONED:
+            {
+                wifi_config_t wifi_cfg;
+                ESP_ERROR_CHECK(esp_wifi_get_config(WIFI_IF_STA, &wifi_cfg));
+                wifi_config = wifi_cfg;
+                changeStatus(WifiManagerStatus::READY_TO_CONNECT);
+                std::string ssid_str(reinterpret_cast<const char*>(wifi_config.sta.ssid), 
+                     strnlen(reinterpret_cast<const char*>(wifi_config.sta.ssid), 32));
+                std::string pwd_str(reinterpret_cast<const char*>(wifi_config.sta.password),
+                    strnlen(reinterpret_cast<const char*>(wifi_config.sta.password), 64));
+                WifiConnect(ssid_str, pwd_str);
+                break;
+            }
             case INIT:
             case READY_TO_CONNECT:
             case CONNECTING:
@@ -321,6 +334,7 @@ void WifiManager::initWifi()
         /* If device is not yet provisioned start provisioning service */
     if (!provisioned) {
         ESP_LOGI(TAG, "Starting provisioning");
+        changeStatus(WifiManagerStatus::PROVISIONING);
 
         /* What is the Device Service Name that we want
          * This translates to :
@@ -389,15 +403,15 @@ void WifiManager::initWifi()
         /* Uncomment the following to wait for the provisioning to finish and then release
          * the resources of the manager. Since in this case de-initialization is triggered
          * by the default event loop handler, we don't need to call the following */
-        // network_prov_mgr_wait();
-        // network_prov_mgr_deinit();
+        network_prov_mgr_wait();
+        network_prov_mgr_deinit();
         /* Print QR code for provisioning */
         //wifi_prov_print_qr(service_name, username, pop, PROV_TRANSPORT_SOFTAP);
 
     } 
     else {
         ESP_LOGI(TAG, "Already provisioned, starting Wi-Fi STA");
-
+        changeStatus(WifiManagerStatus::PROVISIONED);
         /* We don't need the manager as device is already provisioned,
          * so let's release it's resources */
         ESP_ERROR_CHECK(network_prov_mgr_deinit());
@@ -421,7 +435,7 @@ void WifiManager::initWifi()
     
     
     //Do initial wifi networks scan
-    changeStatus(WifiManagerStatus::SCANNING);
+    //changeStatus(WifiManagerStatus::SCANNING);
     //ESP_ERROR_CHECK(esp_wifi_scan_start(NULL,true));
 
     //Initialize cyclic wifi task

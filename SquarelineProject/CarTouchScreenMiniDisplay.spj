@@ -2157,8 +2157,8 @@
               }
             ],
             "isPage": true,
-            "editor_posx": 667,
-            "editor_posy": -667,
+            "editor_posx": 673,
+            "editor_posy": -738,
             "properties": [
               {
                 "nid": 10,
@@ -3373,8 +3373,8 @@
               }
             ],
             "isPage": true,
-            "editor_posx": 1247,
-            "editor_posy": -667,
+            "editor_posx": 1253,
+            "editor_posy": -738,
             "properties": [
               {
                 "nid": 10,
@@ -4451,8 +4451,8 @@
               }
             ],
             "isPage": true,
-            "editor_posx": 1827,
-            "editor_posy": -667,
+            "editor_posx": 1833,
+            "editor_posy": -738,
             "properties": [
               {
                 "nid": 10,
@@ -6076,6 +6076,71 @@
                     "strtype": "BUTTON/Style_main",
                     "strval": "lv.PART.MAIN, Rectangle, Pad, Text, Transform",
                     "InheritedType": 11
+                  },
+                  {
+                    "disabled": false,
+                    "nid": 1001463,
+                    "strtype": "_event/EventHandler",
+                    "strval": "CLICKED",
+                    "childs": [
+                      {
+                        "nid": 1001464,
+                        "strtype": "_event/name",
+                        "strval": "TriggerWifiScan",
+                        "InheritedType": 10
+                      },
+                      {
+                        "nid": 1001465,
+                        "strtype": "_event/condition_C",
+                        "strval": "",
+                        "InheritedType": 10
+                      },
+                      {
+                        "nid": 1001466,
+                        "strtype": "_event/condition_P",
+                        "strval": "",
+                        "InheritedType": 10
+                      },
+                      {
+                        "nid": 1001467,
+                        "strtype": "_event/action",
+                        "strval": "CALL FUNCTION",
+                        "childs": [
+                          {
+                            "nid": 1001468,
+                            "strtype": "CALL FUNCTION/Name",
+                            "strval": "CALL FUNCTION",
+                            "InheritedType": 10
+                          },
+                          {
+                            "nid": 1001469,
+                            "strtype": "CALL FUNCTION/Call",
+                            "strval": "<{Function_name}>( event_struct )",
+                            "InheritedType": 10
+                          },
+                          {
+                            "nid": 1001470,
+                            "strtype": "CALL FUNCTION/CallC",
+                            "strval": "<{Function_name}>( e );",
+                            "InheritedType": 10
+                          },
+                          {
+                            "nid": 1001471,
+                            "strtype": "CALL FUNCTION/Function_name",
+                            "strval": "UI_TriggerWifiScan",
+                            "InheritedType": 10
+                          },
+                          {
+                            "nid": 1001472,
+                            "strtype": "CALL FUNCTION/Dont_export_function",
+                            "strval": "True",
+                            "InheritedType": 2
+                          }
+                        ],
+                        "InheritedType": 10
+                      }
+                    ],
+                    "InheritedType": 4
                   }
                 ],
                 "saved_objtypeKey": "BUTTON"
@@ -6251,7 +6316,7 @@
             ],
             "isPage": true,
             "editor_posx": 2442,
-            "editor_posy": -680,
+            "editor_posy": -738,
             "properties": [
               {
                 "nid": 10,
@@ -7389,7 +7454,7 @@
             ],
             "isPage": true,
             "editor_posx": 2935,
-            "editor_posy": -680,
+            "editor_posy": -738,
             "properties": [
               {
                 "nid": 10,
@@ -8621,8 +8686,8 @@
               }
             ],
             "isPage": true,
-            "editor_posx": 667,
-            "editor_posy": -1392,
+            "editor_posx": 673,
+            "editor_posy": -1405,
             "properties": [
               {
                 "nid": 10,
@@ -10406,8 +10471,8 @@
               }
             ],
             "isPage": true,
-            "editor_posx": 1247,
-            "editor_posy": -1392,
+            "editor_posx": 1253,
+            "editor_posy": -1405,
             "properties": [
               {
                 "nid": 10,
@@ -11685,8 +11750,8 @@
               }
             ],
             "isPage": true,
-            "editor_posx": 1827,
-            "editor_posy": -1392,
+            "editor_posx": 1833,
+            "editor_posy": -1405,
             "properties": [
               {
                 "nid": 10,
@@ -12070,7 +12135,7 @@
     "separate_screen_save": false,
     "hierarchy_state_save": false,
     "reverse_event_order": false,
-    "backup_cnt": 98,
+    "backup_cnt": 100,
     "autosave_cnt": 0,
     "group_color_cnt": 3,
     "imagebytearrayprefix": "",
@@ -12081,7 +12146,7 @@
     "naming": "Name",
     "naming_force_lowercase": false,
     "naming_add_subcomponent": false,
-    "nidcnt": 1001463,
+    "nidcnt": 1001473,
     "BitDepth": 16,
     "Name": "CarTouchScreenMiniDisplay"
   }

@@ -4758,6 +4758,7 @@
                   },
                   {
                     "nid": 90,
+                    "flags": 1048576,
                     "strtype": "OBJECT/Flags",
                     "InheritedType": 1
                   },
@@ -4828,7 +4829,40 @@
                   },
                   {
                     "part": "lv.PART.INDICATOR",
-                    "childs": [],
+                    "childs": [
+                      {
+                        "nid": 10000,
+                        "strtype": "_style/StyleState",
+                        "strval": "DEFAULT",
+                        "childs": [
+                          {
+                            "nid": 10520,
+                            "flags": 4096,
+                            "strtype": "_style/Bg_Color",
+                            "intarray": [
+                              134,
+                              134,
+                              134,
+                              255
+                            ],
+                            "InheritedType": 7
+                          },
+                          {
+                            "nid": 10630,
+                            "flags": 4096,
+                            "strtype": "_style/Bg_Image_Recolor",
+                            "intarray": [
+                              134,
+                              134,
+                              134,
+                              255
+                            ],
+                            "InheritedType": 7
+                          }
+                        ],
+                        "InheritedType": 1
+                      }
+                    ],
                     "nid": 1020,
                     "strtype": "SWITCH/Style_indicator",
                     "strval": "lv.PART.INDICATOR, Rectangle",
@@ -12135,7 +12169,7 @@
     "separate_screen_save": false,
     "hierarchy_state_save": false,
     "reverse_event_order": false,
-    "backup_cnt": 100,
+    "backup_cnt": 101,
     "autosave_cnt": 0,
     "group_color_cnt": 3,
     "imagebytearrayprefix": "",

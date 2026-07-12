@@ -254,6 +254,7 @@ void Display::updateUI()
     if(scr_act == ui_Inclinometer){InclinometerUI();}
     if(scr_act == ui_InclinometerNew){InclinometerNewUI();}
     if(scr_act == ui_Wifi){WifiUI();}
+    if(scr_act == ui_ManualWifi){ManualWifiUI();}
     if(scr_act == ui_OTAUpdate)
     {
         char ip_str[16];
@@ -324,6 +325,28 @@ void Display::InclinometerNewUI()
 
 void Display::WifiUI()
 {
+    WifiManagerPipeline WifiMgrPip{};
+    if (!xQueueReceive(WifiQueue_, &WifiMgrPip, 0)) {return;}
+
+    switch (WifiMgrPip.WifiStatus)
+    {
+    case WifiManagerStatus::PROVISIONING:
+        _ui_label_set_property(uic_ProvisioningText,_UI_LABEL_PROPERTY_TEXT,"Provisioning Mode is enabled");
+        lv_obj_add_state(uic_EnableProvisioning,LV_STATE_CHECKED);
+        _ui_label_set_property(uic_ConnectedWifiSSID,_UI_LABEL_PROPERTY_TEXT,"Wifi SSID");
+        
+        break;
+    case WifiManagerStatus::CONNECTED:
+        /* code */
+        break;
+    default:
+        break;
+    }
+
+}
+
+void Display::ManualWifiUI()
+{
     //ESP_LOGD(DISPLAY_TAG, "Wifi UI is active");
     WifiManagerPipeline WifiMgrPip{};
     static char CurrentAvailableNetworks[200];
@@ -336,6 +359,7 @@ void Display::WifiUI()
     }
     
 }
+
 
 void Display::displayTask() 
 {

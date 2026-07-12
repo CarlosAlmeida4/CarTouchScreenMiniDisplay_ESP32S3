@@ -140,6 +140,7 @@ private:
     void InclinometerUI();
     void InclinometerNewUI();
     void WifiUI();
+    void ManualWifiUI();
 
     std::optional<int32_t> getStoredBright() const;
 

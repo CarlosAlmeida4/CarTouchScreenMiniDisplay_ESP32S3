@@ -113,11 +113,10 @@ void WifiManager::WifiManagerTask()
 
                         WifiManagerPipeline WifiMgrPip{};
                         WifiMgrPip.WifiStatus = connectionStatus_;
-                        
                         auto len = std::min<size_t>(dropdownDisplay.size(),(sizeof(WifiMgrPip.AvailableNetworks) - 1));
                         std::memcpy(WifiMgrPip.AvailableNetworks,dropdownDisplay.c_str(),len);
 
-                        xQueueOverwrite(Queue_,&WifiMgrPip);
+                        
                     }
                      
 
@@ -193,6 +192,9 @@ void WifiManager::WifiManagerTask()
             default:
                 break;
         }
+        WifiManagerPipeline WifiMgrPip{};
+        WifiMgrPip.WifiStatus = connectionStatus_;
+        xQueueOverwrite(Queue_,&WifiMgrPip);
         vTaskDelay(1000 / portTICK_PERIOD_MS);
 
     }
@@ -290,51 +292,11 @@ void WifiManager::registerWifiEvents()
 
 }
 
-void WifiManager::initWifi()
+esp_err_t WifiManager::WifiProvisioning() const
 {
-    changeStatus(WifiManagerStatus::INIT);
-    ESP_ERROR_CHECK(esp_netif_init());
-    ESP_ERROR_CHECK(esp_event_loop_create_default());
-
-    WifiEventGroup = xEventGroupCreate();
-
-    registerWifiEvents();
-
-    /* Initialize Wi-Fi including netif with default config */
-    esp_netif_create_default_wifi_sta();
-
-    //Initialize Wifi AP so that we can use SoftAP
-    esp_netif_create_default_wifi_ap();
-
-    wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
-    ESP_ERROR_CHECK(esp_wifi_init(&cfg));
-
-    
-
-    network_prov_mgr_config_t NetProvMgr = 
-    {
-        
-        .scheme = network_prov_scheme_softap,
-        .scheme_event_handler = NETWORK_PROV_EVENT_HANDLER_NONE,
-        .app_event_handler = WifiProvEventHandler
-    };
-
-    ESP_ERROR_CHECK(network_prov_mgr_init(NetProvMgr));
-
-    bool provisioned = false;
-
-    /* FIXME: Currently it doenst store the connection between connecitons, but if this is removed
-    *   This will for some reason assume the device is already provisioned
-    */ 
-    //network_prov_mgr_reset_wifi_provisioning();
-
-    /* Let's find out if the device is provisioned */
-    ESP_ERROR_CHECK(network_prov_mgr_is_wifi_provisioned(&provisioned)); 
-
-        /* If device is not yet provisioned start provisioning service */
-    if (!provisioned) {
         ESP_LOGI(TAG, "Starting provisioning");
-        changeStatus(WifiManagerStatus::PROVISIONING);
+
+        esp_err_t ret_val;
 
         /* What is the Device Service Name that we want
          * This translates to :
@@ -369,9 +331,10 @@ void WifiManager::initWifi()
         const char *pop = NULL;
 #endif        
         network_prov_security2_params_t sec2_params = {};
-
-        ESP_ERROR_CHECK(example_get_sec2_salt(&sec2_params.salt, &sec2_params.salt_len));
-        ESP_ERROR_CHECK(example_get_sec2_verifier(&sec2_params.verifier, &sec2_params.verifier_len));
+        /* TODO: update sec2 to a real use case
+        */
+        ret_val = ESP_ERROR_CHECK_WITHOUT_ABORT(example_get_sec2_salt(&sec2_params.salt, &sec2_params.salt_len));
+        ret_val = ESP_ERROR_CHECK_WITHOUT_ABORT(example_get_sec2_verifier(&sec2_params.verifier, &sec2_params.verifier_len));
 
         network_prov_security2_params_t *sec_params = &sec2_params;
 
@@ -391,23 +354,66 @@ void WifiManager::initWifi()
         network_prov_mgr_endpoint_create("custom-data");
 
         /* Start provisioning service */
-        ESP_ERROR_CHECK(network_prov_mgr_start_provisioning(security, (const void *) sec_params, service_name, service_key));
+        ret_val = ESP_ERROR_CHECK_WITHOUT_ABORT(network_prov_mgr_start_provisioning(security, (const void *) sec_params, service_name, service_key));
 
         /* The handler for the optional endpoint created above.
          * This call must be made after starting the provisioning, and only if the endpoint
          * has already been created above.
          */
-        network_prov_mgr_endpoint_register("custom-data", custom_prov_data_handler, NULL);
+        ret_val = network_prov_mgr_endpoint_register("custom-data", custom_prov_data_handler, NULL);
         // TODO! - you letf here, check example implementation
 
         /* Uncomment the following to wait for the provisioning to finish and then release
          * the resources of the manager. Since in this case de-initialization is triggered
          * by the default event loop handler, we don't need to call the following */
         network_prov_mgr_wait();
-        network_prov_mgr_deinit();
+        ret_val = network_prov_mgr_deinit();
         /* Print QR code for provisioning */
         //wifi_prov_print_qr(service_name, username, pop, PROV_TRANSPORT_SOFTAP);
+        return ret_val;
+}
 
+void WifiManager::initWifi()
+{
+    changeStatus(WifiManagerStatus::INIT);
+    ESP_ERROR_CHECK(esp_netif_init());
+    ESP_ERROR_CHECK(esp_event_loop_create_default());
+
+    WifiEventGroup = xEventGroupCreate();
+
+    registerWifiEvents();
+
+    /* Initialize Wi-Fi including netif with default config */
+    esp_netif_create_default_wifi_sta();
+
+    //Initialize Wifi AP so that we can use SoftAP
+    esp_netif_create_default_wifi_ap();
+
+    wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
+    ESP_ERROR_CHECK(esp_wifi_init(&cfg));
+
+    network_prov_mgr_config_t NetProvMgr = 
+    {
+        
+        .scheme = network_prov_scheme_softap,
+        .scheme_event_handler = NETWORK_PROV_EVENT_HANDLER_NONE,
+        .app_event_handler = WifiProvEventHandler
+    };
+
+    ESP_ERROR_CHECK(network_prov_mgr_init(NetProvMgr));
+
+    bool provisioned = false;
+
+    // TODO: create a call for this reset using the display
+    //network_prov_mgr_reset_wifi_provisioning();
+
+    /* Let's find out if the device is provisioned */
+    ESP_ERROR_CHECK(network_prov_mgr_is_wifi_provisioned(&provisioned)); 
+
+        /* If device is not yet provisioned start provisioning service */
+    if (!provisioned) {
+        changeStatus(WifiManagerStatus::PROVISIONING);
+        ESP_ERROR_CHECK_WITHOUT_ABORT(WifiProvisioning());
     } 
     else {
         ESP_LOGI(TAG, "Already provisioned, starting Wi-Fi STA");

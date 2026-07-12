@@ -185,6 +185,10 @@ void WifiManager::WifiManagerTask()
                 WifiConnect(ssid_str, pwd_str);
                 break;
             }
+            case PROVISIONING:
+            {
+                // TODO: here a thread should be triggered to run the provisioning without blocking the task loop
+            }
             case INIT:
             case READY_TO_CONNECT:
             case CONNECTING:
@@ -412,7 +416,7 @@ void WifiManager::initWifi()
 
         /* If device is not yet provisioned start provisioning service */
     if (!provisioned) {
-        changeStatus(WifiManagerStatus::PROVISIONING);
+        changeStatus(WifiManagerStatus::READY_TO_PROVISION);
         ESP_ERROR_CHECK_WITHOUT_ABORT(WifiProvisioning());
     } 
     else {

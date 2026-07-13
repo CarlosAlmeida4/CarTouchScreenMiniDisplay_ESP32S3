@@ -96,6 +96,7 @@ class WifiManager
 
     void registerWifiEvents();
     void WifiManagerTask();
+    void WifiProvisioningTask();
     void storeAPPoints();
     void changeStatus(WifiManagerStatus status);
     void WifiConnect(const std::string ssid,const std::string pwd);
@@ -104,10 +105,11 @@ class WifiManager
     esp_err_t WifiProvisioning() const;
     
     static void task_entry(void* arg);
+    static void provisioning_task_entry(void* arg);
     static esp_err_t  custom_prov_data_handler(uint32_t session_id, const uint8_t *inbuf, ssize_t inlen,
                                    uint8_t **outbuf, ssize_t *outlen, void *priv_data);
-
-
+    
+    
     std::function<void(const std::string&)> m_WifiConnectionCallback;
     std::function<void(bool)> m_ConnectionStateCallback;
     std::atomic<int> pendingConnectionState_ {-1};

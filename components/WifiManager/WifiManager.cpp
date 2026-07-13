@@ -68,11 +68,31 @@ inline void WifiManager::changeStatus(WifiManagerStatus status)
     {connectionStatus_ = status;}
 }
 
-
 void WifiManager::task_entry(void* arg)
 {
     auto* self = static_cast<WifiManager*>(arg);
     self->WifiManagerTask(); 
+}
+
+void WifiManager::provisioning_task_entry(void* arg)
+{
+    auto* self = static_cast<WifiManager*>(arg);
+    self->WifiProvisioningTask(); 
+}
+
+void WifiManager::WifiProvisioningTask()
+{
+    esp_err_t esp_err = WifiProvisioning();
+    if(esp_err == ESP_OK)
+    {
+        //sucessfull provisioning, however, the status change is done by the event handler with the connection
+    }
+    else
+    {
+
+    }
+    //Kill the task when the provisioning returns
+    vTaskDelete(NULL);
 }
 
 void WifiManager::WifiManagerTask()
@@ -87,7 +107,7 @@ void WifiManager::WifiManagerTask()
             m_ConnectionStateCallback(pendingState == 1);
         }
 
-        /*ESP_LOGI(TAG, "Wifi Status %d", connectionStatus_);*/
+        ESP_LOGI(TAG, "Wifi Status %d", connectionStatus_);
         switch (connectionStatus_)
         {
             case WifiManagerStatus::CONNECTED:
@@ -185,14 +205,17 @@ void WifiManager::WifiManagerTask()
                 WifiConnect(ssid_str, pwd_str);
                 break;
             }
-            case PROVISIONING:
+            case READY_TO_PROVISION:
             {
                 // TODO: here a thread should be triggered to run the provisioning without blocking the task loop
+                xTaskCreate(provisioning_task_entry,"Provisioning",4096,this,3,NULL);
+                changeStatus(WifiManagerStatus::PROVISIONING);
             }
             case INIT:
             case READY_TO_CONNECT:
             case CONNECTING:
             case CONNECTION_FAILED:
+            case PROVISIONING:
             default:
                 break;
         }
@@ -365,7 +388,7 @@ esp_err_t WifiManager::WifiProvisioning() const
          * has already been created above.
          */
         ret_val = network_prov_mgr_endpoint_register("custom-data", custom_prov_data_handler, NULL);
-        // TODO! - you letf here, check example implementation
+
 
         /* Uncomment the following to wait for the provisioning to finish and then release
          * the resources of the manager. Since in this case de-initialization is triggered
@@ -417,7 +440,7 @@ void WifiManager::initWifi()
         /* If device is not yet provisioned start provisioning service */
     if (!provisioned) {
         changeStatus(WifiManagerStatus::READY_TO_PROVISION);
-        ESP_ERROR_CHECK_WITHOUT_ABORT(WifiProvisioning());
+        //ESP_ERROR_CHECK_WITHOUT_ABORT(WifiProvisioning());
     } 
     else {
         ESP_LOGI(TAG, "Already provisioned, starting Wi-Fi STA");

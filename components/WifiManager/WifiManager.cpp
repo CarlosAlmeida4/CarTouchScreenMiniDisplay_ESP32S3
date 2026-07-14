@@ -34,6 +34,15 @@ static const char sec2_verifier[] = {
     0xe6, 0xf6, 0x53, 0xc8, 0x31, 0xa8, 0x78, 0xde, 0x50, 0x40, 0xf7, 0x62, 0xde, 0x36, 0xb2, 0xba
 };
 
+static void get_device_service_name(char *service_name, size_t max)
+{
+    uint8_t eth_mac[6];
+    const char *ssid_prefix = "PROV_";
+    esp_wifi_get_mac(WIFI_IF_STA, eth_mac);
+    snprintf(service_name, max, "%s%02X%02X%02X",
+             ssid_prefix, eth_mac[3], eth_mac[4], eth_mac[5]);
+}
+
 static esp_err_t example_get_sec2_salt(const char **salt, uint16_t *salt_len)
 {
 #ifdef PROV_DEVMODE
@@ -123,6 +132,8 @@ void WifiManager::WifiManagerTask()
                     std::memcpy(WifiMgrPip.CurrentSSID, wifi_cfg.sta.ssid, ssid_len);
                     WifiMgrPip.CurrentSSID[ssid_len] = '\0';  // Null-terminate
                 }
+                // Provisioning is done, we can release the resources
+                if(isConnectedToProvisionedWifi) ESP_ERROR_CHECK(network_prov_mgr_deinit());
                 break;
 
             case WifiManagerStatus::SCANNING_FINISHED:
@@ -155,12 +166,16 @@ void WifiManager::WifiManagerTask()
                 //Check if any of the found networks is a known network  
                 for(auto currSSID:availableNetworks_)
                 {
-                    if(WIFI_AP.contains(currSSID))
+                    std::string ssid_str(reinterpret_cast<const char*>(wifi_config.sta.ssid), 
+                     strnlen(reinterpret_cast<const char*>(wifi_config.sta.ssid), 32));
+                     std::string pwd_str(reinterpret_cast<const char*>(wifi_config.sta.password),
+                    strnlen(reinterpret_cast<const char*>(wifi_config.sta.password), 64));
+                    if(WIFI_AP.contains(currSSID) || currSSID == ssid_str)
                     {
                         ESP_LOGI(TAG, "Known SSID %s", currSSID.c_str());
                         changeStatus(WifiManagerStatus::READY_TO_CONNECT);
-                        //Known currSSID, connect to it
-                        WifiConnect(currSSID,WIFI_AP[currSSID]);
+                        //Known currSSID, connect to it, if its the provisioned, go with it
+                        WifiConnect(currSSID,(currSSID == ssid_str) ? pwd_str : WIFI_AP[currSSID]);
                         break;
                     }
                 }
@@ -221,18 +236,24 @@ void WifiManager::WifiManagerTask()
                 // TODO: here a thread should be triggered to run the provisioning without blocking the task loop
                 xTaskCreate(provisioning_task_entry,"Provisioning",4096,this,3,NULL);
                 changeStatus(WifiManagerStatus::PROVISIONING);
+                break;
+            }
+            case PROVISIONING:
+            {
+                char service_name[12];
+                get_device_service_name(service_name, sizeof(service_name));
+                size_t ssid_len = strnlen(service_name, 12);
+                std::memcpy(WifiMgrPip.CurrentSSID, service_name, ssid_len);
+                break;
             }
             case INIT:
             case READY_TO_CONNECT:
             case CONNECTING:
             case CONNECTION_FAILED:
-            case PROVISIONING:
+                
             default:
                 break;
         }
-        
-
-        
 
         xQueueOverwrite(Queue_,&WifiMgrPip);
         vTaskDelay(1000 / portTICK_PERIOD_MS);
@@ -241,14 +262,7 @@ void WifiManager::WifiManagerTask()
 
 }
 
-static void get_device_service_name(char *service_name, size_t max)
-{
-    uint8_t eth_mac[6];
-    const char *ssid_prefix = "PROV_";
-    esp_wifi_get_mac(WIFI_IF_STA, eth_mac);
-    snprintf(service_name, max, "%s%02X%02X%02X",
-             ssid_prefix, eth_mac[3], eth_mac[4], eth_mac[5]);
-}
+
 
 /* Handler for the optional provisioning endpoint registered by the application.
  * The data format can be chosen by applications. Here, we are using plain ascii text.
@@ -346,7 +360,6 @@ esp_err_t WifiManager::WifiProvisioning() const
         char service_name[12];
         get_device_service_name(service_name, sizeof(service_name));
 
-
         /* What is the security level that we want (0, 1, 2):
          *      - NETWORK_PROV_SECURITY_0 is simply plain text communication.
          *      - NETWORK_PROV_SECURITY_1 is secure communication which consists of secure handshake
@@ -411,7 +424,7 @@ esp_err_t WifiManager::WifiProvisioning() const
          * by the default event loop handler, we don't need to call the following */
         network_prov_mgr_wait();
         ret_val = network_prov_mgr_deinit();
-        /* Print QR code for provisioning */
+        /* !TODO: Print QR code for provisioning */ 
         //wifi_prov_print_qr(service_name, username, pop, PROV_TRANSPORT_SOFTAP);
         return ret_val;
 }
@@ -447,9 +460,6 @@ void WifiManager::initWifi()
 
     bool provisioned = false;
 
-    // TODO: create a call for this reset using the display
-    //network_prov_mgr_reset_wifi_provisioning();
-
     /* Let's find out if the device is provisioned */
     ESP_ERROR_CHECK(network_prov_mgr_is_wifi_provisioned(&provisioned)); 
 
@@ -457,7 +467,6 @@ void WifiManager::initWifi()
     if (!provisioned) {
         isConnectedToProvisionedWifi = false;
         changeStatus(WifiManagerStatus::READY_TO_PROVISION);
-        //ESP_ERROR_CHECK_WITHOUT_ABORT(WifiProvisioning());
     } 
     else {
         ESP_LOGI(TAG, "Already provisioned, starting Wi-Fi STA");
@@ -475,19 +484,6 @@ void WifiManager::initWifi()
 
     /* Wait for Wi-Fi connection */
     //xEventGroupWaitBits(wifi_event_group, WIFI_CONNECTED_EVENT, true, true, portMAX_DELAY);
-
-
-    //esp_netif_get_ip_info(
-    //esp_netif_get_handle_from_ifkey("WIFI_STA_DEF"),&ip);
-
-    
-    //ESP_LOGI("NET", "IP: " IPSTR, IP2STR(&ip.ip));
-
-    
-    
-    //Do initial wifi networks scan
-    //changeStatus(WifiManagerStatus::SCANNING);
-    //ESP_ERROR_CHECK(esp_wifi_scan_start(NULL,true));
 
     //Initialize cyclic wifi task
     xTaskCreate(task_entry,"Wifi Manager",4096,this,2,NULL);

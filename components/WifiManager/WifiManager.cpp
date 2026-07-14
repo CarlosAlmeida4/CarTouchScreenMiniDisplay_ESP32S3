@@ -108,10 +108,20 @@ void WifiManager::WifiManagerTask()
         }
 
         ESP_LOGI(TAG, "Wifi Status %d", connectionStatus_);
+        WifiManagerPipeline WifiMgrPip{};
         switch (connectionStatus_)
         {
             case WifiManagerStatus::CONNECTED:
                 if(m_WifiConnectionCallback)m_WifiConnectionCallback("Connected");
+                WifiMgrPip.WifiStatus = connectionStatus_;
+                WifiMgrPip.isConnnectedToProvisionedWifi = isConnectedToProvisionedWifi;
+                wifi_config_t wifi_cfg;
+                if(esp_wifi_get_config(WIFI_IF_STA, &wifi_cfg) == ESP_OK)
+                {
+                    size_t ssid_len = strnlen(reinterpret_cast<const char*>(wifi_cfg.sta.ssid), 32);
+                    std::memcpy(WifiMgrPip.CurrentSSID, wifi_cfg.sta.ssid, ssid_len);
+                    WifiMgrPip.CurrentSSID[ssid_len] = '\0';  // Null-terminate
+                }
                 break;
 
             case WifiManagerStatus::SCANNING_FINISHED:
@@ -219,8 +229,10 @@ void WifiManager::WifiManagerTask()
             default:
                 break;
         }
-        WifiManagerPipeline WifiMgrPip{};
-        WifiMgrPip.WifiStatus = connectionStatus_;
+        
+
+        
+
         xQueueOverwrite(Queue_,&WifiMgrPip);
         vTaskDelay(1000 / portTICK_PERIOD_MS);
 
@@ -439,12 +451,14 @@ void WifiManager::initWifi()
 
         /* If device is not yet provisioned start provisioning service */
     if (!provisioned) {
+        isConnectedToProvisionedWifi = false;
         changeStatus(WifiManagerStatus::READY_TO_PROVISION);
         //ESP_ERROR_CHECK_WITHOUT_ABORT(WifiProvisioning());
     } 
     else {
         ESP_LOGI(TAG, "Already provisioned, starting Wi-Fi STA");
         changeStatus(WifiManagerStatus::PROVISIONED);
+        isConnectedToProvisionedWifi = true;
         /* We don't need the manager as device is already provisioned,
          * so let's release it's resources */
         ESP_ERROR_CHECK(network_prov_mgr_deinit());
@@ -654,6 +668,7 @@ void WifiManager::wifiEventHandler(
         }
         case NETWORK_PROV_WIFI_CRED_SUCCESS:
             ESP_LOGI(TAG, "Provisioning successful");
+            isConnectedToProvisionedWifi = true;
             break;
         case NETWORK_PROV_END:{
             /* De-initialize manager once provisioning is finished */

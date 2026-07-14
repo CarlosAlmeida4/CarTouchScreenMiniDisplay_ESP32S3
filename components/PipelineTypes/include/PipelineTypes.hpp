@@ -33,6 +33,8 @@ struct WifiManagerPipeline
 {
     char AvailableNetworks[200];
     WifiManagerStatus WifiStatus;
+    bool isConnnectedToProvisionedWifi;
+    char CurrentSSID[32];
 };
 
 

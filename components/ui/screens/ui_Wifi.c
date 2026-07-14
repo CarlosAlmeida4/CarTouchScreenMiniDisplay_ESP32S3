@@ -149,7 +149,7 @@ void ui_Wifi_screen_init(void)
     lv_obj_set_x(ui_TriggerWifiScan1, 1);
     lv_obj_set_y(ui_TriggerWifiScan1, -394);
     lv_obj_set_align(ui_TriggerWifiScan1, LV_ALIGN_BOTTOM_MID);
-    lv_label_set_text(ui_TriggerWifiScan1, "Scan for Wifi");
+    lv_label_set_text(ui_TriggerWifiScan1, "Reset Provisioning");
     lv_obj_set_style_text_font(ui_TriggerWifiScan1, &ui_font_SmallerEmblemaOne, LV_PART_MAIN | LV_STATE_DEFAULT);
 
     lv_obj_add_event_cb(ui_ManualConnect, ui_event_ManualConnect, LV_EVENT_ALL, NULL);

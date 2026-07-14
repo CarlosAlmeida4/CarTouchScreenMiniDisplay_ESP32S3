@@ -29,8 +29,7 @@ class WifiManager
 {
     using List = std::vector<std::string>;
 
-    public:
-
+public:
 
     WifiManager(QueueHandle_t q): Queue_(q) 
     {
@@ -59,7 +58,7 @@ class WifiManager
 
     void WifiProvAppCallback(network_prov_cb_event_t event, void *event_data);
 
-    private:
+private:
     
     std::mutex networkListMutex_;
     std::mutex WifiStatusMutex_;
@@ -70,7 +69,7 @@ class WifiManager
     List availableNetworks_;
     QueueHandle_t Queue_;
     EventGroupHandle_t WifiEventGroup;
-
+    bool isConnectedToProvisionedWifi=false;
     network_prov_event_handler_t WifiProvEventHandler;
 
     wifi_config_t wifi_config = {

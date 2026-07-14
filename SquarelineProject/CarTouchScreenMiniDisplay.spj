@@ -6312,7 +6312,7 @@
                   {
                     "nid": 1030,
                     "strtype": "LABEL/Text",
-                    "strval": "Scan for Wifi",
+                    "strval": "Reset Provisioning",
                     "InheritedType": 10
                   },
                   {
@@ -12169,7 +12169,7 @@
     "separate_screen_save": false,
     "hierarchy_state_save": false,
     "reverse_event_order": false,
-    "backup_cnt": 101,
+    "backup_cnt": 102,
     "autosave_cnt": 0,
     "group_color_cnt": 3,
     "imagebytearrayprefix": "",

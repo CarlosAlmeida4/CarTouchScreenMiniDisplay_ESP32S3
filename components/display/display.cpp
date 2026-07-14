@@ -328,16 +328,45 @@ void Display::WifiUI()
     WifiManagerPipeline WifiMgrPip{};
     if (!xQueueReceive(WifiQueue_, &WifiMgrPip, 0)) {return;}
 
+    char ip_str[16];
+    char gw_str[16];
+
+    esp_netif_ip_info_t ip_info;
+    esp_netif_t *netif = esp_netif_get_handle_from_ifkey("WIFI_STA_DEF");
+
+    esp_netif_get_ip_info(netif, &ip_info);
+
+    sprintf(ip_str, IPSTR, IP2STR(&ip_info.ip));
+    sprintf(gw_str, IPSTR, IP2STR(&ip_info.gw));
+    
+    
     switch (WifiMgrPip.WifiStatus)
     {
     case WifiManagerStatus::PROVISIONING:
-        _ui_label_set_property(uic_ProvisioningText,_UI_LABEL_PROPERTY_TEXT,"Provisioning Mode is enabled");
+        _ui_label_set_property(uic_ProvisioningText,_UI_LABEL_PROPERTY_TEXT,"Provisioning is enabled");
         lv_obj_add_state(uic_EnableProvisioning,LV_STATE_CHECKED);
         _ui_label_set_property(uic_ConnectedWifiSSID,_UI_LABEL_PROPERTY_TEXT,"Wifi SSID");
-        
+        _ui_label_set_property(uic_myIPString,_UI_LABEL_PROPERTY_TEXT,ip_str);
+        _ui_label_set_property(uic_GatewayIP,_UI_LABEL_PROPERTY_TEXT,gw_str);
         break;
     case WifiManagerStatus::CONNECTED:
         /* code */
+        if(WifiMgrPip.isConnnectedToProvisionedWifi)
+        {
+            _ui_label_set_property(uic_ProvisioningText,_UI_LABEL_PROPERTY_TEXT,"Provisioning Sucessful");
+            lv_obj_add_state(uic_EnableProvisioning,LV_STATE_CHECKED);
+            _ui_label_set_property(uic_ConnectedWifiSSID,_UI_LABEL_PROPERTY_TEXT,WifiMgrPip.CurrentSSID);
+            _ui_label_set_property(uic_myIPString,_UI_LABEL_PROPERTY_TEXT,ip_str);
+            _ui_label_set_property(uic_GatewayIP,_UI_LABEL_PROPERTY_TEXT,gw_str);
+        }
+        else
+        {
+            _ui_label_set_property(uic_ProvisioningText,_UI_LABEL_PROPERTY_TEXT,"Manual Wifi");
+            lv_obj_add_state(uic_EnableProvisioning,LV_STATE_DEFAULT);
+            _ui_label_set_property(uic_ConnectedWifiSSID,_UI_LABEL_PROPERTY_TEXT,WifiMgrPip.CurrentSSID);
+            _ui_label_set_property(uic_myIPString,_UI_LABEL_PROPERTY_TEXT,ip_str);
+            _ui_label_set_property(uic_GatewayIP,_UI_LABEL_PROPERTY_TEXT,gw_str);
+        }
         break;
     default:
         break;

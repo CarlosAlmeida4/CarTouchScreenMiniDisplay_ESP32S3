@@ -109,6 +109,7 @@ void WifiManager::WifiManagerTask()
 
         ESP_LOGI(TAG, "Wifi Status %d", connectionStatus_);
         WifiManagerPipeline WifiMgrPip{};
+        WifiMgrPip.WifiStatus = connectionStatus_;
         switch (connectionStatus_)
         {
             case WifiManagerStatus::CONNECTED:

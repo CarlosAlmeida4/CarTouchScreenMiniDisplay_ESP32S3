@@ -132,8 +132,6 @@ void WifiManager::WifiManagerTask()
                     std::memcpy(WifiMgrPip.CurrentSSID, wifi_cfg.sta.ssid, ssid_len);
                     WifiMgrPip.CurrentSSID[ssid_len] = '\0';  // Null-terminate
                 }
-                // Provisioning is done, we can release the resources
-                if(isConnectedToProvisionedWifi) ESP_ERROR_CHECK(network_prov_mgr_deinit());
                 break;
 
             case WifiManagerStatus::SCANNING_FINISHED:
@@ -419,11 +417,6 @@ esp_err_t WifiManager::WifiProvisioning() const
         ret_val = network_prov_mgr_endpoint_register("custom-data", custom_prov_data_handler, NULL);
 
 
-        /* Uncomment the following to wait for the provisioning to finish and then release
-         * the resources of the manager. Since in this case de-initialization is triggered
-         * by the default event loop handler, we don't need to call the following */
-        network_prov_mgr_wait();
-        ret_val = network_prov_mgr_deinit();
         /* !TODO: Print QR code for provisioning */ 
         //wifi_prov_print_qr(service_name, username, pop, PROV_TRANSPORT_SOFTAP);
         return ret_val;

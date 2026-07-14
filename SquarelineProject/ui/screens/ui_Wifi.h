@@ -23,8 +23,8 @@ extern lv_obj_t * ui_myIPString;
 extern void ui_event_ManualConnect(lv_event_t * e);
 extern lv_obj_t * ui_ManualConnect;
 extern lv_obj_t * ui_Manual_Connect_Text;
-extern void ui_event_TriggerWifiScan(lv_event_t * e);
-extern lv_obj_t * ui_TriggerWifiScan;
+extern void ui_event_ResetProvisioning(lv_event_t * e);
+extern lv_obj_t * ui_ResetProvisioning;
 extern lv_obj_t * ui_TriggerWifiScan1;
 // CUSTOM VARIABLES
 extern lv_obj_t * uic_Wifi;
@@ -33,7 +33,7 @@ extern lv_obj_t * uic_ProvisioningText;
 extern lv_obj_t * uic_ConnectedWifiSSID;
 extern lv_obj_t * uic_GatewayIP;
 extern lv_obj_t * uic_myIPString;
-extern lv_obj_t * uic_TriggerWifiScan;
+extern lv_obj_t * uic_ResetProvisioning;
 extern lv_obj_t * uic_TriggerWifiScan1;
 
 #ifdef __cplusplus

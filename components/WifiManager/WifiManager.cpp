@@ -377,7 +377,8 @@ esp_err_t WifiManager::WifiProvisioning() const
 
         network_prov_security2_params_t *sec_params = &sec2_params;
 
-        /* What is the service key (could be NULL)
+        /* 
+         * What is the service key (could be NULL)
          * This translates to :
          *     - Wi-Fi password when scheme is network_prov_scheme_softap
          *          (Minimum expected length: 8, maximum 64 for WPA2-PSK)
@@ -385,7 +386,8 @@ esp_err_t WifiManager::WifiProvisioning() const
          */
         const char *service_key = NULL;
 
-        /* An optional endpoint that applications can create if they expect to
+        /* 
+         * An optional endpoint that applications can create if they expect to
          * get some additional custom data during provisioning workflow.
          * The endpoint name can be anything of your choice.
          * This call must be made before starting the provisioning.
@@ -395,7 +397,8 @@ esp_err_t WifiManager::WifiProvisioning() const
         /* Start provisioning service */
         ret_val = ESP_ERROR_CHECK_WITHOUT_ABORT(network_prov_mgr_start_provisioning(security, (const void *) sec_params, service_name, service_key));
 
-        /* The handler for the optional endpoint created above.
+        /* 
+         * The handler for the optional endpoint created above.
          * This call must be made after starting the provisioning, and only if the endpoint
          * has already been created above.
          */

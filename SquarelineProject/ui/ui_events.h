@@ -14,7 +14,7 @@ void UI_UpdateBrightnessRuntime(lv_event_t * e);
 void UI_StoreBrightness(lv_event_t * e);
 void UI_ClearNVS(lv_event_t * e);
 void UI_RequestSWUpdate(lv_event_t * e);
-void UI_TriggerWifiScan(lv_event_t * e);
+void UI_ResetProvisioning(lv_event_t * e);
 void UI_ConnectWifiCallback(lv_event_t * e);
 void UI_ZeroOutInclinometer(lv_event_t * e);
 

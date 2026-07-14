@@ -781,7 +781,7 @@ extern "C" void UI_UpdateBrightnessRuntime(lv_event_t * e)
     }
 }
 
-extern "C" void UI_TriggerWifiScan(lv_event_t * e)
+extern "C" void UI_ResetProvisioning(lv_event_t * e)
 {
-
+    network_prov_mgr_reset_wifi_provisioning();
 }

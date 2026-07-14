@@ -5414,6 +5414,7 @@
                     "childs": [
                       {
                         "nid": 15,
+                        "flags": 1048576,
                         "strtype": "_codename/Codename",
                         "strval": "myIPString",
                         "InheritedType": 10
@@ -5963,12 +5964,12 @@
                   {
                     "nid": 10,
                     "strtype": "OBJECT/Name",
-                    "strval": "TriggerWifiScan",
+                    "strval": "ResetProvisioning",
                     "childs": [
                       {
                         "nid": 15,
                         "strtype": "_codename/Codename",
-                        "strval": "TriggerWifiScan",
+                        "strval": "ResetProvisioning",
                         "InheritedType": 10
                       }
                     ],
@@ -6120,7 +6121,7 @@
                       {
                         "nid": 1001464,
                         "strtype": "_event/name",
-                        "strval": "TriggerWifiScan",
+                        "strval": "ResetProvisioning",
                         "InheritedType": 10
                       },
                       {
@@ -6161,7 +6162,7 @@
                           {
                             "nid": 1001471,
                             "strtype": "CALL FUNCTION/Function_name",
-                            "strval": "UI_TriggerWifiScan",
+                            "strval": "UI_ResetProvisioning",
                             "InheritedType": 10
                           },
                           {
@@ -12169,7 +12170,7 @@
     "separate_screen_save": false,
     "hierarchy_state_save": false,
     "reverse_event_order": false,
-    "backup_cnt": 102,
+    "backup_cnt": 105,
     "autosave_cnt": 0,
     "group_color_cnt": 3,
     "imagebytearrayprefix": "",

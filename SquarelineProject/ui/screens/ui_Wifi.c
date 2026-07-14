@@ -6,7 +6,7 @@
 #include "../ui.h"
 
 lv_obj_t * uic_TriggerWifiScan1;
-lv_obj_t * uic_TriggerWifiScan;
+lv_obj_t * uic_ResetProvisioning;
 lv_obj_t * uic_myIPString;
 lv_obj_t * uic_GatewayIP;
 lv_obj_t * uic_ConnectedWifiSSID;
@@ -21,7 +21,7 @@ lv_obj_t * ui_GatewayIP = NULL;
 lv_obj_t * ui_myIPString = NULL;
 lv_obj_t * ui_ManualConnect = NULL;
 lv_obj_t * ui_Manual_Connect_Text = NULL;
-lv_obj_t * ui_TriggerWifiScan = NULL;
+lv_obj_t * ui_ResetProvisioning = NULL;
 lv_obj_t * ui_TriggerWifiScan1 = NULL;
 // event funtions
 void ui_event_Wifi(lv_event_t * e)
@@ -43,12 +43,12 @@ void ui_event_ManualConnect(lv_event_t * e)
     }
 }
 
-void ui_event_TriggerWifiScan(lv_event_t * e)
+void ui_event_ResetProvisioning(lv_event_t * e)
 {
     lv_event_code_t event_code = lv_event_get_code(e);
 
     if(event_code == LV_EVENT_CLICKED) {
-        UI_TriggerWifiScan(e);
+        UI_ResetProvisioning(e);
     }
 }
 
@@ -132,16 +132,16 @@ void ui_Wifi_screen_init(void)
     lv_label_set_text(ui_Manual_Connect_Text, "Manual Config");
     lv_obj_set_style_text_font(ui_Manual_Connect_Text, &ui_font_SmallerEmblemaOne, LV_PART_MAIN | LV_STATE_DEFAULT);
 
-    ui_TriggerWifiScan = lv_btn_create(ui_Wifi);
-    lv_obj_set_width(ui_TriggerWifiScan, 414);
-    lv_obj_set_height(ui_TriggerWifiScan, 105);
-    lv_obj_set_x(ui_TriggerWifiScan, -1);
-    lv_obj_set_y(ui_TriggerWifiScan, -182);
-    lv_obj_set_align(ui_TriggerWifiScan, LV_ALIGN_CENTER);
-    lv_obj_add_flag(ui_TriggerWifiScan, LV_OBJ_FLAG_SCROLL_ON_FOCUS);     /// Flags
-    lv_obj_clear_flag(ui_TriggerWifiScan, LV_OBJ_FLAG_SCROLLABLE);      /// Flags
-    lv_obj_set_style_bg_color(ui_TriggerWifiScan, lv_color_hex(0xE09514), LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_bg_opa(ui_TriggerWifiScan, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
+    ui_ResetProvisioning = lv_btn_create(ui_Wifi);
+    lv_obj_set_width(ui_ResetProvisioning, 414);
+    lv_obj_set_height(ui_ResetProvisioning, 105);
+    lv_obj_set_x(ui_ResetProvisioning, -1);
+    lv_obj_set_y(ui_ResetProvisioning, -182);
+    lv_obj_set_align(ui_ResetProvisioning, LV_ALIGN_CENTER);
+    lv_obj_add_flag(ui_ResetProvisioning, LV_OBJ_FLAG_SCROLL_ON_FOCUS);     /// Flags
+    lv_obj_clear_flag(ui_ResetProvisioning, LV_OBJ_FLAG_SCROLLABLE);      /// Flags
+    lv_obj_set_style_bg_color(ui_ResetProvisioning, lv_color_hex(0xE09514), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_opa(ui_ResetProvisioning, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
 
     ui_TriggerWifiScan1 = lv_label_create(ui_Wifi);
     lv_obj_set_width(ui_TriggerWifiScan1, LV_SIZE_CONTENT);   /// 1
@@ -153,7 +153,7 @@ void ui_Wifi_screen_init(void)
     lv_obj_set_style_text_font(ui_TriggerWifiScan1, &ui_font_SmallerEmblemaOne, LV_PART_MAIN | LV_STATE_DEFAULT);
 
     lv_obj_add_event_cb(ui_ManualConnect, ui_event_ManualConnect, LV_EVENT_ALL, NULL);
-    lv_obj_add_event_cb(ui_TriggerWifiScan, ui_event_TriggerWifiScan, LV_EVENT_ALL, NULL);
+    lv_obj_add_event_cb(ui_ResetProvisioning, ui_event_ResetProvisioning, LV_EVENT_ALL, NULL);
     lv_obj_add_event_cb(ui_Wifi, ui_event_Wifi, LV_EVENT_ALL, NULL);
     uic_Wifi = ui_Wifi;
     uic_EnableProvisioning = ui_EnableProvisioning;
@@ -161,7 +161,7 @@ void ui_Wifi_screen_init(void)
     uic_ConnectedWifiSSID = ui_ConnectedWifiSSID;
     uic_GatewayIP = ui_GatewayIP;
     uic_myIPString = ui_myIPString;
-    uic_TriggerWifiScan = ui_TriggerWifiScan;
+    uic_ResetProvisioning = ui_ResetProvisioning;
     uic_TriggerWifiScan1 = ui_TriggerWifiScan1;
 
 }
@@ -185,8 +185,8 @@ void ui_Wifi_screen_destroy(void)
     ui_myIPString = NULL;
     ui_ManualConnect = NULL;
     ui_Manual_Connect_Text = NULL;
-    uic_TriggerWifiScan = NULL;
-    ui_TriggerWifiScan = NULL;
+    uic_ResetProvisioning = NULL;
+    ui_ResetProvisioning = NULL;
     uic_TriggerWifiScan1 = NULL;
     ui_TriggerWifiScan1 = NULL;
 

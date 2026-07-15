@@ -24,7 +24,7 @@ class System {
 public:
 
 
-    constexpr static std::string ReleaseTAG = "CarTSmD-v1.1.2";
+    constexpr static std::string ReleaseTAG = "CarTSmD-v1.2.0";
     
 
     System(): RollPitchQueue(xQueueCreate(1,sizeof(RollPitch))),

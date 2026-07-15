@@ -16,16 +16,37 @@
 #include <cstddef>
 #include <atomic>
 
+#include "network_provisioning/scheme_softap.h"
+#include <network_provisioning/manager.h>
+
 #include "PipelineTypes.hpp"
+
+#define PROV_DEVMODE
+#define PROV_SEC2_USERNAME          "wifiprov"
+#define PROV_SEC2_PWD               "abcd1234"
 
 class WifiManager
 {
     using List = std::vector<std::string>;
 
-    public:
+public:
 
-
-    WifiManager(QueueHandle_t q): Queue_(q) {}
+    WifiManager(QueueHandle_t q): Queue_(q) 
+    {
+        // Initialize the event handler with lambda that captures 'this'
+        WifiProvEventHandler = {
+        .event_cb = [](void *user_data, 
+                       network_prov_cb_event_t event, 
+                       void *event_data)
+            {
+                WifiManager* pThis = static_cast<WifiManager*>(user_data);
+                if (pThis) {
+                    pThis->WifiProvAppCallback(event, event_data);    
+                }
+            },
+            .user_data = this,
+        };
+    }
     //WifiManager(const WifiManager&) = delete;
     //WifiManager& operator=(const WifiManager&) = delete;
     ~WifiManager() = default;
@@ -35,7 +56,9 @@ class WifiManager
     
     void WifiConnectRequest(std::string ssid, std::string passwrd);
 
-    private:
+    void WifiProvAppCallback(network_prov_cb_event_t event, void *event_data);
+
+private:
     
     std::mutex networkListMutex_;
     std::mutex WifiStatusMutex_;
@@ -45,7 +68,9 @@ class WifiManager
     WifiManagerStatus connectionStatus_ = WifiManagerStatus::INIT;
     List availableNetworks_;
     QueueHandle_t Queue_;
-
+    EventGroupHandle_t WifiEventGroup;
+    bool isConnectedToProvisionedWifi=false;
+    network_prov_event_handler_t WifiProvEventHandler;
 
     wifi_config_t wifi_config = {
         .sta = {
@@ -54,6 +79,8 @@ class WifiManager
         },
     };
 
+    
+    
     
     static void wifiEventHandlerEntry(
         void* arg,
@@ -65,17 +92,27 @@ class WifiManager
         esp_event_base_t event_base,
         int32_t event_id,
         void* event_data);
-            
+
+    void registerWifiEvents();
     void WifiManagerTask();
+    void WifiProvisioningTask();
     void storeAPPoints();
     void changeStatus(WifiManagerStatus status);
     void WifiConnect(const std::string ssid,const std::string pwd);
     void setPendingConnectionState(bool connected);
+    
+    esp_err_t WifiProvisioning() const;
+    
     static void task_entry(void* arg);
-
+    static void provisioning_task_entry(void* arg);
+    static esp_err_t  custom_prov_data_handler(uint32_t session_id, const uint8_t *inbuf, ssize_t inlen,
+                                   uint8_t **outbuf, ssize_t *outlen, void *priv_data);
+    
+    
     std::function<void(const std::string&)> m_WifiConnectionCallback;
     std::function<void(bool)> m_ConnectionStateCallback;
     std::atomic<int> pendingConnectionState_ {-1};
+    std::atomic<bool> pendingScanResults_{false};
 };
 
 

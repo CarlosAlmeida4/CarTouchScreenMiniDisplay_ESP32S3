@@ -11,6 +11,7 @@ idf_component_register(
 		"screens/ui_MainConfigScreen.c"
 		"screens/ui_MemoryEraseValidation.c"
 		"screens/ui_Wifi.c"
+		"screens/ui_ManualWifi.c"
 		"screens/ui_OTAUpdate.c"
 		"images/ui_img_rollpajero2_reduced_png.c"
 		"images/ui_img_rollreduced_png.c"

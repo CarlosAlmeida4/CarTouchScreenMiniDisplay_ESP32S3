@@ -14,7 +14,10 @@ enum WifiManagerStatus {
     SCANNING,
     SCANNING_READY,
     SCANNING_FINISHED,
-    CONNECTION_FAILED
+    CONNECTION_FAILED,
+    READY_TO_PROVISION,
+    PROVISIONING,
+    PROVISIONED
 };
 
 
@@ -29,6 +32,8 @@ struct WifiManagerPipeline
 {
     char AvailableNetworks[200];
     WifiManagerStatus WifiStatus;
+    bool isConnnectedToProvisionedWifi;
+    char CurrentSSID[32];
 };
 
 

@@ -22,10 +22,10 @@ inline float normalize(float input)
     return ((10/9)*input + 50);
 }
 
-inline std::string turnFloat2Char(float input)
+// Note: Caller must provide buffer of at least 16 bytes
+inline void turnFloat2Char(float input, char* buffer, size_t size)
 {
-    return std::format("{:.1f}", input);
-    
+    snprintf(buffer, size, "%.1f", input);
 }
 
 static const sh8601_lcd_init_cmd_t lcd_init_cmds[] = {
@@ -227,6 +227,26 @@ void Display::updateUI()
         return;
     }
 
+    // Apply feedback posted by non-LVGL tasks (safe here because we hold lvgl_mux)
+    {
+        std::lock_guard<std::mutex> lock(m_wifiFeedbackMutex);
+        if (m_wifiFeedbackPending) {
+            m_wifiFeedbackPending = false;
+            if (lv_obj_ready(uic_WifiConnectFeedback)) {
+                _ui_label_set_property(uic_WifiConnectFeedback, _UI_LABEL_PROPERTY_TEXT, m_wifiFeedbackBuf);
+            }
+        }
+    }
+    {
+        std::lock_guard<std::mutex> lock(m_swFeedbackMutex);
+        if (m_swFeedbackPending) {
+            m_swFeedbackPending = false;
+            if (lv_obj_ready(uic_SoftwareUpdateFeedback)) {
+                _ui_label_set_property(uic_SoftwareUpdateFeedback, _UI_LABEL_PROPERTY_TEXT, m_swFeedbackBuf);
+            }
+        }
+    }
+
     //ESP_LOGI("UI", "Current screen: %p", lv_scr_act());
     //Update screen depdending on which is currently loaded
     lv_obj_t* scr_act = lv_scr_act();
@@ -234,6 +254,7 @@ void Display::updateUI()
     if(scr_act == ui_Inclinometer){InclinometerUI();}
     if(scr_act == ui_InclinometerNew){InclinometerNewUI();}
     if(scr_act == ui_Wifi){WifiUI();}
+    if(scr_act == ui_ManualWifi){ManualWifiUI();}
     if(scr_act == ui_OTAUpdate)
     {
         char ip_str[16];
@@ -263,17 +284,14 @@ void Display::InclinometerUI()
         return;
     }
 
+    char rollStr[16], pitchStr[16], tempStr[16];
+    turnFloat2Char(RP.roll, rollStr, sizeof(rollStr));
+    turnFloat2Char(RP.pitch, pitchStr, sizeof(pitchStr));
+    turnFloat2Char(RP.temperature, tempStr, sizeof(tempStr));
 
-
-
-    std::string rollStr  = turnFloat2Char(RP.roll);
-    std::string pitchStr = turnFloat2Char(RP.pitch);
-    std::string TemperatureString = turnFloat2Char(RP.temperature);
-
-    
-    _ui_label_set_property(uic_RollText,_UI_LABEL_PROPERTY_TEXT,rollStr.c_str());
-    _ui_label_set_property(uic_PitchText,_UI_LABEL_PROPERTY_TEXT,pitchStr.c_str());
-    _ui_label_set_property(uic_TemperatureReading,_UI_LABEL_PROPERTY_TEXT,TemperatureString.c_str());
+    _ui_label_set_property(uic_RollText,_UI_LABEL_PROPERTY_TEXT,rollStr);
+    _ui_label_set_property(uic_PitchText,_UI_LABEL_PROPERTY_TEXT,pitchStr);
+    _ui_label_set_property(uic_TemperatureReading,_UI_LABEL_PROPERTY_TEXT,tempStr);
 
     lv_slider_set_value(uic_RollA,(int32_t)(100-normalize(-RP.roll)), LV_ANIM_ON);
     lv_slider_set_value(uic_RollB,(int32_t)(100-normalize(RP.roll)), LV_ANIM_ON);
@@ -294,17 +312,71 @@ void Display::InclinometerNewUI()
         return;
     }
 
-    std::string rollStr  = turnFloat2Char(RP.roll);
-    std::string pitchStr = turnFloat2Char(RP.pitch);
+    char rollStr[16], pitchStr[16];
+    turnFloat2Char(RP.roll, rollStr, sizeof(rollStr));
+    turnFloat2Char(RP.pitch, pitchStr, sizeof(pitchStr));
 
-    _ui_label_set_property(uic_RollTextNew,_UI_LABEL_PROPERTY_TEXT,rollStr.c_str());
-    _ui_label_set_property(uic_PitchTextNew,_UI_LABEL_PROPERTY_TEXT,pitchStr.c_str());
+    _ui_label_set_property(uic_RollTextNew,_UI_LABEL_PROPERTY_TEXT,rollStr);
+    _ui_label_set_property(uic_PitchTextNew,_UI_LABEL_PROPERTY_TEXT,pitchStr);
 
     lv_img_set_angle(uic_PajeroPitch,static_cast<int32_t>((RP.pitch)*10));
     lv_img_set_angle(uic_PajeroRoll, static_cast<int32_t>((RP.roll)*10));
 }
 
 void Display::WifiUI()
+{
+    WifiManagerPipeline WifiMgrPip{};
+    if (!xQueueReceive(WifiQueue_, &WifiMgrPip, 0)) {return;}
+
+    char ip_str[16];
+    char gw_str[16];
+
+    esp_netif_ip_info_t ip_info;
+    
+    esp_netif_t *netif = (WifiMgrPip.WifiStatus == WifiManagerStatus::PROVISIONING) ? 
+    esp_netif_get_handle_from_ifkey("WIFI_AP_DEF") : esp_netif_get_handle_from_ifkey("WIFI_STA_DEF");
+    esp_netif_get_ip_info(netif, &ip_info);
+
+    sprintf(ip_str, IPSTR, IP2STR(&ip_info.ip));
+    sprintf(gw_str, IPSTR, IP2STR(&ip_info.gw));
+
+    
+    
+    switch (WifiMgrPip.WifiStatus)
+    {
+    case WifiManagerStatus::PROVISIONING:
+        _ui_label_set_property(uic_ProvisioningText,_UI_LABEL_PROPERTY_TEXT,"Provisioning is enabled");
+        lv_obj_add_state(uic_EnableProvisioning,LV_STATE_CHECKED);
+        _ui_label_set_property(uic_ConnectedWifiSSID,_UI_LABEL_PROPERTY_TEXT,WifiMgrPip.CurrentSSID);
+        _ui_label_set_property(uic_myIPString,_UI_LABEL_PROPERTY_TEXT,ip_str);
+        _ui_label_set_property(uic_GatewayIP,_UI_LABEL_PROPERTY_TEXT,gw_str);
+        break;
+    case WifiManagerStatus::CONNECTED:
+        /* code */
+        if(WifiMgrPip.isConnnectedToProvisionedWifi)
+        {
+            _ui_label_set_property(uic_ProvisioningText,_UI_LABEL_PROPERTY_TEXT,"Provisioning Successful");
+            lv_obj_add_state(uic_EnableProvisioning,LV_STATE_CHECKED);
+            _ui_label_set_property(uic_ConnectedWifiSSID,_UI_LABEL_PROPERTY_TEXT,WifiMgrPip.CurrentSSID);
+            _ui_label_set_property(uic_myIPString,_UI_LABEL_PROPERTY_TEXT,ip_str);
+            _ui_label_set_property(uic_GatewayIP,_UI_LABEL_PROPERTY_TEXT,gw_str);
+        }
+        else
+        {
+            _ui_label_set_property(uic_ProvisioningText,_UI_LABEL_PROPERTY_TEXT,"Manual Wifi");
+            lv_obj_add_state(uic_EnableProvisioning,LV_STATE_DEFAULT);
+            _ui_label_set_property(uic_ConnectedWifiSSID,_UI_LABEL_PROPERTY_TEXT,WifiMgrPip.CurrentSSID);
+            _ui_label_set_property(uic_myIPString,_UI_LABEL_PROPERTY_TEXT,ip_str);
+            _ui_label_set_property(uic_GatewayIP,_UI_LABEL_PROPERTY_TEXT,gw_str);
+        }
+        break;
+    default:
+        break;
+    }
+
+}
+
+void Display::ManualWifiUI()
 {
     //ESP_LOGD(DISPLAY_TAG, "Wifi UI is active");
     WifiManagerPipeline WifiMgrPip{};
@@ -319,6 +391,7 @@ void Display::WifiUI()
     
 }
 
+
 void Display::displayTask() 
 {
     //ESP_LOGD(DISPLAY_TAG, "Starting LVGL task");
@@ -327,9 +400,9 @@ void Display::displayTask()
     {
         int64_t start = esp_timer_get_time();
         // Lock the mutex due to the LVGL APIs are not thread-safe
-        updateUI();
         if (lvgl_lock(-1))
-        {   
+        {
+            updateUI();
             task_delay_ms = lv_timer_handler();
             
             // Release the mutex
@@ -563,23 +636,16 @@ void Display::invokeInclinometerReset()
 
 void Display::SWUpdateFeedback(const std::string& Feedback)
 {
-
-    if (lv_obj_ready(uic_SoftwareUpdateFeedback)) {
-                _ui_label_set_property(uic_SoftwareUpdateFeedback, 
-                    _UI_LABEL_PROPERTY_TEXT, Feedback.c_str());
-    }
-
+    std::lock_guard<std::mutex> lock(m_swFeedbackMutex);
+    snprintf(m_swFeedbackBuf, sizeof(m_swFeedbackBuf), "%s", Feedback.c_str());
+    m_swFeedbackPending = true;
 }
 
 void Display::WifiConnectionFeedback(const std::string& Feedback)
 {
-    
-    if (lv_obj_ready(uic_WifiConnectFeedback)) 
-    {
-        _ui_label_set_property(uic_WifiConnectFeedback, 
-        _UI_LABEL_PROPERTY_TEXT, Feedback.c_str());
-    }
-
+    std::lock_guard<std::mutex> lock(m_wifiFeedbackMutex);
+    snprintf(m_wifiFeedbackBuf, sizeof(m_wifiFeedbackBuf), "%s", Feedback.c_str());
+    m_wifiFeedbackPending = true;
 }
 
 /*
@@ -715,4 +781,9 @@ extern "C" void UI_UpdateBrightnessRuntime(lv_event_t * e)
     {
         Display::m_activeInstance->setBrightnessHandler(e);
     }
+}
+
+extern "C" void UI_ResetProvisioning(lv_event_t * e)
+{
+    network_prov_mgr_reset_wifi_sm_state_for_reprovision(); //FIXME: THis doenst really work, dont be lazy and create the proper call to the wifi manager
 }

@@ -14,4 +14,5 @@ idf_component_register(
         PipelineTypes
         esp_netif 
         nvs_flash
+        network_provisioning
 )

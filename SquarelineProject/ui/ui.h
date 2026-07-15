@@ -20,13 +20,14 @@ extern "C" {
 
 ///////////////////// SCREENS ////////////////////
 
+#include "screens/ui_MainConfigScreen.h"
+#include "screens/ui_MemoryEraseValidation.h"
+#include "screens/ui_OTAUpdate.h"
+#include "screens/ui_Wifi.h"
+#include "screens/ui_ManualWifi.h"
 #include "screens/ui_InclinometerGraph.h"
 #include "screens/ui_Inclinometer.h"
 #include "screens/ui_InclinometerNew.h"
-#include "screens/ui_MainConfigScreen.h"
-#include "screens/ui_MemoryEraseValidation.h"
-#include "screens/ui_Wifi.h"
-#include "screens/ui_OTAUpdate.h"
 
 ///////////////////// VARIABLES ////////////////////
 

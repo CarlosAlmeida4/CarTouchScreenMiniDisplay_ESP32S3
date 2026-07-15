@@ -10,4 +10,5 @@ idf_component_register(
         esp_system
         esp_partition
         log
+        nvs_flash
 )

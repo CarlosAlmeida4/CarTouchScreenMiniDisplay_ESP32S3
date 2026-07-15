@@ -116,7 +116,7 @@ void WifiManager::WifiManagerTask()
             m_ConnectionStateCallback(pendingState == 1);
         }
 
-        ESP_LOGI(TAG, "Wifi Status %d", connectionStatus_);
+        //ESP_LOGI(TAG, "Wifi Status %d", connectionStatus_);
         WifiManagerPipeline WifiMgrPip{};
         WifiMgrPip.WifiStatus = connectionStatus_;
         switch (connectionStatus_)

@@ -97,6 +97,9 @@ private:
     // Previous log sink for chaining
     vprintf_like_t previousLogSink_;    ///< Previous vprintf handler (for log chaining)
 
+    // Reset reason tracking
+    std::string lastResetReason_;       ///< Last reset reason retrieved from NVS
+
     // Singleton instance
     static DiagnosticsService* instance_; ///< Singleton instance for static callback access
 
@@ -145,6 +148,18 @@ private:
      */
     std::vector<LogSnapshotEntry> snapshotFrom(uint64_t cursor, size_t maxLines, uint64_t* nextCursor) const;
 
+    /**
+     * @brief Load last reset reason from NVS storage
+     * Retrieves the reset reason that was saved on previous boot
+     */
+    void loadLastResetReason();
+
+    /**
+     * @brief Save current reset reason to NVS storage
+     * Persists the current reset reason so it can be retrieved on next boot
+     */
+    void saveCurrentResetReason();
+
     // HTTP handler static entry points
     /** @brief Static HTTP handler for /diag/logs endpoint (wraps handleLogsInternal) */
     static esp_err_t handleLogs(httpd_req_t* req);
@@ -163,7 +178,8 @@ private:
     esp_err_t handleLogsInternal(httpd_req_t* req);
 
     /**
-     * @brief Handle GET /diag/status - return system uptime, reset reason, buffer stats as JSON
+     * @brief Handle GET /diag/status - return system uptime, current and last reset reason, buffer stats as JSON
+     * Returns both current reset reason (why system is running) and last reset reason (from previous boot)
      * Yields to allow LVGL task to run (prevents watchdog timeout)
      */
     esp_err_t handleStatusInternal(httpd_req_t* req);

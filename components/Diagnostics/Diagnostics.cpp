@@ -9,6 +9,8 @@
 #include "esp_partition.h"
 #include "esp_system.h"
 #include "esp_timer.h"
+#include "nvs_flash.h"
+#include "nvs.h"
 #include "freertos/task.h"
 
 DiagnosticsService* DiagnosticsService::instance_ = nullptr;
@@ -98,12 +100,61 @@ void DiagnosticsService::init(size_t maxLines, size_t maxLineLength)
     maxLines_ = std::max<size_t>(50, maxLines);
     maxLineLength_ = std::max<size_t>(80, maxLineLength);
     instance_ = this;
+    
+    // Load previous reset reason from NVS and save current one
+    loadLastResetReason();
+    saveCurrentResetReason();
 }
 
 void DiagnosticsService::setAuthToken(const std::string& token)
 {
     std::lock_guard<std::mutex> lock(serverMutex_);
     authToken_ = token;
+}
+
+void DiagnosticsService::loadLastResetReason()
+{
+    // Open NVS namespace for diagnostics
+    nvs_handle_t nvsHandle;
+    esp_err_t err = nvs_open("diagnostics", NVS_READONLY, &nvsHandle);
+    
+    if (err != ESP_OK) {
+        lastResetReason_ = "unknown";
+        return;
+    }
+
+    // Read last reset reason from NVS (max 32 bytes)
+    char reasonBuffer[32] = {0};
+    size_t length = sizeof(reasonBuffer);
+    err = nvs_get_str(nvsHandle, "last_reset", reasonBuffer, &length);
+    
+    if (err == ESP_OK) {
+        lastResetReason_ = std::string(reasonBuffer);
+    } else {
+        lastResetReason_ = "unknown";
+    }
+    
+    nvs_close(nvsHandle);
+}
+
+void DiagnosticsService::saveCurrentResetReason()
+{
+    // Get current reset reason
+    esp_reset_reason_t reason = esp_reset_reason();
+    const char* reasonStr = resetReasonToString(reason);
+    
+    // Open NVS namespace for diagnostics (read-write)
+    nvs_handle_t nvsHandle;
+    esp_err_t err = nvs_open("diagnostics", NVS_READWRITE, &nvsHandle);
+    
+    if (err != ESP_OK) {
+        return;
+    }
+
+    // Save current reset reason to NVS
+    nvs_set_str(nvsHandle, "last_reset", reasonStr);
+    nvs_commit(nvsHandle);
+    nvs_close(nvsHandle);
 }
 
 void DiagnosticsService::installLogSink()
@@ -437,13 +488,14 @@ esp_err_t DiagnosticsService::handleStatusInternal(httpd_req_t* req)
         return result;
     }
 
-    // Get system metrics
+    // Get current system metrics and retrieve last reset reason from member
     esp_reset_reason_t reason = esp_reset_reason();
 
-    // Build JSON response with system status
+    // Build JSON response with system status including both current and last reset reasons
     std::ostringstream body;
     body << "{\"uptime_us\":" << static_cast<uint64_t>(esp_timer_get_time())
          << ",\"reset_reason\":\"" << resetReasonToString(reason)
+         << "\",\"last_reset_reason\":\"" << lastResetReason_
          << "\",\"buffered_logs\":" << bufferSize()
          << ",\"dropped_logs\":" << droppedCount()
          << ",\"server_running\":" << (isServerRunning() ? "true" : "false")
@@ -491,9 +543,16 @@ esp_err_t DiagnosticsService::handleCoreInfoInternal(httpd_req_t* req)
         }
     }
 
+    // Format core dump partition address as hex string
+    char addressStr[16] = "0x0";
+    if (partitionFound) {
+        std::snprintf(addressStr, sizeof(addressStr), "0x%" PRIx32, corePart->address);
+    }
+
     std::ostringstream body;
     body << "{\"coredump_partition_found\":" << (partitionFound ? "true" : "false")
          << ",\"coredump_has_data_guess\":" << (hasDataGuess ? "true" : "false")
+         << ",\"partition_address\":\"" << addressStr << "\""
          << ",\"partition_size\":" << (partitionFound ? corePart->size : 0)
          << ",\"note\":\"Decode core dump with matching firmware ELF and espcoredump.py\"}";
 

@@ -5,6 +5,14 @@ Examples:
   python tools/poll_diag_logs.py --host 192.168.1.90
   python tools/poll_diag_logs.py --host 192.168.1.90 --output logs.txt --cursor-file .diag.cursor
   python tools/poll_diag_logs.py --host 192.168.1.90 --token my-secret-token --status-every 15
+
+# Poll logs and display core dump partition address
+    python tools/poll_diag_logs.py --host 192.168.1.90 --show-coreinfo
+# Fetch once with all diagnostics
+    python tools/poll_diag_logs.py --host 192.168.1.90 --show-status --show-coreinfo --once
+# With authentication
+    python tools/poll_diag_logs.py --host 192.168.1.90 --token my-token --show-coreinfo
+    
 """
 
 from __future__ import annotations
@@ -48,12 +56,30 @@ def parse_args() -> argparse.Namespace:
         help="Print poll status every N successful requests (default: 30)",
     )
     parser.add_argument("--once", action="store_true", help="Fetch once and exit")
+    parser.add_argument(
+        "--show-status",
+        action="store_true",
+        help="Also fetch and display /diag/status (reset reason, uptime, etc.)",
+    )
+    parser.add_argument(
+        "--show-coreinfo",
+        action="store_true",
+        help="Also fetch and display /diag/coreinfo (core dump partition address and size)",
+    )
     return parser.parse_args()
 
 
 def build_url(host: str, port: int, cursor: int, limit: int) -> str:
     query = urllib.parse.urlencode({"cursor": cursor, "limit": limit})
     return f"http://{host}:{port}/diag/logs?{query}"
+
+
+def build_status_url(host: str, port: int) -> str:
+    return f"http://{host}:{port}/diag/status"
+
+
+def build_coreinfo_url(host: str, port: int) -> str:
+    return f"http://{host}:{port}/diag/coreinfo"
 
 
 def read_cursor(path: pathlib.Path, fallback: int = 0) -> int:
@@ -82,12 +108,69 @@ def fetch_logs(url: str, token: str | None, timeout: float) -> dict[str, Any]:
     return json.loads(body.decode("utf-8"))
 
 
+def fetch_status(url: str, token: str | None, timeout: float) -> dict[str, Any]:
+    """Fetch status from /diag/status endpoint"""
+    req = urllib.request.Request(url, method="GET")
+    req.add_header("Accept", "application/json")
+    if token:
+        req.add_header("X-Diag-Token", token)
+
+    with urllib.request.urlopen(req, timeout=timeout) as response:
+        body = response.read()
+
+    return json.loads(body.decode("utf-8"))
+
+
+def fetch_coreinfo(url: str, token: str | None, timeout: float) -> dict[str, Any]:
+    """Fetch core dump info from /diag/coreinfo endpoint"""
+    req = urllib.request.Request(url, method="GET")
+    req.add_header("Accept", "application/json")
+    if token:
+        req.add_header("X-Diag-Token", token)
+
+    with urllib.request.urlopen(req, timeout=timeout) as response:
+        body = response.read()
+
+    return json.loads(body.decode("utf-8"))
+
+
 def format_line(entry: dict[str, Any]) -> str:
     seq = entry.get("seq", "?")
     ts_us = entry.get("ts_us", 0)
     msg = entry.get("msg", "")
     ts_s = float(ts_us) / 1_000_000.0
     return f"[{seq}] {ts_s:12.6f}s {msg}"
+
+
+def format_status(status: dict[str, Any]) -> str:
+    """Format status info into readable string"""
+    uptime_us = int(status.get("uptime_us", 0))
+    uptime_s = uptime_us / 1_000_000.0
+    reset_reason = status.get("reset_reason", "unknown")
+    last_reset_reason = status.get("last_reset_reason", "unknown")
+    buffered_logs = int(status.get("buffered_logs", 0))
+    dropped_logs = int(status.get("dropped_logs", 0))
+    server_running = status.get("server_running", False)
+    
+    return (
+        f"Status: uptime={uptime_s:.2f}s, "
+        f"reset={reset_reason}, last_reset={last_reset_reason}, "
+        f"buffered_logs={buffered_logs}, dropped={dropped_logs}, "
+        f"server={'ON' if server_running else 'OFF'}"
+    )
+
+
+def format_coreinfo(coreinfo: dict[str, Any]) -> str:
+    """Format core dump info into readable string"""
+    found = coreinfo.get("coredump_partition_found", False)
+    has_data = coreinfo.get("coredump_has_data_guess", False)
+    address = coreinfo.get("partition_address", "0x0")
+    size = int(coreinfo.get("partition_size", 0))
+    
+    if found:
+        return f"CoreDump: address={address}, size={size} bytes, has_data={has_data}"
+    else:
+        return "CoreDump: partition not found"
 
 
 def emit_lines(entries: list[dict[str, Any]], output_path: pathlib.Path | None, raw_json: bool) -> None:
@@ -134,6 +217,18 @@ def main() -> int:
         file=sys.stderr,
         flush=True,
     )
+    if args.show_status:
+        print(
+            f"Also fetching /diag/status for reset reason info",
+            file=sys.stderr,
+            flush=True,
+        )
+    if args.show_coreinfo:
+        print(
+            f"Also fetching /diag/coreinfo for core dump partition address",
+            file=sys.stderr,
+            flush=True,
+        )
 
     while not should_stop:
         url = build_url(args.host, args.port, cursor, limit)
@@ -145,6 +240,26 @@ def main() -> int:
 
             if isinstance(logs, list) and logs:
                 emit_lines(logs, output_path, args.raw_json)
+
+            # Optionally fetch and display status
+            if args.show_status:
+                try:
+                    status_url = build_status_url(args.host, args.port)
+                    status = fetch_status(status_url, args.token, args.timeout)
+                    status_str = format_status(status)
+                    print(status_str, file=sys.stderr, flush=True)
+                except Exception as exc:
+                    print(f"Failed to fetch status: {exc}", file=sys.stderr, flush=True)
+
+            # Optionally fetch and display core dump info
+            if args.show_coreinfo:
+                try:
+                    coreinfo_url = build_coreinfo_url(args.host, args.port)
+                    coreinfo = fetch_coreinfo(coreinfo_url, args.token, args.timeout)
+                    coreinfo_str = format_coreinfo(coreinfo)
+                    print(coreinfo_str, file=sys.stderr, flush=True)
+                except Exception as exc:
+                    print(f"Failed to fetch core info: {exc}", file=sys.stderr, flush=True)
 
             if next_cursor != cursor:
                 cursor = next_cursor

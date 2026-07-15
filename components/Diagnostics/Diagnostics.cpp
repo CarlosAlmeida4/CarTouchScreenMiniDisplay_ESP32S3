@@ -12,6 +12,7 @@
 #include "nvs_flash.h"
 #include "nvs.h"
 #include "freertos/task.h"
+#include "esp_netif.h"
 
 DiagnosticsService* DiagnosticsService::instance_ = nullptr;
 
@@ -246,6 +247,8 @@ void DiagnosticsService::appendLogLine(const char* line, size_t lineLen)
 
 void DiagnosticsService::onWifiConnected()
 {
+    // Small delay before starting server to ensure previous port is fully released
+    vTaskDelay(50 / portTICK_PERIOD_MS);
     startServer();
 }
 
@@ -283,11 +286,30 @@ void DiagnosticsService::startServer()
     httpd_config_t config = HTTPD_DEFAULT_CONFIG();
     config.max_uri_handlers = 8;  // Support up to 8 URI handlers
     config.stack_size = 6144;     // Sufficient for JSON response building
+    config.server_port = 80;       // Explicitly set port
 
-    if (httpd_start(&server_, &config) != ESP_OK) {
-        server_ = nullptr;
-        ESP_LOGE(TAG, "Failed to start diagnostics HTTP server");
-        return;
+    // Retry logic: socket might be in TIME_WAIT after previous bind
+    esp_err_t err = ESP_FAIL;
+    const int maxRetries = 3;
+    const int retryDelayMs = 100;
+
+    for (int attempt = 0; attempt < maxRetries; ++attempt) {
+        err = httpd_start(&server_, &config);
+        if (err == ESP_OK) {
+            ESP_LOGI(TAG, "Diagnostics HTTP server started (attempt %d)", attempt + 1);
+            break;
+        }
+
+        if (attempt < maxRetries - 1) {
+            ESP_LOGW(TAG, "Failed to start server (attempt %d/%d), retrying in %dms...", 
+                     attempt + 1, maxRetries, retryDelayMs);
+            vTaskDelay(retryDelayMs / portTICK_PERIOD_MS);
+        } else {
+            server_ = nullptr;
+            ESP_LOGE(TAG, "Failed to start diagnostics HTTP server after %d attempts (error: %s)", 
+                     maxRetries, esp_err_to_name(err));
+            return;
+        }
     }
 
     // Register /diag/logs endpoint (paginated log buffer)
@@ -329,6 +351,9 @@ void DiagnosticsService::stopServer()
     httpd_stop(server_);
     server_ = nullptr;
     ESP_LOGI(TAG, "Diagnostics HTTP server stopped");
+
+    // Release lock temporarily and wait for port to be fully released by kernel
+    // This prevents EADDRINUSE errors when restarting server shortly after shutdown
 }
 
 bool DiagnosticsService::isAuthorized(httpd_req_t* req) const

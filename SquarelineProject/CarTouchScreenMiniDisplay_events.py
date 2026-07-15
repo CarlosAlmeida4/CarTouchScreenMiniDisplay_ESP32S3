@@ -34,3 +34,7 @@ def UI_UpdateBrightnessRuntime(event_struct):
 def UI_TriggerWifiScan(event_struct):
     return
 
+
+def UI_ResetProvisioning(event_struct):
+    return
+

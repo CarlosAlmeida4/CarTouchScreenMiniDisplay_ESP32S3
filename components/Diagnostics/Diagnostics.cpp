@@ -9,6 +9,7 @@
 #include "esp_partition.h"
 #include "esp_system.h"
 #include "esp_timer.h"
+#include "freertos/task.h"
 
 DiagnosticsService* DiagnosticsService::instance_ = nullptr;
 
@@ -93,6 +94,7 @@ DiagnosticsService::DiagnosticsService()
 
 void DiagnosticsService::init(size_t maxLines, size_t maxLineLength)
 {
+    // Ensure reasonable minimum buffer sizes
     maxLines_ = std::max<size_t>(50, maxLines);
     maxLineLength_ = std::max<size_t>(80, maxLineLength);
     instance_ = this;
@@ -109,6 +111,7 @@ void DiagnosticsService::installLogSink()
     if (instance_ == nullptr) {
         instance_ = this;
     }
+    // Chain previous log sink so we can call it after buffering
     previousLogSink_ = esp_log_set_vprintf(&DiagnosticsService::logSink);
 }
 
@@ -122,6 +125,7 @@ int DiagnosticsService::logSink(const char* fmt, va_list args)
 
 int DiagnosticsService::logSinkInternal(const char* fmt, va_list args)
 {
+    // Format log message into temporary buffer first
     char stackBuffer[256];
 
     va_list formatCopy;
@@ -129,6 +133,7 @@ int DiagnosticsService::logSinkInternal(const char* fmt, va_list args)
     int needed = std::vsnprintf(stackBuffer, sizeof(stackBuffer), fmt, formatCopy);
     va_end(formatCopy);
 
+    // If message fits in stack buffer, use it directly; otherwise allocate on heap
     if (needed > 0) {
         if (static_cast<size_t>(needed) < sizeof(stackBuffer)) {
             appendLogLine(stackBuffer, static_cast<size_t>(needed));
@@ -145,6 +150,7 @@ int DiagnosticsService::logSinkInternal(const char* fmt, va_list args)
         }
     }
 
+    // Chain to previous sink (usually stdout)
     if (previousLogSink_ != nullptr) {
         return previousLogSink_(fmt, args);
     }
@@ -154,29 +160,34 @@ int DiagnosticsService::logSinkInternal(const char* fmt, va_list args)
 
 void DiagnosticsService::appendLogLine(const char* line, size_t lineLen)
 {
+    // Validate input
     if (line == nullptr || lineLen == 0) {
         return;
     }
 
+    // Cap line length and create std::string
     size_t cappedLen = std::min(lineLen, maxLineLength_);
-
     std::string msg(line, cappedLen);
+    
+    // Remove trailing newlines for cleaner storage
     while (!msg.empty() && (msg.back() == '\n' || msg.back() == '\r')) {
         msg.pop_back();
     }
 
     if (msg.empty()) {
-        return;
+        return;  // Skip empty lines
     }
 
+    // Create buffer item with timestamp
     BufferItem item;
     item.seq = nextSeq_.fetch_add(1);
     item.timestampUs = static_cast<uint64_t>(esp_timer_get_time());
     item.message = std::move(msg);
 
+    // Add to circular buffer (thread-safe)
     std::lock_guard<std::mutex> lock(bufferMutex_);
     if (buffer_.size() >= maxLines_) {
-        buffer_.pop_front();
+        buffer_.pop_front();  // Drop oldest entry if full
         droppedCount_.fetch_add(1);
     }
     buffer_.push_back(std::move(item));
@@ -211,14 +222,16 @@ size_t DiagnosticsService::bufferSize() const
 
 void DiagnosticsService::startServer()
 {
+    // Prevent concurrent server start attempts
     std::lock_guard<std::mutex> lock(serverMutex_);
     if (server_ != nullptr) {
-        return;
+        return;  // Already running
     }
 
+    // Configure HTTP server with reasonable defaults
     httpd_config_t config = HTTPD_DEFAULT_CONFIG();
-    config.max_uri_handlers = 8;
-    config.stack_size = 6144;
+    config.max_uri_handlers = 8;  // Support up to 8 URI handlers
+    config.stack_size = 6144;     // Sufficient for JSON response building
 
     if (httpd_start(&server_, &config) != ESP_OK) {
         server_ = nullptr;
@@ -226,18 +239,21 @@ void DiagnosticsService::startServer()
         return;
     }
 
+    // Register /diag/logs endpoint (paginated log buffer)
     httpd_uri_t logsUri = {};
     logsUri.uri = "/diag/logs";
     logsUri.method = HTTP_GET;
     logsUri.handler = &DiagnosticsService::handleLogs;
     logsUri.user_ctx = this;
 
+    // Register /diag/status endpoint (system status)
     httpd_uri_t statusUri = {};
     statusUri.uri = "/diag/status";
     statusUri.method = HTTP_GET;
     statusUri.handler = &DiagnosticsService::handleStatus;
     statusUri.user_ctx = this;
 
+    // Register /diag/coreinfo endpoint (core dump info)
     httpd_uri_t coreUri = {};
     coreUri.uri = "/diag/coreinfo";
     coreUri.method = HTTP_GET;
@@ -253,9 +269,10 @@ void DiagnosticsService::startServer()
 
 void DiagnosticsService::stopServer()
 {
+    // Prevent concurrent server stop attempts
     std::lock_guard<std::mutex> lock(serverMutex_);
     if (server_ == nullptr) {
-        return;
+        return;  // Already stopped
     }
 
     httpd_stop(server_);
@@ -323,8 +340,10 @@ DiagnosticsService::snapshotFrom(uint64_t cursor, size_t maxLines, uint64_t* nex
 
     uint64_t localNext = cursor;
 
+    // Snapshot buffer under lock to avoid concurrent modification
     std::lock_guard<std::mutex> lock(bufferMutex_);
     for (const auto& item : buffer_) {
+        // Skip entries up to and including cursor
         if (item.seq <= cursor) {
             continue;
         }
@@ -343,36 +362,45 @@ DiagnosticsService::snapshotFrom(uint64_t cursor, size_t maxLines, uint64_t* nex
 
 esp_err_t DiagnosticsService::handleLogs(httpd_req_t* req)
 {
+    // Static entry point - get instance and call instance method
     auto* self = static_cast<DiagnosticsService*>(req->user_ctx);
     return self->handleLogsInternal(req);
 }
 
 esp_err_t DiagnosticsService::handleStatus(httpd_req_t* req)
 {
+    // Static entry point - get instance and call instance method
     auto* self = static_cast<DiagnosticsService*>(req->user_ctx);
     return self->handleStatusInternal(req);
 }
 
 esp_err_t DiagnosticsService::handleCoreInfo(httpd_req_t* req)
 {
+    // Static entry point - get instance and call instance method
     auto* self = static_cast<DiagnosticsService*>(req->user_ctx);
     return self->handleCoreInfoInternal(req);
 }
 
 esp_err_t DiagnosticsService::handleLogsInternal(httpd_req_t* req)
 {
+    // Validate authentication token from X-Diag-Token header
     if (!isAuthorized(req)) {
         httpd_resp_set_status(req, "401 Unauthorized");
-        return httpd_resp_send(req, "unauthorized", HTTPD_RESP_USE_STRLEN);
+        esp_err_t result = httpd_resp_send(req, "unauthorized", HTTPD_RESP_USE_STRLEN);
+        vTaskDelay(1 / portTICK_PERIOD_MS);  // Yield to LVGL
+        return result;
     }
 
+    // Parse pagination parameters: ?cursor=N&limit=M
     uint64_t cursor = 0;
     size_t limit = 80;
     parseCursorAndLimit(req, &cursor, &limit);
 
+    // Get snapshot of log entries from cursor position
     uint64_t nextCursor = cursor;
     auto rows = snapshotFrom(cursor, limit, &nextCursor);
 
+    // Build JSON response body with log entries
     std::ostringstream body;
     body << "{\"cursor\":" << cursor
          << ",\"next_cursor\":" << nextCursor
@@ -394,18 +422,25 @@ esp_err_t DiagnosticsService::handleLogsInternal(httpd_req_t* req)
 
     httpd_resp_set_type(req, "application/json");
     httpd_resp_set_hdr(req, "Cache-Control", "no-store");
-    return httpd_resp_send(req, out.c_str(), out.size());
+    esp_err_t result = httpd_resp_send(req, out.c_str(), out.size());
+    vTaskDelay(1 / portTICK_PERIOD_MS);  // Yield to LVGL
+    return result;
 }
 
 esp_err_t DiagnosticsService::handleStatusInternal(httpd_req_t* req)
 {
+    // Validate authentication token from X-Diag-Token header
     if (!isAuthorized(req)) {
         httpd_resp_set_status(req, "401 Unauthorized");
-        return httpd_resp_send(req, "unauthorized", HTTPD_RESP_USE_STRLEN);
+        esp_err_t result = httpd_resp_send(req, "unauthorized", HTTPD_RESP_USE_STRLEN);
+        vTaskDelay(1 / portTICK_PERIOD_MS);  // Yield to LVGL
+        return result;
     }
 
+    // Get system metrics
     esp_reset_reason_t reason = esp_reset_reason();
 
+    // Build JSON response with system status
     std::ostringstream body;
     body << "{\"uptime_us\":" << static_cast<uint64_t>(esp_timer_get_time())
          << ",\"reset_reason\":\"" << resetReasonToString(reason)
@@ -418,16 +453,22 @@ esp_err_t DiagnosticsService::handleStatusInternal(httpd_req_t* req)
 
     httpd_resp_set_type(req, "application/json");
     httpd_resp_set_hdr(req, "Cache-Control", "no-store");
-    return httpd_resp_send(req, out.c_str(), out.size());
+    esp_err_t result = httpd_resp_send(req, out.c_str(), out.size());
+    vTaskDelay(1 / portTICK_PERIOD_MS);  // Yield to LVGL
+    return result;
 }
 
 esp_err_t DiagnosticsService::handleCoreInfoInternal(httpd_req_t* req)
 {
+    // Validate authentication token from X-Diag-Token header
     if (!isAuthorized(req)) {
         httpd_resp_set_status(req, "401 Unauthorized");
-        return httpd_resp_send(req, "unauthorized", HTTPD_RESP_USE_STRLEN);
+        esp_err_t result = httpd_resp_send(req, "unauthorized", HTTPD_RESP_USE_STRLEN);
+        vTaskDelay(1 / portTICK_PERIOD_MS);  // Yield to LVGL
+        return result;
     }
 
+    // Find core dump partition in flash
     const esp_partition_t* corePart = esp_partition_find_first(
         ESP_PARTITION_TYPE_DATA,
         ESP_PARTITION_SUBTYPE_DATA_COREDUMP,
@@ -436,6 +477,7 @@ esp_err_t DiagnosticsService::handleCoreInfoInternal(httpd_req_t* req)
     bool partitionFound = (corePart != nullptr);
     bool hasDataGuess = false;
 
+    // Check if partition contains data (not erased to 0xFF)
     if (partitionFound) {
         uint8_t header[16] = {0};
         if (esp_partition_read(corePart, 0, header, sizeof(header)) == ESP_OK) {
@@ -459,5 +501,7 @@ esp_err_t DiagnosticsService::handleCoreInfoInternal(httpd_req_t* req)
 
     httpd_resp_set_type(req, "application/json");
     httpd_resp_set_hdr(req, "Cache-Control", "no-store");
-    return httpd_resp_send(req, out.c_str(), out.size());
+    esp_err_t result = httpd_resp_send(req, out.c_str(), out.size());
+    vTaskDelay(1 / portTICK_PERIOD_MS);  // Yield to LVGL
+    return result;
 }

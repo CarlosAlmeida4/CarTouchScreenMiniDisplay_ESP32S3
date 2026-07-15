@@ -355,7 +355,7 @@ void Display::WifiUI()
         /* code */
         if(WifiMgrPip.isConnnectedToProvisionedWifi)
         {
-            _ui_label_set_property(uic_ProvisioningText,_UI_LABEL_PROPERTY_TEXT,"Provisioning Sucessful");
+            _ui_label_set_property(uic_ProvisioningText,_UI_LABEL_PROPERTY_TEXT,"Provisioning Successful");
             lv_obj_add_state(uic_EnableProvisioning,LV_STATE_CHECKED);
             _ui_label_set_property(uic_ConnectedWifiSSID,_UI_LABEL_PROPERTY_TEXT,WifiMgrPip.CurrentSSID);
             _ui_label_set_property(uic_myIPString,_UI_LABEL_PROPERTY_TEXT,ip_str);
@@ -785,5 +785,5 @@ extern "C" void UI_UpdateBrightnessRuntime(lv_event_t * e)
 
 extern "C" void UI_ResetProvisioning(lv_event_t * e)
 {
-    network_prov_mgr_reset_wifi_sm_state_for_reprovision();
+    network_prov_mgr_reset_wifi_sm_state_for_reprovision(); //FIXME: THis doenst really work, dont be lazy and create the proper call to the wifi manager
 }

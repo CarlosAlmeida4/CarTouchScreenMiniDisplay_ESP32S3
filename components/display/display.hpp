@@ -28,7 +28,7 @@
 #include <bits/stdc++.h>
 #include <optional>
 
-#include "network_provisioning\scheme_softap.h"
+#include "network_provisioning/scheme_softap.h"
 #include <network_provisioning/manager.h>
 
 struct DisplayPins {

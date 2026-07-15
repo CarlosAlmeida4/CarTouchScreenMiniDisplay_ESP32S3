@@ -247,8 +247,8 @@ void DiagnosticsService::appendLogLine(const char* line, size_t lineLen)
 
 void DiagnosticsService::onWifiConnected()
 {
-    // Small delay before starting server to ensure previous port is fully released
-    vTaskDelay(50 / portTICK_PERIOD_MS);
+    // Delay to ensure previous port is fully released and TIME_WAIT expires
+    vTaskDelay(500 / portTICK_PERIOD_MS);
     startServer();
 }
 
@@ -290,8 +290,8 @@ void DiagnosticsService::startServer()
 
     // Retry logic: socket might be in TIME_WAIT after previous bind
     esp_err_t err = ESP_FAIL;
-    const int maxRetries = 3;
-    const int retryDelayMs = 100;
+    const int maxRetries = 5;      // Increased from 3
+    const int retryDelayMs = 200;  // Increased from 100 to allow TIME_WAIT to expire
 
     for (int attempt = 0; attempt < maxRetries; ++attempt) {
         err = httpd_start(&server_, &config);

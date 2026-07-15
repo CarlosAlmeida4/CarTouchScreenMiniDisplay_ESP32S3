@@ -16,7 +16,7 @@
 #include <cstddef>
 #include <atomic>
 
-#include "network_provisioning\scheme_softap.h"
+#include "network_provisioning/scheme_softap.h"
 #include <network_provisioning/manager.h>
 
 #include "PipelineTypes.hpp"

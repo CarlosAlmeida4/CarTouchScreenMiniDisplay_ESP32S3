@@ -68,7 +68,7 @@ public:
     /** @brief Get current number of buffered log lines */
     size_t bufferSize() const;
 
-private:
+    // ========== PRIVATE STATIC MEMBERS ==========
     /** @brief Log tag for ESP_LOG macros */
     static constexpr const char* TAG = "Diagnostics";
 
@@ -79,48 +79,62 @@ private:
         std::string message;       ///< Log message text (trimmed)
     };
 
-    // Configuration
+    // ========== CONFIGURATION ==========
     size_t maxLines_;              ///< Maximum number of log lines to keep in buffer
     size_t maxLineLength_;         ///< Maximum characters per log line
 
-    // Logging buffer (thread-safe via bufferMutex_)
+    // ========== LOGGING BUFFER (Thread-safe via bufferMutex_) ==========
     std::deque<BufferItem> buffer_;     ///< Circular buffer of log entries
     mutable std::mutex bufferMutex_;    ///< Protects buffer_ and related atomics
     std::atomic<uint64_t> nextSeq_;     ///< Next sequence number for log entries
     std::atomic<uint64_t> droppedCount_; ///< Count of log lines lost to overflow
 
-    // HTTP server (thread-safe via serverMutex_)
+    // ========== HTTP SERVER (Thread-safe via serverMutex_) ==========
     mutable std::mutex serverMutex_;    ///< Protects server_ and authToken_
     httpd_handle_t server_;             ///< ESP HTTP server handle (nullptr if stopped)
     std::string authToken_;             ///< Bearer token for X-Diag-Token header validation
 
-    // Previous log sink for chaining
+    // ========== LOG SINK CHAINING ==========
     vprintf_like_t previousLogSink_;    ///< Previous vprintf handler (for log chaining)
 
-    // Reset reason tracking
+    // ========== RESET REASON TRACKING ==========
     std::string lastResetReason_;       ///< Last reset reason retrieved from NVS
 
-    // Singleton instance
+    // ========== SINGLETON INSTANCE ==========
     static DiagnosticsService* instance_; ///< Singleton instance for static callback access
 
-    // Log sink installation (static callbacks)
-    /** @brief Static entry point for log sink (calls logSinkInternal via instance_) */
+    // ========== PRIVATE STATIC METHODS (Log sink callbacks for C API) ==========
+    
+    /// @brief Static entry point for log sink - calls instance logSinkInternal via instance_
+    /// @param fmt printf-style format string
+    /// @param args va_list arguments
+    /// @return Character count written (or 0 on error)
     static int logSink(const char* fmt, va_list args);
 
-    /** @brief Internal log sink that buffers log messages with timestamps */
+    // ========== PRIVATE INSTANCE METHODS ==========
+
+    /// @brief Internal log sink that buffers log messages with timestamps and chaining
+    /// @param fmt printf-style format string
+    /// @param args va_list arguments
+    /// @return Character count written to previous sink
     int logSinkInternal(const char* fmt, va_list args);
 
     /**
      * @brief Append formatted log line to buffer with auto-trim and overflow handling
-     * @param line Log message text
-     * @param lineLen Length of message
+     * @param line Log message text (may contain leading/trailing whitespace)
+     * @param lineLen Length of message in bytes
+     * @return none (thread-safe, updates buffer_, nextSeq_, droppedCount_)
      */
     void appendLogLine(const char* line, size_t lineLen);
 
-    /** @brief Initialize and start HTTP server (thread-safe, idempotent) */
+    /// @brief Initialize and start HTTP server (thread-safe, idempotent)
+    /// @param none
+    /// @return none (registers /diag/logs, /diag/status, /diag/coreinfo endpoints)
     void startServer();
 
-    /** @brief Shut down and stop HTTP server (thread-safe, idempotent) */
+    /// @brief Shut down and stop HTTP server (thread-safe, idempotent)
+    /// @param none
+    /// @return none (calls httpd_stop, sets server_ = nullptr)
     void stopServer();
 
     /**
@@ -140,7 +154,7 @@ private:
     bool parseCursorAndLimit(httpd_req_t* req, uint64_t* cursor, size_t* limit) const;
 
     /**
-     * @brief Get snapshot of log entries from cursor position
+     * @brief Get snapshot of log entries from cursor position (thread-safe snapshot)
      * @param cursor Start from entries after this sequence number
      * @param maxLines Maximum entries to return
      * @param nextCursor Output for next cursor value (for pagination)
@@ -149,31 +163,43 @@ private:
     std::vector<LogSnapshotEntry> snapshotFrom(uint64_t cursor, size_t maxLines, uint64_t* nextCursor) const;
 
     /**
-     * @brief Load last reset reason from NVS storage
-     * Retrieves the reset reason that was saved on previous boot
+     * @brief Load last reset reason from NVS storage (reads previous boot's reset cause)
+     * @param none
+     * @return none (populates lastResetReason_)
      */
     void loadLastResetReason();
 
     /**
-     * @brief Save current reset reason to NVS storage
-     * Persists the current reset reason so it can be retrieved on next boot
+     * @brief Save current reset reason to NVS storage (persists boot reason for next boot)
+     * @param none
+     * @return none
      */
     void saveCurrentResetReason();
 
-    // HTTP handler static entry points
-    /** @brief Static HTTP handler for /diag/logs endpoint (wraps handleLogsInternal) */
+    // ========== HTTP HANDLER STATIC ENTRY POINTS (C API compatibility) ==========
+    
+    /// @brief Static HTTP handler for /diag/logs endpoint (wraps handleLogsInternal)
+    /// @param req HTTP request object
+    /// @return ESP_OK on success, ESP_ERR_* on failure
     static esp_err_t handleLogs(httpd_req_t* req);
 
-    /** @brief Static HTTP handler for /diag/status endpoint (wraps handleStatusInternal) */
+    /// @brief Static HTTP handler for /diag/status endpoint (wraps handleStatusInternal)
+    /// @param req HTTP request object
+    /// @return ESP_OK on success, ESP_ERR_* on failure
     static esp_err_t handleStatus(httpd_req_t* req);
 
-    /** @brief Static HTTP handler for /diag/coreinfo endpoint (wraps handleCoreInfoInternal) */
+    /// @brief Static HTTP handler for /diag/coreinfo endpoint (wraps handleCoreInfoInternal)
+    /// @param req HTTP request object
+    /// @return ESP_OK on success, ESP_ERR_* on failure
     static esp_err_t handleCoreInfo(httpd_req_t* req);
 
-    // HTTP handler implementations
+    // ========== HTTP HANDLER IMPLEMENTATIONS ==========
+
     /**
-     * @brief Handle GET /diag/logs - return paginated log buffer as JSON
-     * Yields to allow LVGL task to run (prevents watchdog timeout)
+     * @brief Handle GET /diag/logs - return paginated log buffer as JSON array
+     * Yields to LVGL task (calls vTaskDelay) to prevent watchdog timeout
+     * @param req HTTP request with optional ?cursor=N&limit=N query parameters
+     * @return ESP_OK on success; 401 if unauthorized
      */
     esp_err_t handleLogsInternal(httpd_req_t* req);
 
@@ -181,12 +207,17 @@ private:
      * @brief Handle GET /diag/status - return system uptime, current and last reset reason, buffer stats as JSON
      * Returns both current reset reason (why system is running) and last reset reason (from previous boot)
      * Yields to allow LVGL task to run (prevents watchdog timeout)
+     * @param req HTTP request object
+     * @return ESP_OK on success; 401 if unauthorized
      */
     esp_err_t handleStatusInternal(httpd_req_t* req);
 
     /**
      * @brief Handle GET /diag/coreinfo - return core dump partition info as JSON
+     * Checks for coredump partition and provides address/size information for espcoredump extraction
      * Yields to allow LVGL task to run (prevents watchdog timeout)
+     * @param req HTTP request object
+     * @return ESP_OK on success; 401 if unauthorized
      */
     esp_err_t handleCoreInfoInternal(httpd_req_t* req);
 };

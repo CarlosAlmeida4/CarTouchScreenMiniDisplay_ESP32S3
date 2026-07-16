@@ -22,11 +22,12 @@
 
 class System {
 public:
-
-
+    /// @brief Release version tag for the firmware
     constexpr static std::string ReleaseTAG = "CarTSmD-v1.2.0";
     
-
+    /// @brief Constructor - Initializes all subsystem queues and component instances
+    /// @param none
+    /// @return none (creates 2 FreeRTOS queues for inter-component communication)
     System(): RollPitchQueue(xQueueCreate(1,sizeof(RollPitch))),
     WifiMgrQueue(xQueueCreate(1,sizeof(WifiManagerPipeline))),
     display(RollPitchQueue,WifiMgrQueue),
@@ -37,6 +38,14 @@ public:
     System& operator=(const System&) = delete;
     ~System() = default;
     
+    /// @brief Initialize all subsystems and connect callbacks (main entry point after boot)
+    /// @param none
+    /// @return none
+    /// @details Performs the following initialization sequence:
+    ///   1. NVS flash initialization (persistent storage for WiFi credentials, settings)
+    ///   2. Component initialization (display hardware, WiFi, IMU sensor, OTA, diagnostics)
+    ///   3. Cross-component callback wiring (connects all event handlers for propagation)
+    ///   4. Starts WiFi provisioning or auto-connection based on stored credentials
     void start()
     {
         //General inits needed by multiple components
@@ -111,16 +120,14 @@ public:
 
     } 
 
+    // ========== PRIVATE MEMBERS (Component instances) ==========
     
-
-private:
-      
-    QueueHandle_t RollPitchQueue,WifiMgrQueue;
-    Display display;
-    qmi8658cInterface qmiItf;
-    OTAUpdater OTAUpd;
-    WifiManager WifiMgr;
-    DiagnosticsService diagnostics;
+    QueueHandle_t RollPitchQueue,WifiMgrQueue;  ///< Inter-task communication queues
+    Display display;                            ///< Display/LVGL/touch driver (reads queues, renders UI)
+    qmi8658cInterface qmiItf;                   ///< IMU sensor interface (writes RollPitchQueue)
+    OTAUpdater OTAUpd;                          ///< Over-the-air firmware update manager
+    WifiManager WifiMgr;                        ///< WiFi provisioning and connection manager
+    DiagnosticsService diagnostics;             ///< HTTP diagnostics server (logs + status)
 
 };
 

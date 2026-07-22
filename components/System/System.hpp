@@ -5,10 +5,8 @@
 #include <stdio.h>
 #include <cstring>
 
-#include "freertos/FreeRTOS.h"
-#include "freertos/queue.h"
-#include "freertos/task.h"
-
+#include "os_primitives.h"
+#include "system_os.h"
 #include "sdkconfig.h"
 #include "SensorLib.h"
 #include "display.hpp"
@@ -27,12 +25,18 @@ public:
     
     /// @brief Constructor - Initializes all subsystem queues and component instances
     /// @param none
-    /// @return none (creates 2 FreeRTOS queues for inter-component communication)
-    System(): RollPitchQueue(xQueueCreate(1,sizeof(RollPitch))),
-    WifiMgrQueue(xQueueCreate(1,sizeof(WifiManagerPipeline))),
-    display(RollPitchQueue,WifiMgrQueue),
-    qmiItf(RollPitchQueue),
-    WifiMgr(WifiMgrQueue) {}
+    /// @return none (creates 2 queues for inter-component communication)
+    System() {
+        // Initialize OS abstraction layer
+        os::init();
+        
+        // Create inter-component communication queues using SystemOS factory
+        auto result = SystemOS::createQueues(RollPitchQueue, WifiMgrQueue);
+        if (result != os::Result::OK) {
+            // Queue creation failed - this is fatal
+            printf("ERROR: Failed to create system queues\n");
+        }
+    }
 
     System(const System&) = delete;
     System& operator=(const System&) = delete;
